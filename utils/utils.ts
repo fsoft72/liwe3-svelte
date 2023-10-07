@@ -43,7 +43,6 @@ export const format_size = ( size: number ) => {
 };
 
 export const has_perm = ( user: UserAuth | null, perm: string ) => {
-	console.log( "=== has_perm: ", user?.perms, perm );
 	if ( !user ) return false;
 	if ( !user.perms ) return false;
 
