@@ -15,6 +15,10 @@
 	// pagination options
 	export let options: number[] = [10, 20, 50, 100];
 
+	export const setPage = (p: number) => {
+		page = p;
+	};
+
 	$: pages = Math.ceil(total / rows);
 	$: dispatch('pagechange', { page, rows });
 </script>
