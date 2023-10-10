@@ -246,7 +246,11 @@
 					>
 						{#if field.render}
 							{#if field.click}
-								<Button variant="outline" on:click={() => field.click && field.click(row)}>
+								<Button
+									size="sm"
+									variant="outline"
+									on:click={() => field.click && field.click(row)}
+								>
 									{@html field.render(row[field.name], row)}
 								</Button>
 							{:else}
@@ -264,7 +268,7 @@
 						{:else if field.type == 'avatar'}
 							<Avatar size="64px" value={row} />
 						{:else if field.click}
-							<Button variant="outline" on:click={() => field.click && field.click(row)}>
+							<Button size="sm" variant="outline" on:click={() => field.click && field.click(row)}>
 								{row[field.name]}
 							</Button>
 						{:else}
