@@ -114,6 +114,9 @@
 
 	.modal-body {
 		padding: 0.5rem;
+
+		max-height: 90vh;
+		overflow: auto;
 	}
 
 	.modal-footer {
