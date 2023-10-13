@@ -20,8 +20,10 @@
 
 	export interface GridAction {
 		id: string;
-		label: string;
-		icon: string;
+		label?: string;
+		icon?: IconSource;
+		mode?: Color;
+		variant?: Variant;
 		action: (row: GridDataRow) => void;
 	}
 </script>
@@ -32,6 +34,8 @@
 	import { createEventDispatcher } from 'svelte';
 	import Modal from './Modal.svelte';
 	import Avatar from './Avatar.svelte';
+	import type { IconSource } from 'svelte-hero-icons';
+	import type { Color, Variant } from '$liwe3/types/types';
 
 	const dispatch = createEventDispatcher();
 
@@ -281,7 +285,15 @@
 			{#if actions.length > 0}
 				<td class="actions">
 					{#each actions as action}
-						<Button size="xs" on:click={() => action.action(row)}>{action.label}</Button>
+						<Button
+							size="xs"
+							mode={action.mode}
+							variant={action.variant}
+							icon={action.icon}
+							on:click={() => action.action(row)}
+						>
+							{action.label ? action.label : ''}
+						</Button>
 					{/each}
 				</td>
 			{/if}
