@@ -7,12 +7,11 @@
 
 	export let size: Size = 'md';
 	export let cssClass: string = '';
-	export let mode: Color = 'primary';
+	export let mode: Color = 'mode1';
 	export let variant: Variant = 'solid';
 	export let icon: IconSource | null = null;
 	export let iconRight: IconSource | null = null;
 	export let solid: boolean = true;
-	export let parentVars: boolean = false;
 
 	const dispatch = createEventDispatcher();
 
@@ -36,10 +35,7 @@
 
 <button
 	{...$$restProps}
-	class={`liwe-button ${mode ? 'liwe3-scheme-' + mode : ''} ${
-		variant ? 'liwe3-' + variant : ''
-	} ${size} ${cssClass}`}
-	class:liwe-button-custom={parentVars}
+	class={`liwe-button ${mode} ${variant ? 'liwe3-' + variant : ''} ${size} ${cssClass}`}
 	on:click={onClick}
 >
 	{#if icon}
@@ -65,20 +61,6 @@
 		justify-content: center;
 		white-space: nowrap;
 		--unit-w-size: 15rem;
-	}
-	/* parent custom properties */
-	.liwe-button-custom {
-		border-width: var(--liwe-button-custom-borderwidth, --liwe-border-width);
-		border-style: var(--liwe-button-custom-borderstyle, --liwe-border-style);
-		border-radius: var(--liwe-button-custom-borderradius, --liwe-border-radius);
-		padding-top: var(--liwe-button-custom-padding-y, --liwe-button-padding-y) !important;
-		padding-bottom: var(--liwe-button-custom-padding-y, --liwe-button-padding-y) !important;
-		padding-left: var(--liwe-button-custom-padding-x, --liwe-button-padding-x) !important;
-		padding-right: var(--liwe-button-custom-padding-x, --liwe-button-padding-x) !important;
-		margin-top: var(--liwe-button-custom-margin-y, 0) !important;
-		margin-bottom: var(--liwe-button-custom-margin-y, 0) !important;
-		margin-left: var(--liwe-button-custom-margin-x, 0) !important;
-		margin-right: var(--liwe-button-custom-margin-x, 0) !important;
 	}
 
 	.liwe-button-icon-left {
@@ -134,5 +116,181 @@
 		padding: 0.2em 0.5em;
 		font-size: 2rem;
 		/* min-width: var(--unit-w-size); */
+	}
+
+	button.mode1,
+	button.mode2,
+	button.mode3,
+	button.mode4,
+	button.info,
+	button.error,
+	button.warning,
+	button.success {
+		cursor: pointer;
+		transition: all 0.2s ease-in-out;
+	}
+
+	button.mode1:disabled,
+	button.mode2:disabled,
+	button.mode3:disabled,
+	button.mode4:disabled,
+	button.info:disabled,
+	button.error:disabled,
+	button.warning:disabled,
+	button.success:disabled {
+		cursor: not-allowed;
+		transition: all 0.2s ease-in-out;
+	}
+
+	button.mode1 {
+		background-color: var(--liwe3-mode1-700);
+		border: 1px solid var(--liwe3-mode1-700-border);
+		color: var(--liwe3-mode1-700-text);
+	}
+
+	button.mode1:disabled {
+		background-color: var(--liwe3-mode1-700-disabled);
+		color: var(--liwe3-mode1-700-disabled-text);
+	}
+
+	button.mode1:hover:not(:disabled) {
+		background-color: var(--liwe3-mode1-700-hover);
+	}
+
+	button.mode1:active {
+		background-color: var(--liwe3-mode1-700-clicked);
+	}
+
+	button.mode2 {
+		background-color: var(--liwe3-mode2-700);
+		border: 1px solid var(--liwe3-mode2-700-border);
+		color: var(--liwe3-mode2-700-text);
+	}
+
+	button.mode2:disabled {
+		background-color: var(--liwe3-mode2-700-disabled);
+		color: var(--liwe3-mode2-700-disabled-text);
+	}
+
+	button.mode2:hover:not(:disabled) {
+		background-color: var(--liwe3-mode2-700-hover);
+	}
+
+	button.mode2:active {
+		background-color: var(--liwe3-mode2-700-clicked);
+	}
+
+	button.mode3 {
+		background-color: var(--liwe3-mode3-700);
+		border: 1px solid var(--liwe3-mode3-700-border);
+		color: var(--liwe3-mode3-700-text);
+	}
+
+	button.mode3:disabled {
+		background-color: var(--liwe3-mode3-700-disabled);
+		color: var(--liwe3-mode3-700-disabled-text);
+	}
+
+	button.mode3:hover:not(:disabled) {
+		background-color: var(--liwe3-mode3-700-hover);
+	}
+
+	button.mode3:active {
+		background-color: var(--liwe3-mode3-700-clicked);
+	}
+
+	button.mode4 {
+		background-color: var(--liwe3-mode4-700);
+		border: 1px solid var(--liwe3-mode4-700-border);
+		color: var(--liwe3-mode4-700-text);
+	}
+
+	button.mode4:disabled {
+		background-color: var(--liwe3-mode4-700-disabled);
+		color: var(--liwe3-mode4-700-disabled-text);
+	}
+
+	button.mode4:hover:not(:disabled) {
+		background-color: var(--liwe3-mode4-700-hover);
+	}
+
+	button.mode4:active {
+		background-color: var(--liwe3-mode4-700-clicked);
+	}
+
+	button.info {
+		background-color: var(--liwe3-info-700);
+		border: 1px solid var(--liwe3-info-700-border);
+		color: var(--liwe3-info-700-text);
+	}
+
+	button.info:disabled {
+		background-color: var(--liwe3-info-700-disabled);
+		color: var(--liwe3-info-700-disabled-text);
+	}
+
+	button.info:hover:not(:disabled) {
+		background-color: var(--liwe3-info-700-hover);
+	}
+
+	button.info:active {
+		background-color: var(--liwe3-info-700-clicked);
+	}
+
+	button.error {
+		background-color: var(--liwe3-error-700);
+		border: 1px solid var(--liwe3-error-700-border);
+		color: var(--liwe3-error-700-text);
+	}
+
+	button.error:disabled {
+		background-color: var(--liwe3-error-700-disabled);
+		color: var(--liwe3-error-700-disabled-text);
+	}
+
+	button.error:hover:not(:disabled) {
+		background-color: var(--liwe3-error-700-hover);
+	}
+
+	button.error:active {
+		background-color: var(--liwe3-error-700-clicked);
+	}
+
+	button.warning {
+		background-color: var(--liwe3-warning-700);
+		border: 1px solid var(--liwe3-warning-700-border);
+		color: var(--liwe3-warning-700-text);
+	}
+
+	button.warning:disabled {
+		background-color: var(--liwe3-warning-700-disabled);
+		color: var(--liwe3-warning-700-disabled-text);
+	}
+
+	button.warning:hover:not(:disabled) {
+		background-color: var(--liwe3-warning-700-hover);
+	}
+
+	button.warning:active {
+		background-color: var(--liwe3-warning-700-clicked);
+	}
+
+	button.success {
+		background-color: var(--liwe3-success-700);
+		border: 1px solid var(--liwe3-success-700-border);
+		color: var(--liwe3-success-700-text);
+	}
+
+	button.success:disabled {
+		background-color: var(--liwe3-success-700-disabled);
+		color: var(--liwe3-success-700-disabled-text);
+	}
+
+	button.success:hover:not(:disabled) {
+		background-color: var(--liwe3-success-700-hover);
+	}
+
+	button.success:active {
+		background-color: var(--liwe3-success-700-clicked);
 	}
 </style>
