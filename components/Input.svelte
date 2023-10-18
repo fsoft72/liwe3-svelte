@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
-	import type { InputVariant, Size } from '$liwe3/types/types';
+	import type { Color, InputVariant, Size } from '$liwe3/types/types';
 
 	export let label = '';
 	export let id = ($$restProps.name ?? Math.random().toString()) + new Date().getTime().toString();
@@ -9,6 +9,7 @@
 	export let variant: InputVariant = 'plain';
 	export let validChars: string = '';
 	export let width: string = '100%';
+	export let mode: Color = 'mode1';
 
 	let type = 'checkbox';
 	let rx = validChars ? new RegExp(`[^${validChars}]*`, 'g') : null;
@@ -57,12 +58,12 @@
 	$: if (type == 'checkbox') variant = 'none';
 </script>
 
-<div class={`input-${variant}`} class:checkbox={type === 'checkbox'} style={`width: ${width}`}>
+<div class={`form input-${variant}`} class:checkbox={type === 'checkbox'} style={`width: ${width}`}>
 	<input
 		class:filled={value}
 		{id}
 		{...$$restProps}
-		class={`input ${size} i-${type}`}
+		class={`input ${mode} ${size} i-${type}`}
 		on:blur
 		on:change
 		on:keydown
@@ -81,18 +82,10 @@
 
 <style>
 	/* generic input rules --------------------------*/
-	input,
-	input:active,
-	input:focus {
-		border: none;
-		border-color: transparent;
-		outline: none;
-	}
 	input {
 		--input-w-unit: 0.5rem;
 	}
 	.input {
-		color: var(--liwe-main-color);
 		border-radius: var(--liwe-border-radius);
 	}
 
@@ -119,8 +112,6 @@
 	/* end generic input rules --------------------------*/
 	/* input plain rules --------------------------*/
 	.input-plain .input {
-		background-color: var(--liwe-main-bg-color);
-		border: 1px solid var(--liwe-border-color);
 		width: 100%;
 	}
 	/* end input plain rules --------------------------*/
@@ -132,10 +123,8 @@
 	.input-boxed .input {
 		position: relative;
 		width: 100%;
-		background: var(--liwe-main-bg-color);
-		border: solid 1.5px var(--liwe-darker-primary-color);
+		border-width: 1.5px;
 		border-radius: var(--liwe-border-radius);
-		color: var(--liwe-main-color);
 	}
 
 	.input-boxed .label {
@@ -147,7 +136,6 @@
 		white-space: nowrap;
 		overflow: hidden;
 		line-height: 1rem;
-		color: var(--liwe-darker-secondary-color);
 		background-color: transparent;
 		transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
@@ -157,7 +145,6 @@
 		top: -0.5rem;
 		left: 0.7rem;
 		font-size: 0.675rem;
-		background-color: var(--liwe-main-bg-color);
 		color: var(--liwe-primary-color);
 	}
 
