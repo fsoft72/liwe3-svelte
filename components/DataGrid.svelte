@@ -45,6 +45,7 @@
 	export let data: GridDataRow[] = [];
 	export let actions: GridAction[] = [];
 	export let updateField: UpdateFieldCallback | null = null;
+	export let mode: Color = 'mode1';
 
 	let is_resizing = false;
 	let td: HTMLTableCellElement | null = null;
@@ -182,125 +183,148 @@
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<table on:mousemove={mouse_move} on:mouseup={mouse_up} bind:this={table_element}>
-	<!-- headers -->
-	<tr>
-		{#each fields as field}
-			{#if !field.hidden}
-				<th>{field.label || field.name}</th>
-				<th class="resize" on:mousedown={resize_start} />
-			{/if}
-		{/each}
-		{#if actions.length > 0}
-			<th>Actions</th>
-		{:else}
-			<th />
-		{/if}
-		<th>
-			<Button size="xs" on:click={() => (showFieldsModal = true)}>Fields</Button>
-		</th>
-	</tr>
-
-	<!-- filters -->
-	{#if has_filters}
+<div class="table">
+	<table class={mode} on:mousemove={mouse_move} on:mouseup={mouse_up} bind:this={table_element}>
+		<!-- headers -->
 		<tr>
 			{#each fields as field}
 				{#if !field.hidden}
-					<td class="filter">
-						{#if field.filterable}
-							{#if field.type == 'string'}
-								<Input size="xs" name={`f_${field.name}`} on:change={filter_change} />
-							{:else if field.type == 'number'}
-								<Input
-									size="xs"
-									type="number"
-									name={`f_${field.name}_1`}
-									on:change={filter_change}
-								/>
-								<Input
-									size="xs"
-									type="number"
-									name={`f_${field.name}_2`}
-									on:change={filter_change}
-								/>
-							{:else if field.type == 'date'}
-								<Input size="xs" type="date" name={`f_${field.name}_1`} on:change={filter_change} />
-								<Input size="xs" type="date" name={`f_${field.name}_2`} on:change={filter_change} />
-							{:else if field.type == 'checkbox'}
-								<Input size="xs" type="checkbox" on:change={filter_change} />
-							{/if}
-						{/if}
-					</td>
-					<td style="border: 0" />
+					<th>{field.label || field.name}</th>
+					<th class="resize" on:mousedown={resize_start} />
 				{/if}
 			{/each}
-			<td />
-			<td />
+			{#if actions.length > 0}
+				<th>Actions</th>
+			{:else}
+				<th />
+			{/if}
+			<th>
+				<Button {mode} size="xs" on:click={() => (showFieldsModal = true)}>Fields</Button>
+			</th>
 		</tr>
-	{/if}
 
-	<!-- rows -->
-	{#each data as row}
-		<tr>
-			{#each fields as field}
-				{#if !field.hidden}
-					<td
-						on:dblclick={(e) => cell_doubleclick(e, row, field.name)}
-						style={`text-align: ${field.align}`}
-					>
-						{#if field.render}
-							{#if field.click}
+		<!-- filters -->
+		{#if has_filters}
+			<tr>
+				{#each fields as field}
+					{#if !field.hidden}
+						<td class="filter">
+							{#if field.filterable}
+								{#if field.type == 'string'}
+									<Input {mode} size="xs" name={`f_${field.name}`} on:change={filter_change} />
+								{:else if field.type == 'number'}
+									<Input
+										{mode}
+										size="xs"
+										type="number"
+										name={`f_${field.name}_1`}
+										on:change={filter_change}
+									/>
+									<Input
+										{mode}
+										size="xs"
+										type="number"
+										name={`f_${field.name}_2`}
+										on:change={filter_change}
+									/>
+								{:else if field.type == 'date'}
+									<Input
+										{mode}
+										size="xs"
+										type="date"
+										name={`f_${field.name}_1`}
+										on:change={filter_change}
+									/>
+									<Input
+										{mode}
+										size="xs"
+										type="date"
+										name={`f_${field.name}_2`}
+										on:change={filter_change}
+									/>
+								{:else if field.type == 'checkbox'}
+									<Input {mode} size="xs" type="checkbox" on:change={filter_change} />
+								{/if}
+							{/if}
+						</td>
+						<td style="border: 0" />
+					{/if}
+				{/each}
+				<td />
+				<td />
+			</tr>
+		{/if}
+
+		<!-- rows -->
+		{#each data as row}
+			<tr>
+				{#each fields as field}
+					{#if !field.hidden}
+						<td
+							on:dblclick={(e) => cell_doubleclick(e, row, field.name)}
+							style={`text-align: ${field.align}`}
+						>
+							{#if field.render}
+								{#if field.click}
+									<Button
+										{mode}
+										size="sm"
+										variant="outline"
+										on:click={() => field.click && field.click(row)}
+									>
+										{@html field.render(row[field.name], row)}
+									</Button>
+								{:else}
+									{@html field.render(row[field.name], row)}
+								{/if}
+							{:else if field.type == 'checkbox'}
+								<Input
+									{mode}
+									type="checkbox"
+									checked={row[field.name]}
+									on:change={(e) => {
+										row[field.name] = e.target?.checked;
+										updateField && updateField(row, field.name);
+									}}
+								/>
+							{:else if field.type == 'avatar'}
+								<Avatar size="64px" value={row} />
+							{:else if field.click}
 								<Button
+									{mode}
 									size="sm"
 									variant="outline"
 									on:click={() => field.click && field.click(row)}
 								>
-									{@html field.render(row[field.name], row)}
+									{row[field.name]}
 								</Button>
 							{:else}
-								{@html field.render(row[field.name], row)}
-							{/if}
-						{:else if field.type == 'checkbox'}
-							<Input
-								type="checkbox"
-								checked={row[field.name]}
-								on:change={(e) => {
-									row[field.name] = e.target?.checked;
-									updateField && updateField(row, field.name);
-								}}
-							/>
-						{:else if field.type == 'avatar'}
-							<Avatar size="64px" value={row} />
-						{:else if field.click}
-							<Button size="sm" variant="outline" on:click={() => field.click && field.click(row)}>
 								{row[field.name]}
+							{/if}
+						</td>
+						<td class="resize" on:mousedown={resize_start} />
+					{/if}
+				{/each}
+				{#if actions.length > 0}
+					<td class="actions">
+						{#each actions as action}
+							<Button
+								size="xs"
+								mode={action.mode || mode}
+								variant={action.variant}
+								icon={action.icon}
+								on:click={() => action.action(row)}
+							>
+								{action.label ? action.label : ''}
 							</Button>
-						{:else}
-							{row[field.name]}
-						{/if}
+						{/each}
 					</td>
-					<td class="resize" on:mousedown={resize_start} />
 				{/if}
-			{/each}
-			{#if actions.length > 0}
-				<td class="actions">
-					{#each actions as action}
-						<Button
-							size="xs"
-							mode={action.mode}
-							variant={action.variant}
-							icon={action.icon}
-							on:click={() => action.action(row)}
-						>
-							{action.label ? action.label : ''}
-						</Button>
-					{/each}
-				</td>
-			{/if}
-			<td />
-		</tr>
-	{/each}
-</table>
+				<td />
+			</tr>
+		{/each}
+	</table>
+</div>
 
 {#if showFieldsModal}
 	<Modal
@@ -335,23 +359,23 @@
 	table {
 		width: 100%;
 
-		border: 1px solid var(--liwe-border-color);
+		border: 1px solid var(--border);
 		border-collapse: collapse;
 
-		background-color: var(--liwe-paper-color);
+		background-color: var(--paper);
 
 		font-size: var(--table-font-size);
 		font-family: var(--table-font-family);
-		color: var(--text-color);
+		color: var(--color);
 	}
 
 	table tr {
-		border-bottom: 1px solid var(--liwe-darker-secondary-color);
+		border-bottom: 1px solid var(--darker);
 		max-height: 2rem;
 	}
 
 	table td {
-		border-right: 1px solid var(--liwe-darker-secondary-color);
+		border-right: 1px solid var(--darker);
 	}
 
 	table td .filter {
@@ -374,7 +398,7 @@
 
 	table th {
 		text-align: left;
-		background-color: var(--liwe-lighter-primary-color);
+		background-color: var(--lighter);
 		/* disable selection */
 		user-select: none;
 	}
@@ -385,7 +409,7 @@
 	}
 
 	table tr:hover td {
-		background-color: var(--liwe-darker-secondary-color);
+		background-color: var(--darker);
 	}
 
 	table td.actions {
