@@ -58,23 +58,25 @@
 	const dispatch = createEventDispatcher();
 
 	const _check_required_fields = () => {
-		let error = false;
+		const required: string[] = [];
 
 		fields.forEach((field) => {
-			if (field.required && !values[field.name]) {
-				error = true;
+			if (field.required && typeof values[field.name] == 'undefined') {
+				required.push(field.label ?? field.name);
 			}
 		});
 
-		return error;
+		return required;
 	};
 
 	const handleSubmit = (e: Event) => {
+		const missing = _check_required_fields();
+
 		// verify required fields
-		if (_check_required_fields()) {
+		if (missing.length) {
 			addToast({
 				type: 'error',
-				message: 'Please fill all required fields'
+				message: 'Please fill all required fields: ' + missing.join(', ')
 			});
 
 			return;

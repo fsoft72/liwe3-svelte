@@ -301,13 +301,13 @@
 
 	/* checkbox settings 👇 --------------------------*/
 	.i-checkbox {
-		--primary-color: var(--liwe-primary-color);
-		--secondary-color: var(--liwe-secondary-color);
-		--primary-hover-color: var(--liwe-comp-primary-color);
+		--primary-color: var(--dark);
+		--secondary-color: var(--lighter);
+		--primary-hover-color: var(--dark);
 		/* checkbox */
 		--checkbox-diameter: 20px;
 		--checkbox-border-radius: 5px;
-		--checkbox-border-color: var(--liwe-darker-secondary-color);
+		--checkbox-border-color: var(--border);
 		--checkbox-border-width: 1px;
 		--checkbox-border-style: solid;
 		/* checkmark */
