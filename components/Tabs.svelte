@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import type { Color } from '$liwe3/types/types';
 	import { onMount } from 'svelte';
 
 	export let active: string = '';
 	export let minHeight: string = '200px';
 	export let height: string = '';
+	export let mode: Color = 'mode1';
 
 	interface TabInfo {
 		id: string;
@@ -55,27 +57,29 @@
 	}
 </script>
 
-<div class="container">
-	<div class="tabs-buttons" bind:this={tabsButtons}>
-		{#each tabs as tab (tab.id)}
-			<div
-				role="button"
-				tabindex="0"
-				class="tab-label"
-				class:active={tab.id === active}
-				on:click={() => (active = tab.id)}
-				on:keydown={(e) => {
-					if (e.key === 'Enter') {
-						active = tab.id;
-					}
-				}}
-			>
-				{tab.title}
-			</div>
-		{/each}
-	</div>
-	<div class="tabs" bind:this={tabsDiv} style:height style:min-height={minHeight}>
-		<slot />
+<div class="liwe3-tabs">
+	<div class={`container ${mode}`}>
+		<div class="tabs-buttons" bind:this={tabsButtons}>
+			{#each tabs as tab (tab.id)}
+				<div
+					role="button"
+					tabindex="0"
+					class="tab-label"
+					class:active={tab.id === active}
+					on:click={() => (active = tab.id)}
+					on:keydown={(e) => {
+						if (e.key === 'Enter') {
+							active = tab.id;
+						}
+					}}
+				>
+					{tab.title}
+				</div>
+			{/each}
+		</div>
+		<div class="tabs" bind:this={tabsDiv} style:height style:min-height={minHeight}>
+			<slot />
+		</div>
 	</div>
 </div>
 
@@ -86,7 +90,7 @@
 		position: relative;
 		height: auto;
 
-		box-shadow: 0 2px 3px 1px var(--liwe-darker-secondary-color);
+		box-shadow: 0 2px 3px 1px var(--shadow);
 	}
 
 	.tabs {
@@ -94,7 +98,7 @@
 		height: auto;
 		display: flex;
 		padding: 1rem 0.5rem;
-		background: var(--liwe-paper-color);
+		background: var(--paper);
 	}
 
 	.tabs-buttons {
@@ -104,11 +108,11 @@
 
 	.tab-label {
 		cursor: pointer;
-		background: var(--liwe-lighter-primary-color);
-		border-left: 1px solid var(--liwe-darker-secondary-color);
-		border-right: 1px solid var(--liwe-darker-secondary-color);
-		border-top: 1px solid var(--liwe-darker-secondary-color);
-		color: var(--liwe-dark-colo);
+		background: var(--lighter);
+		border-left: 1px solid var(--darker);
+		border-right: 1px solid var(--darker);
+		border-top: 1px solid var(--darker);
+		color: var(--label);
 
 		padding: 1rem;
 
@@ -116,6 +120,6 @@
 	}
 
 	.tab-label.active {
-		background: var(--liwe-paper-color);
+		background: var(--paper);
 	}
 </style>
