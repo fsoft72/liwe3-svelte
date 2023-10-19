@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import AutoComplete from '$liwe3/components/AutoComplete.svelte';
+	import type { Color } from '$liwe3/types/types';
+
+	export let mode: Color = 'mode1';
 
 	export let tags: string[] = [];
 	export let selected: string[] = [];
@@ -48,7 +51,7 @@
 	});
 </script>
 
-<div class="tag-input">
+<div class={`tag-input ${mode}`}>
 	<input type="hidden" {name} bind:value={finalValue} />
 	<AutoComplete items={tags} selectedItems={selected} {...$$restProps} on:set={set_tag} />
 	<div class="tags-list">
@@ -80,9 +83,9 @@
 		align-items: center;
 		justify-content: space-between;
 
-		background-color: var(--liwe-darker-primary-color);
-		color: var(--liwe-lighter-primary-color);
-		border: 1px solid var(--liwe-primary-color);
+		background-color: var(--background);
+		color: var(--color);
+		border: 1px solid var(--border);
 
 		font-size: 70%;
 
@@ -100,13 +103,14 @@
 		padding: 0 2px;
 
 		font-weight: bold;
-		background-color: var(--liwe-darker-danger-color);
+		background-color: var(--liwe3-error-500);
+		color: var(--liwe3-error-500-color);
 		height: 100%;
 
 		cursor: pointer;
 	}
 
 	.btn:hover {
-		background-color: var(--liwe-lighter-danger-color);
+		background-color: var(--liwe3-error-300);
 	}
 </style>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Color } from '$liwe3/types/types';
 	import { media_url } from '$liwe3/utils/utils';
 	import { onMount } from 'svelte';
 
@@ -7,7 +8,8 @@
 	export let url: string = '';
 	export let name: string = 'A';
 	export let size: string;
-	export let mode: 'circle' | 'square' = 'circle';
+	export let mode: Color = 'mode1';
+	export let shape: 'circle' | 'square' = 'circle';
 	export let shadow: boolean = false;
 
 	export let border: string = 'none';
@@ -30,7 +32,7 @@
 </script>
 
 <div
-	class="avatar {mode} {shadow ? 'shadow' : ''}"
+	class={`avatar ${mode} ${shape} ${shadow ? 'shadow' : ''}`}
 	style="background-image: url({url}); width: {size}; height: {size}; border: {border}; "
 >
 	{#if !src}
@@ -52,9 +54,9 @@
 
 		background-size: cover;
 		background-position: center;
-		background-color: var(--liwe-lighter-primary-color);
+		background-color: var(--lighter);
 
-		border: 1px solid var(--liwe-border-color);
+		border: 1px solid var(--border);
 
 		user-select: none;
 	}

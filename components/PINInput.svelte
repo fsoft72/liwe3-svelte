@@ -1,6 +1,9 @@
 <script lang="ts">
+	import type { Color } from '$liwe3/types/types';
+
 	export let value = '';
 	export let size = 6;
+	export let mode: Color = 'mode1';
 
 	let fields: any[] = [];
 
@@ -68,7 +71,7 @@
 	};
 </script>
 
-<div class="container">
+<div class={`container ${mode}`}>
 	{#each fields as field}
 		<input
 			type="text"
@@ -96,7 +99,7 @@
 	}
 	input {
 		border-radius: var(--liwe-border-radius);
-		border: 1px solid var(--liwe-border-color);
+		border: 1px solid var(--border);
 
 		text-align: center;
 

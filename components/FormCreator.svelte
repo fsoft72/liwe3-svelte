@@ -212,10 +212,6 @@
 		gap: 0.5rem;
 	}
 	.form {
-		/*border: 1px solid var(--liwe-secondary-color);
-		padding: 1rem;
-		*/
-
 		width: 100%;
 	}
 
