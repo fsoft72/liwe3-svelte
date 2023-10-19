@@ -4,6 +4,9 @@
 	const dispatch = createEventDispatcher();
 
 	import Button from './Button.svelte';
+	import type { Color } from '$liwe3/types/types';
+
+	export let mode: Color = 'mode1';
 
 	// current page
 	export let page = 1;
@@ -24,11 +27,11 @@
 </script>
 
 <div class="paginator">
-	<Button size="sm" disabled={page == 1} on:click={() => (page = 1)}>First</Button>
-	<Button size="sm" disabled={page == 1} on:click={() => (page -= 1)}>Prev</Button>
+	<Button {mode} size="sm" disabled={page == 1} on:click={() => (page = 1)}>First</Button>
+	<Button {mode} size="sm" disabled={page == 1} on:click={() => (page -= 1)}>Prev</Button>
 	{page} of {pages}
-	<Button size="sm" disabled={page == pages} on:click={() => (page += 1)}>Next</Button>
-	<Button size="sm" disabled={page == pages} on:click={() => (page = pages)}>Last</Button>
+	<Button {mode} size="sm" disabled={page == pages} on:click={() => (page += 1)}>Next</Button>
+	<Button {mode} size="sm" disabled={page == pages} on:click={() => (page = pages)}>Last</Button>
 </div>
 
 <style>

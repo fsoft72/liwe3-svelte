@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Size } from '$liwe3/types/types';
+	import type { Color, Size } from '$liwe3/types/types';
 	import Button from './Button.svelte';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { XCircle } from 'svelte-hero-icons';
@@ -9,6 +9,7 @@
 
 	export let title: string = '';
 	export let size: Size | string | undefined = 'md';
+	export let mode: Color = 'mode1';
 
 	export let closeOnEsc: boolean = true;
 	export let closeOnOutsideClick: boolean = true;
@@ -36,28 +37,30 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="modal-container" on:click={onCloseOnOutside}>
-	<div class={`modal ${size}`}>
-		<div class="modal-header">
-			<h3>{title}</h3>
-			<Button
-				size="sm"
-				mode="danger"
-				variant="outline"
-				on:click={() => {
-					dispatch('cancel', false);
-				}}
-				icon={XCircle}
-			/>
-		</div>
-		<div class="modal-body">
-			<slot />
-		</div>
-		{#if $$slots.footer}
-			<div class="modal-footer">
-				<slot name="footer" />
+<div class="liwe3-theme">
+	<div class={`modal-container ${mode}`} on:click={onCloseOnOutside}>
+		<div class={`modal ${size}`}>
+			<div class="modal-header">
+				<h3>{title}</h3>
+				<Button
+					size="sm"
+					mode="danger"
+					variant="outline"
+					on:click={() => {
+						dispatch('cancel', false);
+					}}
+					icon={XCircle}
+				/>
 			</div>
-		{/if}
+			<div class="modal-body">
+				<slot />
+			</div>
+			{#if $$slots.footer}
+				<div class="modal-footer">
+					<slot name="footer" />
+				</div>
+			{/if}
+		</div>
 	</div>
 </div>
 
@@ -85,11 +88,11 @@
 	}
 
 	.modal {
-		border: 2px solid var(--border-color);
+		border: 2px solid var(--border);
 		border-radius: 0.5rem;
-		color: var(--text-color);
+		color: var(--color);
 
-		background-color: var(--liwe-main-bg-color);
+		background-color: var(--paper);
 
 		box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
 	}
@@ -100,16 +103,17 @@
 		align-items: center;
 		border-radius: 0.5rem 0.5rem 0 0;
 
-		border-bottom: 1px solid var(--liwe-border-color);
+		border-bottom: 1px solid var(--border);
 		padding: 0.5rem;
 
-		background-color: var(--liwe-darker-secondary-color);
+		background-color: var(--darker);
 	}
 
 	.modal-header h3 {
 		margin: 0;
 		font-size: 1em;
 		font-weight: 400;
+		color: var(--color);
 	}
 
 	.modal-body {
@@ -126,10 +130,10 @@
 
 		border-radius: 0 0 0.5rem 0.5rem;
 
-		border-top: 1px solid var(--border-color);
+		border-top: 1px solid var(--border);
 		padding: 0.5rem;
 
-		background-color: var(--main-bg-darker);
+		background-color: var(--darker);
 	}
 
 	.xs {

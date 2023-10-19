@@ -5,11 +5,13 @@
 	import Input from './Input.svelte';
 	import Button from './Button.svelte';
 	import { Icon, Trash } from 'svelte-hero-icons';
+	import type { Color } from '$liwe3/types/types';
 
 	const dispatch = createEventDispatcher();
 
 	export let value: string = '';
 	export let name: string = '';
+	export let mode: Color = 'mode1';
 
 	let items: string[] = [];
 	let jitems: string = '';
@@ -79,7 +81,7 @@
 	$: dispatch('change', jitems);
 </script>
 
-<div>
+<div class={mode}>
 	<input type="hidden" {name} bind:value={jitems} />
 	{#each items as item, index (index)}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -91,18 +93,19 @@
 			on:dragover={handleDragOver}
 		>
 			<Input
+				{mode}
 				type="text"
 				autofocus
 				bind:value={item}
 				on:input={() => updateItem(index, item)}
 				on:keypress={onKeyPress}
 			/>
-			<Button mode="danger" on:click={(e) => removeItem(index)}>
+			<Button mode="error" on:click={(e) => removeItem(index)}>
 				<Icon src={Trash} size="24" />
 			</Button>
 		</div>
 	{/each}
-	<Button mode="success" on:click={addItem}>Add</Button>
+	<Button {mode} on:click={addItem}>Add</Button>
 </div>
 
 <style>

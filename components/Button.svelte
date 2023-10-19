@@ -39,7 +39,6 @@
 	on:click={onClick}
 >
 	{#if icon}
-		ICON: {icon}
 		<div class="liwe-button-icon-left">
 			<Icon src={icon} size={iconSizes[size]} {solid} />
 		</div>

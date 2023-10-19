@@ -4,6 +4,7 @@
 	import DraggableTreeItem from './sub/DraggableTreeItem.svelte';
 	import Button from './Button.svelte';
 	import { tree_set_meta } from '$liwe3/utils/utils';
+	import type { Color } from '$liwe3/types/types';
 
 	// maximum number of nested folders
 	export let name = '';
@@ -13,6 +14,8 @@
 	export let canEdit: boolean = true;
 	export let canDelete: boolean = true;
 	export let value: string = '';
+
+	export let mode: Color = 'mode1';
 
 	export let showNew: boolean = true;
 	export let newLabel: string = 'New';
@@ -54,9 +57,11 @@
 
 		tree_set_meta(newItems, '', 0);
 
+		/*
 		console.log('=== SOURCE: ', sourceItem.name);
 		console.log('=== TARGET: ', targetItem.name);
 		console.log('=== POS: ', pos);
+		*/
 
 		// if pos == -1, append the sourceItem to the targetItem (if it has children)
 		if (pos == -1) {
@@ -162,7 +167,7 @@
 
 {#if showNew}
 	<div class="new-item">
-		<Button size="xs" on:click={newItem} disabled={!canAdd}>
+		<Button {mode} size="xs" on:click={newItem} disabled={!canAdd}>
 			{newLabel}
 		</Button>
 	</div>
@@ -170,6 +175,7 @@
 
 <input type="hidden" {name} value={JSON.stringify(items)} />
 <DraggableTreeItem
+	{mode}
 	{items}
 	{canAdd}
 	{canEdit}

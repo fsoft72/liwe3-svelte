@@ -4,8 +4,11 @@
 	import { Icon, ChevronDown, ChevronRight, Trash, Plus, PencilSquare } from 'svelte-hero-icons';
 	import type { TreeItem } from '$liwe3/utils/tree';
 	import Button from '../Button.svelte';
+	import type { Color } from '$liwe3/types/types';
 
 	export let items: TreeItem[] = [];
+
+	export let mode: Color = 'mode1';
 
 	export let canAdd: boolean = true;
 	export let canDelete: boolean = true;
@@ -99,7 +102,7 @@
 	};
 </script>
 
-<div class="tree">
+<div class={`tree ${mode}`}>
 	{#each items as item (item.id)}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="item">
@@ -139,7 +142,7 @@
 					{#if canDelete}
 						<Button
 							size="xs"
-							mode="danger"
+							mode="error"
 							icon={Trash}
 							on:click={() => deleteItem(item)}
 							title="Delete Item"
@@ -147,6 +150,7 @@
 					{/if}
 					{#if canEdit}
 						<Button
+							{mode}
 							size="xs"
 							icon={PencilSquare}
 							on:click={() => editItem(item)}
@@ -168,6 +172,7 @@
 				{#if item.children.length > 0 && item.isOpen}
 					<svelte:self
 						items={item.children}
+						{mode}
 						{canAdd}
 						{canEdit}
 						{canDelete}
@@ -187,12 +192,18 @@
 <style>
 	.tree {
 		padding-left: 1rem;
+		background-color: var(--paper);
+	}
+
+	.item {
+		background-color: var(--background);
+		color: var(--color);
 	}
 
 	.bar {
-		border: 1px solid var(--liwe-darker-secondary-color);
+		border: 1px solid var(--border);
 		padding: 0.5rem;
-		border-radius: 2px;
+		border-radius: var(--liwe-border-radius);
 
 		margin-bottom: 0;
 
@@ -217,7 +228,7 @@
 	}
 
 	.btn:hover {
-		background-color: var(--liwe-secondary-color);
+		background-color: var(--lighter);
 	}
 
 	.mini {
@@ -226,7 +237,7 @@
 	}
 
 	.is-dragging-over {
-		border: 2px dashed red;
+		border: 2px dashed var(--darker);
 		padding: 1rem;
 	}
 

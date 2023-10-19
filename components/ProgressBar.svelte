@@ -1,9 +1,12 @@
 <script lang="ts">
+	import type { Color } from '$liwe3/types/types';
+
 	export let text: string = '';
 	export let percentage: number = 0;
+	export let mode: Color = 'mode1';
 </script>
 
-<div class="progress-bar">
+<div class={`progress-bar ${mode}`}>
 	<div class="progress-bar-fill" style={`width: ${percentage}%`} />
 	<div class="text">{text}</div>
 </div>
@@ -12,9 +15,9 @@
 	.progress-bar {
 		width: 100%;
 		height: 20px;
-		border: 1px solid var(--liwe-darker-secondary-color);
-		background-color: var(--liwe-primary-color);
-		border-radius: 2px;
+		border: 1px solid var(--border);
+		background-color: var(--color);
+		border-radius: var(--liwe-border-radius);
 		overflow: hidden;
 
 		position: relative;
@@ -32,7 +35,7 @@
 
 	.progress-bar-fill {
 		height: 100%;
-		background-color: var(--liwe-darker-primary-color);
+		background-color: var(--darker);
 		transition: width 0.3s ease-in-out;
 	}
 </style>
