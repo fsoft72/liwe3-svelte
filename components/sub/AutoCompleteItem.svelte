@@ -12,7 +12,7 @@
 <style>
 	li.autocomplete-items {
 		list-style: none;
-		border-bottom: 1px solid #d4d4d4;
+		border-bottom: 1px solid var(--border);
 		z-index: 99;
 		/*position the autocomplete items to be the same width as the container:*/
 		top: 100%;
@@ -20,24 +20,24 @@
 		right: 0;
 		padding: 10px;
 		cursor: pointer;
-		background-color: #fff;
+		background-color: var(--paper);
 	}
 
 	li.autocomplete-items:hover {
 		/*when hovering an item:*/
-		background-color: #81921f;
+		background-color: var(--dark);
 		color: white;
 	}
 
 	li.autocomplete-items:active {
 		/*when navigating through the items using the arrow keys:*/
-		background-color: DodgerBlue !important;
+		background-color: var(--dark);
 		color: #ffffff;
 	}
 
 	.autocomplete-active {
 		/*when navigating through the items using the arrow keys:*/
-		background-color: DodgerBlue !important;
+		background-color: var(--dark);
 		color: #ffffff;
 	}
 </style>

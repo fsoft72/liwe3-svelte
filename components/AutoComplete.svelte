@@ -2,9 +2,11 @@
 	import { createEventDispatcher } from 'svelte';
 	import ACItem from './sub/AutoCompleteItem.svelte';
 	import Input from '$liwe3/components/Input.svelte';
+	import type { Color } from '$liwe3/types/types';
 
 	export let items: string[] = [];
 	export let selectedItems: string[] = [];
+	export let mode: Color = 'mode1';
 
 	/* FILTERING items DATA BASED ON INPUT */
 	let filteredItems: string[] = [];
@@ -68,9 +70,10 @@
 	}
 </script>
 
-<div class="container">
+<div class={`container ${mode}`}>
 	<div class="autocomplete">
 		<Input
+			{mode}
 			class="input"
 			{...$$restProps}
 			type="text"
@@ -83,7 +86,7 @@
 
 	<!-- FILTERED LIST OF ITEMS -->
 	{#if filteredItems.length > 0}
-		<div class="items">
+		<div class={`items ${mode}`}>
 			<ul class="autocomplete-items-list">
 				{#each filteredItems as item, i}
 					<ACItem itemLabel={item} highlighted={i === hlIndex} on:click={() => setInput(item)} />
@@ -107,8 +110,8 @@
 		padding: 0;
 		top: 0;
 		width: 297px;
-		border: 1px solid #ddd;
-		background-color: #ddd;
+		border: 1px solid var(--border);
+		background-color: var(--background);
 
 		z-index: 99;
 
