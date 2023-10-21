@@ -92,7 +92,7 @@
 		border-radius: 0.5rem;
 		color: var(--color);
 
-		background-color: var(--paper);
+		background-color: var(--liwe3-dark-900);
 
 		box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
 	}
