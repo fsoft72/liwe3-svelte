@@ -31,6 +31,11 @@
 			});
 		}
 
+		// remove similar items in storageArr
+		storageArr = [...new Set(storageArr)];
+
+		console.log('=== STORAGE ARR: ', storageArr);
+
 		filteredItems = storageArr;
 	};
 
