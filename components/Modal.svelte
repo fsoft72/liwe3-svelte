@@ -44,8 +44,7 @@
 				<h3>{title}</h3>
 				<Button
 					size="sm"
-					mode="danger"
-					variant="outline"
+					mode="info"
 					on:click={() => {
 						dispatch('cancel', false);
 					}}
@@ -121,6 +120,8 @@
 
 		max-height: 90vh;
 		overflow: auto;
+
+		background-color: var(--light);
 	}
 
 	.modal-footer {
