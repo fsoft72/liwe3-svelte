@@ -160,11 +160,17 @@
 		}
 
 		filters = new_filters;
+
+		console.log('=== FILTER CHANGE: ', filters);
+
+		dispatch('filterchange', filters);
 	};
 
+	/*
 	$: {
 		dispatch('filterchange', filters);
 	}
+	*/
 
 	let table_element: HTMLTableElement | null = null;
 	/*
