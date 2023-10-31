@@ -58,10 +58,10 @@
 		tree_set_meta(newItems, '', 0);
 
 		/*
-		console.log('=== SOURCE: ', sourceItem.name);
-		console.log('=== TARGET: ', targetItem.name);
-		console.log('=== POS: ', pos);
-		*/
+        console.log('=== SOURCE: ', sourceItem.name);
+        console.log('=== TARGET: ', targetItem.name);
+        console.log('=== POS: ', pos);
+        */
 
 		// if pos == -1, append the sourceItem to the targetItem (if it has children)
 		if (pos == -1) {
@@ -165,7 +165,7 @@
 	}
 </script>
 
-<div class="container">
+<div class={`container ${mode}`}>
 	{#if showNew}
 		<div class="new-item">
 			<Button {mode} size="xs" on:click={newItem} disabled={!canAdd}>
@@ -194,6 +194,12 @@
 	.container {
 		display: flex;
 		flex-direction: column;
+
+		min-width: 8rem;
+
+		background-color: var(--paper);
+
+		padding: 0.5rem;
 	}
 
 	.new-item {
