@@ -165,25 +165,40 @@
 	}
 </script>
 
-{#if showNew}
-	<div class="new-item">
-		<Button {mode} size="xs" on:click={newItem} disabled={!canAdd}>
-			{newLabel}
-		</Button>
-	</div>
-{/if}
+<div class="container">
+	{#if showNew}
+		<div class="new-item">
+			<Button {mode} size="xs" on:click={newItem} disabled={!canAdd}>
+				{newLabel}
+			</Button>
+		</div>
+	{/if}
 
-<input type="hidden" {name} value={JSON.stringify(items)} />
-<DraggableTreeItem
-	{mode}
-	{items}
-	{canAdd}
-	{canEdit}
-	{canDelete}
-	{maxDepth}
-	on:additem={onAddItem}
-	on:edititem={onEditItem}
-	on:delitem={onDelItem}
-	on:reorder={onReorder}
-	on:change={onChange}
-/>
+	<input type="hidden" {name} value={JSON.stringify(items)} />
+	<DraggableTreeItem
+		{mode}
+		{items}
+		{canAdd}
+		{canEdit}
+		{canDelete}
+		{maxDepth}
+		on:additem={onAddItem}
+		on:edititem={onEditItem}
+		on:delitem={onDelItem}
+		on:reorder={onReorder}
+		on:change={onChange}
+	/>
+</div>
+
+<style>
+	.container {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.new-item {
+		display: flex;
+		justify-content: flex-end;
+		margin-bottom: 0.5rem;
+	}
+</style>
