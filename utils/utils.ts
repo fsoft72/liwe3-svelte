@@ -203,3 +203,8 @@ export const secs2time = ( secs?: number ) => {
 	return time;
 
 };
+
+export const toBool = ( val: any ) => {
+	if ( val === 'true' || val === true || val === 1 || val === '1' ) return true;
+	return false;
+};
