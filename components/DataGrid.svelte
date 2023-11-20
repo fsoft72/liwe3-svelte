@@ -305,7 +305,7 @@
 									{row[field.name]}
 								</Button>
 							{:else}
-								{row[field.name]}
+								{row[field?.name || '']}
 							{/if}
 						</td>
 						<td class="resize" on:mousedown={resize_start} />
