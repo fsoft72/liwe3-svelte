@@ -209,3 +209,16 @@ export const toBool = ( val: any ) => {
 	if ( val === 'true' || val === true || val === 1 || val === '1' ) return true;
 	return false;
 };
+
+
+/**
+ * This function returns the username or (deleted) if the username starts with 'user.'
+ *
+ * @param username
+ * @returns
+ */
+export const uname = ( username?: string ) => {
+	if ( !username ) return '';
+	if ( username.startsWith( 'user.' ) ) return '(deleted)';
+	return username;
+};
