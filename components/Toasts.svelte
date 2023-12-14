@@ -11,10 +11,9 @@
 				type={toast.type}
 				dismissible={toast.dismissible}
 				on:dismiss={() => dismissToast(toast.id ?? 0)}
-			>
-				{toast.title}<br />
-				{toast.message}
-			</Toast>
+				title={toast.title}
+				message={toast.message}
+			/>
 		{/each}
 	</section>
 {/if}
