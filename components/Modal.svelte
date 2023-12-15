@@ -14,6 +14,9 @@
 	export let closeOnEsc: boolean = true;
 	export let closeOnOutsideClick: boolean = true;
 
+	export let padding = '0.5rem';
+	export let showCloseButton = true;
+
 	const onCloseOnOutside = (e: MouseEvent) => {
 		if (closeOnOutsideClick && e.target === e.currentTarget) {
 			dispatch('cancel', false);
@@ -42,16 +45,18 @@
 		<div class={`modal ${size}`}>
 			<div class="modal-header">
 				<h3>{title}</h3>
-				<Button
-					size="sm"
-					mode="info"
-					on:click={() => {
-						dispatch('cancel', false);
-					}}
-					icon={XCircle}
-				/>
+				{#if showCloseButton}
+					<Button
+						size="sm"
+						mode="info"
+						on:click={() => {
+							dispatch('cancel', false);
+						}}
+						icon={XCircle}
+					/>
+				{/if}
 			</div>
-			<div class="modal-body">
+			<div class="modal-body" style:padding>
 				<slot />
 			</div>
 			{#if $$slots.footer}
@@ -116,7 +121,7 @@
 	}
 
 	.modal-body {
-		padding: 0.5rem;
+		/* padding: 0.5rem; */
 
 		max-height: 90vh;
 		overflow: auto;
