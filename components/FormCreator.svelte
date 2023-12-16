@@ -14,6 +14,7 @@
 		align?: 'flex-start' | 'flex-end' | 'center';
 		icon?: IconSource;
 		extra?: Record<string, unknown>;
+		options?: { label: string; value: string }[];
 
 		// events
 		onChange?: (name: string, value: any, values: Record<string, any>) => Promise<boolean>;
@@ -47,6 +48,7 @@
 	import type { Size } from '$liwe3/types/types';
 	import ElementList from './ElementList.svelte';
 	import { addToast } from '$liwe3/stores/ToastStore';
+	import Select from 'svelte-select';
 
 	export let fields: FormField[] = [];
 	export let values: Record<string, any> = {};
@@ -182,6 +184,15 @@
 							</div>
 						{:else if field?.type === 'hidden'}
 							<input type="hidden" name={field.name} value={values[field.name] ?? ''} />
+						{:else if field?.type === 'select'}
+							<Select
+								name={field.name}
+								value={values[field.name] ?? ''}
+								{...field.extra}
+								on:change={(e) => onChangeField(field.name, e)}
+								on:clear={() => onChangeField(field.name, '')}
+								items={field.options ?? []}
+							/>
 						{:else}
 							<Input
 								{...field}
