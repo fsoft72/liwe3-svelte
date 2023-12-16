@@ -49,6 +49,7 @@
 	import ElementList from './ElementList.svelte';
 	import { addToast } from '$liwe3/stores/ToastStore';
 	import Select from 'svelte-select';
+	import { _ } from '$liwe3/stores/LocalizationStore';
 
 	export let fields: FormField[] = [];
 	export let values: Record<string, any> = {};
@@ -78,7 +79,10 @@
 		if (missing.length) {
 			addToast({
 				type: 'error',
-				message: 'Please fill all required fields: ' + missing.join(', ')
+				message:
+					$_('Please fill all required fields:<br /><ul><li>') +
+					missing.join('</li><li>') +
+					'</li></ul>'
 			});
 
 			return;
@@ -189,7 +193,7 @@
 								name={field.name}
 								value={values[field.name] ?? ''}
 								{...field.extra}
-								on:change={(e) => onChangeField(field.name, e)}
+								on:change={(e) => onChangeField(field.name, e.detail.value)}
 								on:clear={() => onChangeField(field.name, '')}
 								items={field.options ?? []}
 							/>
