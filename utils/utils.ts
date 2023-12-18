@@ -8,8 +8,14 @@ import type { TreeItem } from './tree';
 import { url_and_headers } from './fetcher';
 
 // Format a date string like '2023-08-01T17:15:09.388Z' into a readable date string
-export const format_date = ( date: string, format = 'YYYY-MM-DD HH:mm:ss' ) => {
-	const d = new Date( date );
+export const format_date = ( date: string | Date, format = 'YYYY-MM-DD HH:mm:ss' ) => {
+	let d: Date;
+
+	if ( typeof date === 'string' ) {
+		d = new Date( date );
+	} else {
+		d = date;
+	}
 
 	const dct: Record<string, string> = {
 		YYYY: d.getFullYear().toString(),
