@@ -13,7 +13,11 @@ const url_and_headers = ( url: string, authenticated = false ) => {
 		'Content-Type': 'application/json;charset=utf-8',
 	};
 
-	if ( authenticated ) {
+	if ( authenticated && !currentUser?.token ) {
+		console.error( "ERROR: authenticated request without token", url );
+	}
+
+	if ( currentUser?.token ) {
 		headers.Authorization = `Bearer ${ currentUser?.token }`;
 	}
 
