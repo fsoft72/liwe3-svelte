@@ -119,7 +119,7 @@
 
 		dispatch('edititem', { id });
 
-		items = structuredClone(tree_del_item(items, id));
+		// items = structuredClone(tree_del_item(items, id));
 
 		dispatch('change', { items });
 	};
