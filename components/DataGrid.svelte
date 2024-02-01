@@ -250,7 +250,7 @@
 											name={`f_${field.name}_2`}
 											on:change={filter_change}
 										/>
-									{:else if field.type == 'checkbox'}
+									{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
 										<Input {mode} size="xs" type="checkbox" on:change={filter_change} />
 									{/if}
 								{/if}
@@ -285,7 +285,7 @@
 									{:else}
 										{@html field.render(row[field.name], row)}
 									{/if}
-								{:else if field.type == 'checkbox'}
+								{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
 									<Input
 										{mode}
 										type="checkbox"
