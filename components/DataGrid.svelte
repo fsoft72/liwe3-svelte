@@ -139,13 +139,27 @@
 		const input = e.target as HTMLInputElement;
 		const name = input.name.replace('f_', '');
 		const field = fields.find((f) => f.name === name);
-		const value = input.value;
+		let value: any = input.value;
 		let mode = field?.searchMode || '==';
+
+		console.log('=== FILTER CHANGE: ', { name, field, value, mode, type: input.type });
 
 		if (name.endsWith('_1')) {
 			mode = '>=';
 		} else if (name.endsWith('_2')) {
 			mode = '<=';
+		}
+
+		// we add to the query only checkboxes that are set to true
+		if (input.type == 'checkbox' && toBool(value) == false) {
+			const nf = { ...filters };
+			delete nf[name];
+
+			filters = nf;
+			dispatch('filterchange', filters);
+			return;
+		} else if (input.type == 'checkbox' && toBool(value) == true) {
+			value = true;
 		}
 
 		const new_filters = {
@@ -253,7 +267,13 @@
 											on:change={filter_change}
 										/>
 									{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
-										<Input {mode} size="xs" type="checkbox" on:change={filter_change} />
+										<Input
+											{mode}
+											name={`f_${field.name}`}
+											size="xs"
+											type="checkbox"
+											on:change={filter_change}
+										/>
 									{/if}
 								{/if}
 							</td>
