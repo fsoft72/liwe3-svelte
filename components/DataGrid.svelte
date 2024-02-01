@@ -5,6 +5,7 @@
 		label?: string;
 		sortable?: boolean;
 		filterable?: boolean;
+		searchMode?: string;
 		editable?: boolean;
 		deletable?: boolean;
 		hidden?: boolean;
@@ -40,7 +41,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	type UpdateFieldCallback = (row: GridDataRow, field_name: string) => void;
+	type UpdateFieldCallback = (row: GridDataRow, field_name: string, value: any) => void;
 
 	export let fields: GridField[] = [];
 	export let data: GridDataRow[] = [];
@@ -125,7 +126,7 @@
 			if (!do_update) return;
 
 			// update the field
-			updateField && updateField(row, field_name);
+			updateField && updateField(row, field_name, row[field_name]);
 		});
 
 		// focus the input
@@ -137,8 +138,9 @@
 	const filter_change = (e: Event) => {
 		const input = e.target as HTMLInputElement;
 		const name = input.name.replace('f_', '');
+		const field = fields.find((f) => f.name === name);
 		const value = input.value;
-		let mode = '==';
+		let mode = field?.searchMode || '==';
 
 		if (name.endsWith('_1')) {
 			mode = '>=';
@@ -292,7 +294,7 @@
 										checked={toBool(row[field.name])}
 										on:change={(e) => {
 											row[field.name] = e.target?.checked;
-											updateField && updateField(row, field.name);
+											updateField && updateField(row, field.name, row[field.name]);
 										}}
 									/>
 								{:else if field.type == 'avatar'}
@@ -370,6 +372,7 @@
 
 		border: 1px solid var(--border);
 		border-collapse: collapse;
+		border-radius: var(--liwe-border-radius);
 
 		background-color: var(--paper);
 
