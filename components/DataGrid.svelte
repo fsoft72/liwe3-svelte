@@ -36,6 +36,7 @@
 	import Avatar from './Avatar.svelte';
 	import type { IconSource } from 'svelte-hero-icons';
 	import type { Color, Variant } from '$liwe3/types/types';
+	import { toBool } from '$liwe3/utils/utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -288,7 +289,7 @@
 									<Input
 										{mode}
 										type="checkbox"
-										checked={row[field.name]}
+										checked={toBool(row[field.name])}
 										on:change={(e) => {
 											row[field.name] = e.target?.checked;
 											updateField && updateField(row, field.name);
