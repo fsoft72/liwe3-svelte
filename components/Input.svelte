@@ -10,6 +10,7 @@
 	export let validChars: string = '';
 	export let width: string = '100%';
 	export let mode: Color = 'mode1';
+	export let divClass: string = '';
 
 	let type = 'checkbox';
 	let rx = validChars ? new RegExp(`[^${validChars}]*`, 'g') : null;
@@ -55,360 +56,108 @@
 	};
 
 	$: type = $$restProps.type || 'text';
-	$: if (type == 'checkbox') variant = 'none';
 </script>
 
-<div class={`form input-${variant}`} class:checkbox={type === 'checkbox'} style={`width: ${width}`}>
+<div class={`${divClass} input-container`} class:checkbox={type === 'checkbox'} style={`width: ${width}`}>
+	{#if label}
+		<label for={id} class="label">{label} {type}</label>
+	{/if}
 	<input
-		class:filled={value}
 		{id}
 		{...$$restProps}
-		class={`input ${mode} ${size} i-${type}`}
+		class={`cform cform-custom-input ${$$restProps.class} ${mode} input ${size}`}
+		{type}
 		on:blur
 		on:change
 		on:keydown
 		on:keyup
 		on:keypress
 		on:input={handleInput}
-		bind:value
 	/>
-	{#if label}
-		<label for={id} class="label">{label}</label>
-	{/if}
-	{#if variant === 'material'}
-		<div class="underline" />
-	{/if}
 </div>
 
 <style>
 	/* generic input rules --------------------------*/
-	input {
-		--input-w-unit: 0.5rem;
+	:global(:root) {
+		--liwe3-input-w-unit: 0.3rem;
+	}
+	.input-container {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		justify-content: flex-end;
 	}
 	.input {
-		border-radius: var(--liwe-border-radius);
+		margin-right: var(--liwe3-input-w-unit);
+	}
+	.checkbox {
+		width: 100%;
+		flex-direction: row-reverse;
+		align-items: flex-end;
+		justify-content: flex-end;
+		padding-bottom: .5rem;
 	}
 
 	.label {
 		white-space: nowrap;
+		font-size: .6rem;
+		margin: var(--liwe3-input-w-unit) 0;
 	}
-	.input-plain,
-	.input-none {
-		display: flex;
-		flex-direction: column-reverse;
-		align-items: flex-start;
-		width: 100%;
-	}
-
-	.input-none.checkbox {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: flex-start;
-		max-width: max-content;
-		min-height: 0.875rem;
-		max-height: 1.5rem;
-	}
-	/* end generic input rules --------------------------*/
-	/* input plain rules --------------------------*/
-	.input-plain .input {
-		width: 100%;
-	}
-	/* end input plain rules --------------------------*/
-	/* input boxed rules --------------------------*/
-	.input-boxed {
-		position: relative;
-	}
-
-	.input-boxed .input {
-		position: relative;
-		width: 100%;
-		border-width: 1.5px;
-		border-radius: var(--liwe-border-radius);
-	}
-
-	.input-boxed .label {
-		position: absolute;
-		pointer-events: none;
-		left: 0.5rem;
-		top: 0.4rem;
-		padding: 0 0.3rem;
-		white-space: nowrap;
-		overflow: hidden;
-		line-height: 1rem;
-		background-color: transparent;
-		transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.input-boxed .input.filled ~ .label,
-	.input-boxed .input:focus ~ .label {
-		top: -0.5rem;
-		left: 0.7rem;
-		font-size: 0.675rem;
-		color: var(--liwe-primary-color);
-	}
-
-	.input-boxed .input.filled:not(:focus) ~ .label {
-		color: var(--liwe-primary-color);
-	}
-	/* end input boxed rules --------------------------*/
-	/* input material rules --------------------------*/
-	.input-material {
-		position: relative;
-		margin: 2rem auto;
-		width: fit-content;
-	}
-
-	.input-material .input {
-		border: none;
-		border-bottom: 2px solid var(--liwe-darker-secondary-color);
-		padding: 5px 0;
-		background-color: transparent;
-		outline: none;
-	}
-
-	.input-material .label {
-		position: absolute;
-		top: 0;
-		left: 0;
-		color: var(--liwe-darker-secondary-color);
-		transition: all 0.3s ease;
-		pointer-events: none;
-	}
-
-	.input-material .input.filled ~ .label,
-	.input-material .input:focus ~ .label {
-		top: -20px;
-		font-size: 16px;
-		color: var(--liwe-dark-color);
-	}
-
-	.input-material .underline {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		height: 2px;
-		min-width: 100%;
-		background-color: var(--liwe-main-color);
-		transform: scaleX(0);
-		transition: all 0.3s ease;
-	}
-
-	.input-material input:focus ~ .underline,
-	.input-material .input.filled ~ .underline {
-		transform: scaleX(1);
-	}
-	/* end input material rules --------------------------*/
 	/* generic size rules for inputs and labels--------------------------*/
 	.input.xxs ~ .label,
 	.xxs {
 		padding: 0.12rem 0.2rem;
 		font-size: 0.75rem;
-		min-width: calc(var(--input-w-unit) * 4);
+		min-width: calc(var(--liwe3-input-w-unit) * 4);
 	}
 
 	.input.xs ~ .label,
 	.xs {
 		padding: 0.15rem 0.22rem;
 		font-size: 0.75rem;
-		min-width: calc(var(--input-w-unit) * 5);
+		min-width: calc(var(--liwe3-input-w-unit) * 5);
 	}
 
 	.input.sm ~ .label,
 	.sm {
 		padding: 0.18rem 0.24rem;
 		font-size: 0.875rem;
-		min-width: calc(var(--input-w-unit) * 6);
+		min-width: calc(var(--liwe3-input-w-unit) * 6);
 	}
 
 	.input.md ~ .label,
 	.md {
 		padding: 0.2rem 0.26rem;
 		font-size: 1rem;
-		min-width: calc(var(--input-w-unit) * 7);
+		min-width: calc(var(--liwe3-input-w-unit) * 7);
 	}
 
 	.input.lg ~ .label,
 	.lg {
 		padding: 0.22rem 0.28rem;
 		font-size: 1.12rem;
-		min-width: calc(var(--input-w-unit) * 8);
+		min-width: calc(var(--liwe3-input-w-unit) * 8);
 	}
 
 	.input.xl ~ .label,
 	.xl {
 		padding: 0.24rem 0.4rem;
 		font-size: 1.25rem;
-		min-width: calc(var(--input-w-unit) * 9);
+		min-width: calc(var(--liwe3-input-w-unit) * 9);
 	}
 
 	.input.xxl ~ .label,
 	.xxl {
 		padding: 0.28rem 0.45rem;
 		font-size: 1.5rem;
-		min-width: calc(var(--input-w-unit) * 10);
+		min-width: calc(var(--liwe3-input-w-unit) * 10);
+	}
+	input[type="checkbox"] {
+		width: 1rem;
+		height: 1rem;
+		min-width: 1rem;
+		min-height: 1rem;
 	}
 	/* end generic size rules for inputs and labels--------------------------*/
-	/* input boxed labels rules --------------------------*/
-	/* blurred */
-	.input-boxed .input.xxs ~ .label,
-	.input-boxed .input.xs ~ .label,
-	.input-boxed .input.sm ~ .label {
-		padding: 0 0.2rem;
-		margin-top: -0.2rem;
-	}
-	.input-boxed .input.md ~ .label,
-	.input-boxed .input.lg ~ .label {
-		padding: 0 0.25rem;
-	}
-	/* focus/filled */
-	.input-boxed .input.xxs.filled ~ .label,
-	.input-boxed .input.xxs:focus ~ .label,
-	.input-boxed .input.xs.filled ~ .label,
-	.input-boxed .input.xs:focus ~ .label {
-		padding: 0 0.2rem;
-		margin-top: -0.2rem;
-		font-size: 0.75rem;
-	}
-	.input-boxed .input.sm.filled ~ .label,
-	.input-boxed .input.sm:focus ~ .label {
-		padding: 0 0.2rem;
-		margin-top: -0.4rem;
-		font-size: 0.875rem;
-	}
-	.input-boxed .input.md.filled ~ .label,
-	.input-boxed .input.md:focus ~ .label,
-	.input-boxed .input.lg.filled ~ .label,
-	.input-boxed .input.lg:focus ~ .label {
-		padding: 0 0.4rem;
-		margin-top: -0.25rem;
-		font-size: 1rem;
-	}
-	.input-boxed .input.xl.filled ~ .label,
-	.input-boxed .input.xl:focus ~ .label,
-	.input-boxed .input.xxl.filled ~ .label,
-	.input-boxed .input.xxl:focus ~ .label {
-		margin-top: -0.25rem;
-		padding: 0 0.25rem;
-		font-size: 1rem;
-	}
-	/* end input boxed labels rules --------------------------*/
 
-	/* input type number settings 👇 --------------------------*/
-	.i-number {
-		text-align: right;
-	}
-
-	/* checkbox settings 👇 --------------------------*/
-	.i-checkbox {
-		--primary-color: var(--dark);
-		--secondary-color: var(--lighter);
-		--primary-hover-color: var(--dark);
-		/* checkbox */
-		--checkbox-diameter: 20px;
-		--checkbox-border-radius: 5px;
-		--checkbox-border-color: var(--border);
-		--checkbox-border-width: 1px;
-		--checkbox-border-style: solid;
-		/* checkmark */
-		--checkmark-size: 1.4;
-	}
-
-	.input.i-checkbox.xxs {
-		width: var(--checkbox-diameter) !important;
-		height: var(--checkbox-diameter) !important;
-		max-width: var(--checkbox-diameter) !important;
-		max-height: var(--checkbox-diameter) !important;
-	}
-
-	.i-checkbox,
-	.i-checkbox *,
-	.i-checkbox *::before,
-	.i-checkbox *::after {
-		box-sizing: border-box;
-	}
-
-	.i-checkbox {
-		-webkit-appearance: none;
-		-moz-appearance: none;
-		appearance: none;
-		width: var(--checkbox-diameter) !important;
-		height: var(--checkbox-diameter) !important;
-		max-width: var(--checkbox-diameter) !important;
-		max-height: var(--checkbox-diameter) !important;
-		border-radius: var(--checkbox-border-radius);
-		background: var(--secondary-color);
-		border: var(--checkbox-border-width) var(--checkbox-border-style) var(--checkbox-border-color);
-		transition: all 0.3s;
-		cursor: pointer;
-		position: relative;
-		display: inline-block;
-	}
-
-	/* reset input width and height --------------------------*/
-	.input.i-checkbox.xxs,
-	.input.i-checkbox.xs,
-	.input.i-checkbox.xs,
-	.input.i-checkbox.sm,
-	.input.i-checkbox.md,
-	.input.i-checkbox.lg,
-	.input.i-checkbox.xl,
-	.input.i-checkbox.xxl {
-		min-width: var(--checkbox-diameter) !important;
-		min-height: var(--checkbox-diameter) !important;
-	}
-
-	.i-checkbox::after {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		box-shadow: 0 0 0 calc(var(--checkbox-diameter) / 2.5) var(--primary-color);
-		border-radius: inherit;
-		opacity: 0;
-		transition: all 0.5s cubic-bezier(0.12, 0.4, 0.29, 1.46);
-	}
-
-	.i-checkbox::before {
-		top: 40%;
-		left: 50%;
-		content: '';
-		position: absolute;
-		width: 4px;
-		height: 7px;
-		border-right: 2px solid var(--secondary-color);
-		border-bottom: 2px solid var(--secondary-color);
-		transform: translate(-50%, -50%) rotate(45deg) scale(0);
-		opacity: 0;
-		transition: all 0.1s cubic-bezier(0.71, -0.46, 0.88, 0.6), opacity 0.1s;
-	}
-
-	.i-checkbox ~ .label {
-		margin: 0;
-		padding: 0;
-	}
-	/* actions --------------------------*/
-
-	.i-checkbox:hover {
-		border-color: var(--primary-color);
-	}
-
-	.i-checkbox:checked {
-		background: var(--primary-color);
-		border-color: transparent;
-	}
-
-	.i-checkbox:checked::before {
-		opacity: 1;
-		transform: translate(-50%, -50%) rotate(45deg) scale(var(--checkmark-size));
-		transition: all 0.2s cubic-bezier(0.12, 0.4, 0.29, 1.46) 0.1s;
-	}
-
-	.i-checkbox:active:not(:checked)::after {
-		box-shadow: none;
-		transition: none;
-		opacity: 1;
-	}
 </style>
