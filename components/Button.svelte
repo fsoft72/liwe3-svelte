@@ -35,11 +35,11 @@
 
 <button
 	{...$$restProps}
-	class={`liwe-button ${mode} ${variant ? 'liwe3-' + variant : ''} ${size} ${cssClass}`}
+	class={`liwe3-button ${mode} ${variant ? 'liwe3-' + variant : ''} ${size} ${cssClass}`}
 	on:click={onClick}
 >
 	{#if icon}
-		<div class="liwe-button-icon-left">
+		<div class="liwe3-button-icon-left">
 			<Icon src={icon} size={iconSizes[size]} {solid} />
 		</div>
 	{/if}
@@ -47,14 +47,14 @@
 		<div class="button-no-content" />
 	</slot>
 	{#if iconRight}
-		<div class="liwe-button-icon-right">
+		<div class="liwe3-button-icon-right">
 			<Icon src={iconRight} size={iconSizes[size]} {solid} />
 		</div>
 	{/if}
 </button>
 
 <style>
-	.liwe-button {
+	.liwe3-button {
 		display: inline-flex;
 		flex-direction: row;
 		align-items: center;
@@ -65,17 +65,17 @@
 		transition: all 0.2s ease-in-out;
 	}
 
-	.liwe-button:disabled {
+	.liwe3-button:disabled {
 		cursor: not-allowed;
 		transition: all 0.2s ease-in-out;
 	}
 
-	.liwe-button-icon-left {
+	.liwe3-button-icon-left {
 		flex: 0.1 0 10%;
 		margin-right: 0.5em;
 		padding-top: 0.2em;
 	}
-	.liwe-button-icon-right {
+	.liwe3-button-icon-right {
 		flex: 0.1 0 10%;
 		margin-left: 0.5em;
 		padding-top: 0.2em;
@@ -85,20 +85,20 @@
 		margin-right: -0.5em;
 	}
 
-	.liwe-button.liwe3-link {
+	.liwe3-button.liwe3-link {
 		background-color: transparent !important;
 		border: none !important;
-		color: var(--button-text) !important;
+		color: var(--liwe3-button-background) !important;
 	}
 
-	.liwe-button.liwe3-link:hover:not(:disabled) {
+	.liwe3-button.liwe3-link:hover:not(:disabled) {
 		background-color: transparent !important;
 		text-decoration: underline !important;
 	}
 
-	.liwe-button.liwe3-outline {
+	.liwe3-button.liwe3-outline:not(:hover) {
 		background-color: transparent !important;
-		color: var(--liwe-default-color) !important;
+		color: var(--liwe3-button-background) !important;
 	}
 
 	.xxs {
@@ -141,7 +141,7 @@
 		font-size: 2rem;
 		/* min-width: var(--unit-w-size); */
 	}
-
+	/*
 	.liwe-button.mode1 {
 		background-color: var(--button-mode1-background);
 		border: 1px solid var(--button-mode1-border);
@@ -293,4 +293,5 @@
 	button.success:active {
 		background-color: var(--liwe3-success-700-clicked);
 	}
+	*/
 </style>
