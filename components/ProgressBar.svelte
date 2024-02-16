@@ -17,7 +17,7 @@
 		height: 20px;
 		border: 1px solid var(--border);
 		background-color: var(--color);
-		border-radius: var(--liwe-border-radius);
+		border-radius: var(--liwe3-border-radius);
 		overflow: hidden;
 
 		position: relative;

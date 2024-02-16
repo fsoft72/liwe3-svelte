@@ -73,7 +73,7 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background-color: var(--liwe-main-bg-color);
+		background-color: var(--liwe3-main-bg-color);
 		transition: 0.4s;
 		border-radius: 20px;
 
@@ -96,7 +96,7 @@
 	}
 
 	input:checked + .liwe3-themeswitch-slider {
-		background-color: var(--liwe-main-bg-color);
+		background-color: var(--liwe3-main-bg-color);
 	}
 
 	input:checked + .liwe3-themeswitch-slider:before {

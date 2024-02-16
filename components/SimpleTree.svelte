@@ -155,12 +155,12 @@
 
 	.tree-item:hover {
 		cursor: pointer;
-		background-color: var(--liwe-secondary-color);
+		background-color: var(--liwe3-secondary-color);
 	}
 
 	.selected {
-		background-color: var(--liwe-success-color);
-		color: var(--liwe-light-color);
+		background-color: var(--liwe3-success-color);
+		color: var(--liwe3-light-color);
 	}
 
 	.actions {

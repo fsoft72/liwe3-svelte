@@ -55,7 +55,7 @@
 	{#if showClear}
 		<Button icon={XCircle} size="xs" variant="link" on:click={clear} />
 	{:else}
-		<div style="width: 24px"></div>
+		<div style="width: 24px" />
 	{/if}
 </div>
 
@@ -69,7 +69,7 @@
 
 		border: 1px solid var(--border);
 		padding: 0.4rem;
-		border-radius: var(--liwe-border-radius);
+		border-radius: var(--liwe3-border-radius);
 		background-color: var(--background);
 	}
 

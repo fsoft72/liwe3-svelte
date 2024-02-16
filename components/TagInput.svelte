@@ -89,7 +89,7 @@
 
 		font-size: 70%;
 
-		border-radius: var(--liwe-border-radius);
+		border-radius: var(--liwe3-border-radius);
 	}
 
 	.name {

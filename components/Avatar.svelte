@@ -66,7 +66,7 @@
 	}
 
 	.avatar.square {
-		border-radius: var(--liwe-border-radius);
+		border-radius: var(--liwe3-border-radius);
 	}
 
 	.avatar.shadow {

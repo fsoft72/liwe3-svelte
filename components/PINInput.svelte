@@ -98,7 +98,7 @@
 		padding: 1rem;
 	}
 	input {
-		border-radius: var(--liwe-border-radius);
+		border-radius: var(--liwe3-border-radius);
 		border: 1px solid var(--border);
 
 		text-align: center;

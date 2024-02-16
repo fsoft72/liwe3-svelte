@@ -377,7 +377,7 @@
 	:root {
 		--table-font-size: 0.8rem;
 		--table-font-color: var(--text-color);
-		--table-font-family: var(--liwe-main-font-family);
+		--table-font-family: var(--liwe3-main-font-family);
 	}
 
 	.fields-chk {
@@ -405,7 +405,7 @@
 
 		border: 1px solid var(--border);
 		border-collapse: collapse;
-		border-radius: var(--liwe-border-radius);
+		border-radius: var(--liwe3-border-radius);
 
 		background-color: var(--paper);
 

@@ -203,7 +203,7 @@
 	.bar {
 		border: 1px solid var(--border);
 		padding: 0.5rem;
-		border-radius: var(--liwe-border-radius);
+		border-radius: var(--liwe3-border-radius);
 
 		margin-bottom: 0;
 

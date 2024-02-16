@@ -92,7 +92,7 @@
 	}
 
 	.modal {
-		border: 2px solid var(--border);
+		border: 2px solid var(--liwe3-border-width);
 		border-radius: 0.5rem;
 		color: var(--color);
 
