@@ -83,7 +83,7 @@
 		align-items: center;
 		justify-content: space-between;
 
-		background-color: var(--background);
+		background-color: var(--liwe3-background);
 		color: var(--color);
 		border: 1px solid var(--border);
 

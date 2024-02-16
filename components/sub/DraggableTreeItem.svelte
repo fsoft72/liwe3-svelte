@@ -196,7 +196,7 @@
 	}
 
 	.item {
-		background-color: var(--background);
+		background-color: var(--liwe3-background);
 		color: var(--color);
 	}
 

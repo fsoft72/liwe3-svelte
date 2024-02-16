@@ -70,12 +70,12 @@
 		border: 1px solid var(--border);
 		padding: 0.4rem;
 		border-radius: var(--liwe3-border-radius);
-		background-color: var(--background);
+		background-color: var(--liwe3-background);
 	}
 
 	.dropdown,
 	.input {
 		width: 100%;
-		background-color: var(--background);
+		background-color: var(--liwe3-background);
 	}
 </style>

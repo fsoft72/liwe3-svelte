@@ -114,7 +114,7 @@
 		top: 0;
 		width: 297px;
 		border: 1px solid var(--border);
-		background-color: var(--background);
+		background-color: var(--liwe3-background);
 
 		z-index: 99;
 

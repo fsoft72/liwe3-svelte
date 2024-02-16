@@ -77,7 +77,7 @@
 		transition: 0.4s;
 		border-radius: 20px;
 
-		border: 1px solid var(--text-color);
+		border: 1px solid var(--liwe3-color);
 		width: var(--width-of-switch);
 		height: var(--height-of-switch);
 	}

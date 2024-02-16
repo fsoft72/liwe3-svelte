@@ -376,7 +376,7 @@
 <style>
 	:root {
 		--table-font-size: 0.8rem;
-		--table-font-color: var(--text-color);
+		--table-font-color: var(--liwe3-color);
 		--table-font-family: var(--liwe3-main-font-family);
 	}
 
