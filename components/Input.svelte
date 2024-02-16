@@ -6,10 +6,9 @@
 	export let id = ($$restProps.name ?? Math.random().toString()) + new Date().getTime().toString();
 	export let size: Size = 'md';
 	export let value: string | number | boolean = '';
-	export let variant: InputVariant = 'plain';
 	export let validChars: string = '';
 	export let width: string = '100%';
-	export let mode: Color = 'mode1';
+	export let mode: Color = 'mode3';
 	export let divClass: string = '';
 
 	let type = 'checkbox';
