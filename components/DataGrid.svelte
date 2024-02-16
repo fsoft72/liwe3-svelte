@@ -387,6 +387,19 @@
 		gap: 0.5rem;
 	}
 
+	.table {
+		min-width: 100%;
+		overflow: auto;
+		padding-bottom: 1rem;
+
+		/* make the scrollbars smaller */
+		scrollbar-width: thin;
+
+		/* make the scrollbars transparent */
+		/* scrollbar-color: var(--border) var(--paper); */
+		scrollbar-color: var(--liwe3-dark-900) var(--liwe3-dark-400);
+	}
+
 	table {
 		width: 100%;
 
