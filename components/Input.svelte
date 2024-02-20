@@ -11,6 +11,9 @@
 	export let mode: Color = 'mode3';
 	export let divClass: string = '';
 
+	const inputClass = `cform cform-custom-input ${$$restProps.class} ${mode} input ${size}`;
+	const checkboxClass = `${mode} cform cform-custom-checkbox-radio ${$$restProps.class} checkbox ${size}`;
+
 	let type = 'checkbox';
 	let rx = validChars ? new RegExp(`[^${validChars}]*`, 'g') : null;
 
@@ -64,7 +67,7 @@
 	<input
 		{id}
 		{...$$restProps}
-		class={`cform cform-custom-input ${$$restProps.class} ${mode} input ${size}`}
+		class = {type === 'checkbox' ? checkboxClass : inputClass}
 		{type}
 		on:blur
 		on:change
@@ -85,6 +88,10 @@
 		flex-direction: column;
 		align-items: flex-start;
 		justify-content: flex-end;
+		padding-top: var(--liwe3-form-padding-x);
+		padding-bottom: var(--liwe3-form-padding-x);
+		padding-left: var(--liwe3-form-padding-y);
+		padding-right: var(--liwe3-form-padding-y);
 	}
 	.input {
 		margin-right: var(--liwe3-input-w-unit);
@@ -94,7 +101,7 @@
 		flex-direction: row-reverse;
 		align-items: flex-end;
 		justify-content: flex-end;
-		padding-bottom: .5rem;
+		gap:0.2rem;
 	}
 
 	.label {
