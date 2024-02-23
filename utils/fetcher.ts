@@ -4,7 +4,7 @@ import { currentUser } from '$modules/user/store';
 import { app } from '$liwe3/stores/LiWEApp';
 import { addToast } from '$liwe3/stores/ToastStore';
 
-const url_and_headers = ( url: string, authenticated = false ) => {
+const url_and_headers = ( url: string ) => {
 	if ( !url.startsWith( 'http' ) ) {
 		url = PUBLIC_LIWE_SERVER + url;
 	}
@@ -13,13 +13,7 @@ const url_and_headers = ( url: string, authenticated = false ) => {
 		'Content-Type': 'application/json;charset=utf-8',
 	};
 
-	if ( authenticated && !currentUser?.token ) {
-		console.error( "ERROR: authenticated request without token", url );
-	}
-
-	if ( currentUser?.token ) {
-		headers.Authorization = `Bearer ${ currentUser?.token }`;
-	}
+	headers.Authorization = `Bearer ${ currentUser?.token }`;
 
 	return { url, headers };
 };
@@ -50,13 +44,35 @@ const _showError = ( url: string, error: any ) => {
 	} );
 };
 
+const _post = async ( method: string, url: string, data: FetcherData, skipError: boolean ) => {
+	const d = url_and_headers( url );
+
+	try {
+		const res = await fetch( d.url, {
+			method,
+			body: JSON.stringify( data ),
+			headers: d.headers,
+		} );
+
+		const r = await res.json();
+
+		if ( r.error && app.showRequestsError && !skipError ) _showError( url, r.error );
+
+		return r;
+
+	} catch ( e ) {
+		if ( !skipError ) _showError( url, e );
+		return { error: e };
+	}
+};
+
 
 interface FetcherData {
 	[ key: string ]: string | number | boolean | Record<string, unknown> | Array<unknown> | undefined | Date | null;
 }
 
-const get = async ( url: string, data: FetcherData | null, authenticated = false ) => {
-	const d = url_and_headers( url, authenticated );
+const get = async ( url: string, data: FetcherData | null, skipError: boolean ) => {
+	const d = url_and_headers( url );
 	const params = _get_params( data );
 
 	try {
@@ -67,77 +83,26 @@ const get = async ( url: string, data: FetcherData | null, authenticated = false
 
 		const r = await res.json();
 
-		if ( r.error && app.showRequestsError ) _showError( url, r.error );
+		if ( r.error && app.showRequestsError && !skipError ) _showError( url, r.error );
 
 		return r;
 	} catch ( e ) {
-		_showError( url, e );
+		if ( !skipError ) _showError( url, e );
 		return { error: e };
 	}
 };
 
-const post = async ( url: string, data: FetcherData, authenticated = false ) => {
-	const d = url_and_headers( url, authenticated );
-
-	try {
-		const res = await fetch( d.url, {
-			method: 'POST',
-			body: JSON.stringify( data ),
-			headers: d.headers,
-		} );
-
-		const r = await res.json();
-
-		if ( r.error && app.showRequestsError ) _showError( url, r.error );
-
-		return r;
-
-	} catch ( e ) {
-		_showError( url, e );
-		return { error: e };
-	}
+const post = async ( url: string, data: FetcherData, skipError = false ) => {
+	return _post( 'POST', url, data, skipError );
 };
 
-const patch = async ( url: string, data: FetcherData, authenticated = false ) => {
-	const d = url_and_headers( url, authenticated );
-
-	try {
-		const res = await fetch( d.url, {
-			method: 'PATCH',
-			body: JSON.stringify( data ),
-			headers: d.headers,
-		} );
-		const r = await res.json();
-
-		if ( r.error && app.showRequestsError ) _showError( url, r.error );
-
-		return r;
-	} catch ( e ) {
-		_showError( url, e );
-		return { error: e };
-	}
+const patch = async ( url: string, data: FetcherData, skipError = false ) => {
+	return _post( 'PATCH', url, data, skipError );
 };
 
-const delete_ = async ( url: string, data: FetcherData, authenticated = false ) => {
-	const d = url_and_headers( url, authenticated );
-
-	try {
-		const res = await fetch( d.url, {
-			method: 'DELETE',
-			body: JSON.stringify( data ),
-			headers: d.headers,
-		} );
-		const r = await res.json();
-
-		if ( r.error && app.showRequestsError ) _showError( url, r.error );
-
-		return r;
-	} catch ( e ) {
-		_showError( url, e );
-		return { error: e };
-	}
+const delete_ = async ( url: string, data: FetcherData, skipError = false ) => {
+	return _post( 'DELETE', url, data, skipError );
 };
-
 
 export {
 	post,
