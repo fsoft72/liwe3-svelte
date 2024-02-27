@@ -112,49 +112,49 @@
 	/* generic size rules for inputs and labels--------------------------*/
 	.input.xxs ~ .label,
 	.xxs {
-		padding: 0.12rem 0.2rem;
+		padding: 0.12rem 0.2rem !important;
 		font-size: 0.75rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 4);
 	}
 
 	.input.xs ~ .label,
 	.xs {
-		padding: 0.15rem 0.22rem;
+		padding: 0.15rem 0.22rem !important;
 		font-size: 0.75rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 5);
 	}
 
 	.input.sm ~ .label,
 	.sm {
-		padding: 0.18rem 0.24rem;
+		padding: 0.18rem 0.24rem !important;
 		font-size: 0.875rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 6);
 	}
 
 	.input.md ~ .label,
 	.md {
-		padding: 0.2rem 0.26rem;
+		/* padding is the default value defined in css variables */
 		font-size: 1rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 7);
 	}
 
 	.input.lg ~ .label,
 	.lg {
-		padding: 0.22rem 0.28rem;
+		padding: 0.22rem 0.28rem !important;
 		font-size: 1.12rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 8);
 	}
 
 	.input.xl ~ .label,
 	.xl {
-		padding: 0.24rem 0.4rem;
+		padding: 0.24rem 0.4rem !important;
 		font-size: 1.25rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 9);
 	}
 
 	.input.xxl ~ .label,
 	.xxl {
-		padding: 0.28rem 0.45rem;
+		padding: 0.28rem 0.45rem !important;
 		font-size: 1.5rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 10);
 	}
