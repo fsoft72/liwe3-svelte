@@ -403,24 +403,24 @@
 	table {
 		width: 100%;
 
-		border: 1px solid var(--border);
+		border: 1px solid var(--liwe3-border-width);
 		border-collapse: collapse;
 		border-radius: var(--liwe3-border-radius);
 
-		background-color: var(--paper);
+		background-color: var(--liwe3-paper);
 
 		font-size: var(--table-font-size);
 		font-family: var(--table-font-family);
-		color: var(--color);
+		color: var(--liwe3-color);
 	}
 
 	table tr {
-		border-bottom: 1px solid var(--darker);
+		border-bottom: 1px solid var(--liwe3-tertiary-color);
 		max-height: 2rem;
 	}
 
 	table td {
-		border-right: 1px solid var(--darker);
+		border-right: 1px solid var(--liwe3-tertiary-color);
 	}
 
 	table td .filter {
@@ -443,7 +443,7 @@
 
 	table th {
 		text-align: left;
-		background-color: var(--lighter);
+		background-color: var(--liwe3-lighter-tertiary-color);
 		/* disable selection */
 		user-select: none;
 	}
@@ -454,7 +454,7 @@
 	}
 
 	table tr:hover td {
-		background-color: var(--darker);
+		background-color: var(--liwe3-tertiary-color);
 	}
 
 	table td.actions {
