@@ -126,6 +126,8 @@
 		max-height: 90vh;
 		overflow: auto;
 
+		scrollbar-width: thin;
+
 		/* background-color: var(--light); */
 	}
 
