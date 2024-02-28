@@ -3,7 +3,7 @@ export type UserAuth = {
 	email?: string;
 	name?: string;
 	avatar?: string;
-	perms?: Record<string, string[]>;
+	perms?: string[];  // Record<string, string[]>;
 	token?: string;
 	username?: string;
 };
