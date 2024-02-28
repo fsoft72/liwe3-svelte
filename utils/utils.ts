@@ -55,6 +55,7 @@ export const has_perm = ( user: UserAuth | null, perm: string ) => {
 	// console.log( "=== PERM: ", perm, user, user?.perms );
 	if ( !user ) return false;
 	if ( !user.perms ) return false;
+	if ( !user.perms.length ) return false;
 
 	if ( user.perms.indexOf( 'system.admin' ) >= 0 ) return true;
 
@@ -71,6 +72,7 @@ export const has_one_perm = ( user: UserAuth | null, perms: string[] ) => {
 	if ( !user ) return false;
 	if ( !user.perms ) return false;
 
+	if ( !user.perms.length ) return false;
 	if ( user.perms.indexOf( 'system.admin' ) >= 0 ) return true;
 
 	for ( let i = 0; i < perms.length; i++ ) {
