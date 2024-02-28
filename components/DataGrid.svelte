@@ -10,6 +10,7 @@
 		deletable?: boolean;
 		hidden?: boolean;
 		align?: string;
+		width?: string;
 		render?: (value: any, row: any) => any;
 		click?: (row: any) => void;
 	}
@@ -183,26 +184,7 @@
 		dispatch('filterchange', filters);
 	};
 
-	/*
-	$: {
-		dispatch('filterchange', filters);
-	}
-	*/
-
 	let table_element: HTMLTableElement | null = null;
-	/*
-	let table_height = 0;
-
-	$: {
-		if (table_element && !table_height) {
-			// get the table height
-			table_height = table_element.offsetHeight;
-
-			// set the table height
-			table_element.style.height = `${table_height}px`;
-		}
-	}
-	*/
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
@@ -213,7 +195,7 @@
 			<tr>
 				{#each fields as field}
 					{#if !field.hidden}
-						<th>{field.label || field.name}</th>
+						<th style={`width: ${field.width || 'auto'};`}>{field.label || field.name}</th>
 						<th class="resize" on:mousedown={resize_start} />
 					{/if}
 				{/each}
@@ -232,10 +214,16 @@
 				<tr>
 					{#each fields as field}
 						{#if !field.hidden}
-							<td class="filter">
+							<td class="filter" style={`width: ${field.width || 'auto'};`}>
 								{#if field.filterable}
 									{#if field.type == 'string'}
-										<Input {mode} size="xs" name={`f_${field.name}`} on:change={filter_change} />
+										<Input
+											{mode}
+											width={field.width}
+											size="xs"
+											name={`f_${field.name}`}
+											on:change={filter_change}
+										/>
 									{:else if field.type == 'number'}
 										<Input
 											{mode}
@@ -292,12 +280,12 @@
 						{#if !field.hidden}
 							<td
 								on:dblclick={(e) => cell_doubleclick(e, row, field.name)}
-								style={`text-align: ${field.align}`}
+								style={`text-align: ${field.align || 'left'}; width: ${field.width || 'auto'};`}
 							>
 								{#if field.render}
 									{#if field.click}
 										<Button
-											{mode}
+											mode="mode4"
 											size="sm"
 											variant="outline"
 											on:click={() => field.click && field.click(row)}
@@ -321,7 +309,7 @@
 									<Avatar size="64px" value={row} />
 								{:else if field.click}
 									<Button
-										{mode}
+										mode="mode4"
 										size="sm"
 										variant="outline"
 										on:click={() => field.click && field.click(row)}
@@ -396,31 +384,31 @@
 		scrollbar-width: thin;
 
 		/* make the scrollbars transparent */
-		/* scrollbar-color: var(--border) var(--paper); */
+		/* scrollbar-color: var(--liwe3-border-width) var(--paper); */
 		scrollbar-color: var(--liwe3-dark-900) var(--liwe3-dark-400);
 	}
 
 	table {
 		width: 100%;
 
-		border: 1px solid var(--border);
+		border: 1px solid var(--liwe3-border-width);
 		border-collapse: collapse;
 		border-radius: var(--liwe3-border-radius);
 
-		background-color: var(--paper);
+		background-color: var(--liwe3-paper);
+		color: var(--liwe3-color);
 
 		font-size: var(--table-font-size);
 		font-family: var(--table-font-family);
-		color: var(--color);
 	}
 
 	table tr {
-		border-bottom: 1px solid var(--darker);
+		border-bottom: 1px solid var(--liwe3-tertiary-color);
 		max-height: 2rem;
 	}
 
 	table td {
-		border-right: 1px solid var(--darker);
+		border-right: 1px solid var(--liwe3-tertiary-color);
 	}
 
 	table td .filter {
@@ -443,7 +431,7 @@
 
 	table th {
 		text-align: left;
-		background-color: var(--lighter);
+		background-color: var(--liwe3-lighter-tertiary-color);
 		/* disable selection */
 		user-select: none;
 	}
@@ -454,7 +442,7 @@
 	}
 
 	table tr:hover td {
-		background-color: var(--darker);
+		background-color: var(--liwe3-tertiary-color);
 	}
 
 	table td.actions {

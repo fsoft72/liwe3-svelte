@@ -12,7 +12,7 @@
 <style>
 	li.autocomplete-items {
 		list-style: none;
-		border-bottom: 1px solid var(--border);
+		border-bottom: 1px solid var(--liwe3-border-width);
 		z-index: 99;
 		/*position the autocomplete items to be the same width as the container:*/
 		top: 100%;

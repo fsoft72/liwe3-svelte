@@ -84,8 +84,8 @@
 		justify-content: space-between;
 
 		background-color: var(--liwe3-background);
-		color: var(--color);
-		border: 1px solid var(--border);
+		color: var(--liwe3-color);
+		border: 1px solid var(--liwe3-border-width);
 
 		font-size: 70%;
 

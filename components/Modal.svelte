@@ -93,10 +93,10 @@
 
 	.modal {
 		border: 2px solid var(--liwe3-border-width);
-		border-radius: 0.5rem;
-		color: var(--color);
+		border-radius: var(--liwe3-border-radius);
+		color: var(--liwe3-color);
 
-		background-color: var(--liwe3-dark-900);
+		background-color: var(--liwe3-lighter-tertiary-color);
 
 		box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
 	}
@@ -105,19 +105,19 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		border-radius: 0.5rem 0.5rem 0 0;
+		border-radius: var(--liwe3-border-radius) var(--liwe3-border-radius) 0 0;
 
-		border-bottom: 1px solid var(--border);
+		border-bottom: 1px solid var(--liwe3-border-width);
 		padding: 0.5rem;
 
-		background-color: var(--darker);
+		background-color: var(--liwe3-darker-tertiary-color);
 	}
 
 	.modal-header h3 {
 		margin: 0;
 		font-size: 1em;
 		font-weight: 400;
-		color: var(--color);
+		color: var(--liwe3-darker-tertiary-color-text);
 	}
 
 	.modal-body {
@@ -126,7 +126,9 @@
 		max-height: 90vh;
 		overflow: auto;
 
-		background-color: var(--light);
+		scrollbar-width: thin;
+
+		/* background-color: var(--light); */
 	}
 
 	.modal-footer {
@@ -136,10 +138,10 @@
 
 		border-radius: 0 0 0.5rem 0.5rem;
 
-		border-top: 1px solid var(--border);
+		border-top: 1px solid var(--liwe3-border-width);
 		padding: 0.5rem;
 
-		background-color: var(--darker);
+		background-color: var(--liwe3-dark-tertiary-color);
 	}
 
 	.xs {

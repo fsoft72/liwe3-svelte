@@ -113,7 +113,7 @@
 		padding: 0;
 		top: 0;
 		width: 297px;
-		border: 1px solid var(--border);
+		border: 1px solid var(--liwe3-border-width);
 		background-color: var(--liwe3-background);
 
 		z-index: 99;

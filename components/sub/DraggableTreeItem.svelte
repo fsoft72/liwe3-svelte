@@ -197,11 +197,11 @@
 
 	.item {
 		background-color: var(--liwe3-background);
-		color: var(--color);
+		color: var(--liwe3-color);
 	}
 
 	.bar {
-		border: 1px solid var(--border);
+		border: 1px solid var(--liwe3-border-width);
 		padding: 0.5rem;
 		border-radius: var(--liwe3-border-radius);
 

@@ -99,7 +99,7 @@
 	}
 	input {
 		border-radius: var(--liwe3-border-radius);
-		border: 1px solid var(--border);
+		border: 1px solid var(--liwe3-border-width);
 
 		text-align: center;
 

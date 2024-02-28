@@ -7,7 +7,7 @@
 	export let size: Size = 'md';
 	export let value: string | number | boolean = '';
 	export let validChars: string = '';
-	export let width: string = '100%';
+	export let width: string = 'auto';
 	export let mode: Color = 'mode3';
 	export let divClass: string = '';
 
@@ -60,14 +60,18 @@
 	$: type = $$restProps.type || 'text';
 </script>
 
-<div class={`${divClass} input-container`} class:checkbox={type === 'checkbox'} style={`width: ${width}`}>
+<div
+	class={`${divClass} input-container`}
+	class:checkbox={type === 'checkbox'}
+	style={`width: ${width}`}
+>
 	{#if label}
-		<label for={id} class="label">{label} {type}</label>
+		<label for={id} class="label">{label}</label>
 	{/if}
 	<input
 		{id}
 		{...$$restProps}
-		class = {type === 'checkbox' ? checkboxClass : inputClass}
+		class={type === 'checkbox' ? checkboxClass : inputClass}
 		{type}
 		on:blur
 		on:change
@@ -97,73 +101,72 @@
 		margin-right: var(--liwe3-input-w-unit);
 	}
 	.checkbox {
-		width: 100%;
+		/* width: 100%; */
 		flex-direction: row-reverse;
 		align-items: flex-end;
 		justify-content: flex-end;
-		gap:0.2rem;
+		gap: 0.2rem;
 	}
 
 	.label {
 		white-space: nowrap;
-		font-size: .6rem;
+		font-size: 0.6rem;
 		margin: var(--liwe3-input-w-unit) 0;
 	}
 	/* generic size rules for inputs and labels--------------------------*/
 	.input.xxs ~ .label,
 	.xxs {
-		padding: 0.12rem 0.2rem;
+		padding: 0.12rem 0.2rem !important;
 		font-size: 0.75rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 4);
 	}
 
 	.input.xs ~ .label,
 	.xs {
-		padding: 0.15rem 0.22rem;
+		padding: 0.15rem 0.22rem !important;
 		font-size: 0.75rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 5);
 	}
 
 	.input.sm ~ .label,
 	.sm {
-		padding: 0.18rem 0.24rem;
+		padding: 0.18rem 0.24rem !important;
 		font-size: 0.875rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 6);
 	}
 
 	.input.md ~ .label,
 	.md {
-		padding: 0.2rem 0.26rem;
+		/* padding is the default value defined in css variables */
 		font-size: 1rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 7);
 	}
 
 	.input.lg ~ .label,
 	.lg {
-		padding: 0.22rem 0.28rem;
+		padding: 0.22rem 0.28rem !important;
 		font-size: 1.12rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 8);
 	}
 
 	.input.xl ~ .label,
 	.xl {
-		padding: 0.24rem 0.4rem;
+		padding: 0.24rem 0.4rem !important;
 		font-size: 1.25rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 9);
 	}
 
 	.input.xxl ~ .label,
 	.xxl {
-		padding: 0.28rem 0.45rem;
+		padding: 0.28rem 0.45rem !important;
 		font-size: 1.5rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 10);
 	}
-	input[type="checkbox"] {
+	input[type='checkbox'] {
 		width: 1rem;
 		height: 1rem;
 		min-width: 1rem;
 		min-height: 1rem;
 	}
 	/* end generic size rules for inputs and labels--------------------------*/
-
 </style>
