@@ -56,14 +56,13 @@ export const has_perm = ( user: UserAuth | null, perm: string ) => {
 	if ( !user ) return false;
 	if ( !user.perms ) return false;
 
-	if ( user.perms[ 'system' ]?.includes( 'admin' ) ) return true;
+	if ( user.perms.indexOf( 'system.admin' ) >= 0 ) return true;
 
-	const [ module, action ] = perm.split( '.' );
+	// split on the first dot
+	const mod = perm.split( '.' )[ 0 ];
+	if ( user.perms.indexOf( `${ mod }.admin` ) >= 0 ) return true;
 
-	if ( !user.perms[ module ] ) return false;
-	if ( user.perms[ module ].includes( 'admin' ) ) return true;
-
-	if ( user.perms[ module ].includes( action ) ) return true;
+	if ( user.perms.indexOf( perm ) >= 0 ) return true;
 
 	return false;
 };
@@ -72,7 +71,7 @@ export const has_one_perm = ( user: UserAuth | null, perms: string[] ) => {
 	if ( !user ) return false;
 	if ( !user.perms ) return false;
 
-	if ( user.perms[ 'system' ]?.includes( 'admin' ) ) return true;
+	if ( user.perms.indexOf( 'system.admin' ) >= 0 ) return true;
 
 	for ( let i = 0; i < perms.length; i++ ) {
 		const perm = perms[ i ];
@@ -82,6 +81,7 @@ export const has_one_perm = ( user: UserAuth | null, perms: string[] ) => {
 
 	return false;
 };
+
 
 
 export const tree_set_meta = ( items: TreeItem[], id_parent: string, level: number ) => {
