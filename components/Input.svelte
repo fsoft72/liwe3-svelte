@@ -60,14 +60,18 @@
 	$: type = $$restProps.type || 'text';
 </script>
 
-<div class={`${divClass} input-container`} class:checkbox={type === 'checkbox'} style={`width: ${width}`}>
+<div
+	class={`${divClass} input-container`}
+	class:checkbox={type === 'checkbox'}
+	style={`width: ${width}`}
+>
 	{#if label}
-		<label for={id} class="label">{label} {type}</label>
+		<label for={id} class="label">{label}</label>
 	{/if}
 	<input
 		{id}
 		{...$$restProps}
-		class = {type === 'checkbox' ? checkboxClass : inputClass}
+		class={type === 'checkbox' ? checkboxClass : inputClass}
 		{type}
 		on:blur
 		on:change
@@ -101,12 +105,12 @@
 		flex-direction: row-reverse;
 		align-items: flex-end;
 		justify-content: flex-end;
-		gap:0.2rem;
+		gap: 0.2rem;
 	}
 
 	.label {
 		white-space: nowrap;
-		font-size: .6rem;
+		font-size: 0.6rem;
 		margin: var(--liwe3-input-w-unit) 0;
 	}
 	/* generic size rules for inputs and labels--------------------------*/
@@ -158,12 +162,11 @@
 		font-size: 1.5rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 10);
 	}
-	input[type="checkbox"] {
+	input[type='checkbox'] {
 		width: 1rem;
 		height: 1rem;
 		min-width: 1rem;
 		min-height: 1rem;
 	}
 	/* end generic size rules for inputs and labels--------------------------*/
-
 </style>
