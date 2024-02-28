@@ -49,7 +49,7 @@
 
 	.preview {
 		position: relative;
-		border: 1px solid var(--border);
+		border: 1px solid var(--liwe3-border-width);
 		height: 100%;
 	}
 

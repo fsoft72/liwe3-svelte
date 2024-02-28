@@ -56,7 +56,7 @@
 		background-position: center;
 		background-color: var(--lighter);
 
-		border: 1px solid var(--border);
+		border: 1px solid var(--liwe3-border-width);
 
 		user-select: none;
 	}

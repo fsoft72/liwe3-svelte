@@ -297,7 +297,7 @@
 								{#if field.render}
 									{#if field.click}
 										<Button
-											{mode}
+											mode="mode4"
 											size="sm"
 											variant="outline"
 											on:click={() => field.click && field.click(row)}
@@ -321,7 +321,7 @@
 									<Avatar size="64px" value={row} />
 								{:else if field.click}
 									<Button
-										{mode}
+										mode="mode4"
 										size="sm"
 										variant="outline"
 										on:click={() => field.click && field.click(row)}
@@ -396,7 +396,7 @@
 		scrollbar-width: thin;
 
 		/* make the scrollbars transparent */
-		/* scrollbar-color: var(--border) var(--paper); */
+		/* scrollbar-color: var(--liwe3-border-width) var(--paper); */
 		scrollbar-color: var(--liwe3-dark-900) var(--liwe3-dark-400);
 	}
 
@@ -408,10 +408,10 @@
 		border-radius: var(--liwe3-border-radius);
 
 		background-color: var(--liwe3-paper);
+		color: var(--liwe3-color);
 
 		font-size: var(--table-font-size);
 		font-family: var(--table-font-family);
-		color: var(--liwe3-color);
 	}
 
 	table tr {
