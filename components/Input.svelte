@@ -7,7 +7,7 @@
 	export let size: Size = 'md';
 	export let value: string | number | boolean = '';
 	export let validChars: string = '';
-	export let width: string = '100%';
+	export let width: string = 'auto';
 	export let mode: Color = 'mode3';
 	export let divClass: string = '';
 
@@ -101,7 +101,7 @@
 		margin-right: var(--liwe3-input-w-unit);
 	}
 	.checkbox {
-		width: 100%;
+		/* width: 100%; */
 		flex-direction: row-reverse;
 		align-items: flex-end;
 		justify-content: flex-end;
