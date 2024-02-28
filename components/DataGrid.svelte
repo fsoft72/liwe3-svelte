@@ -10,6 +10,7 @@
 		deletable?: boolean;
 		hidden?: boolean;
 		align?: string;
+		width?: string;
 		render?: (value: any, row: any) => any;
 		click?: (row: any) => void;
 	}
@@ -183,26 +184,7 @@
 		dispatch('filterchange', filters);
 	};
 
-	/*
-	$: {
-		dispatch('filterchange', filters);
-	}
-	*/
-
 	let table_element: HTMLTableElement | null = null;
-	/*
-	let table_height = 0;
-
-	$: {
-		if (table_element && !table_height) {
-			// get the table height
-			table_height = table_element.offsetHeight;
-
-			// set the table height
-			table_element.style.height = `${table_height}px`;
-		}
-	}
-	*/
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
@@ -213,7 +195,7 @@
 			<tr>
 				{#each fields as field}
 					{#if !field.hidden}
-						<th>{field.label || field.name}</th>
+						<th style={`width: ${field.width || 'auto'};`}>{field.label || field.name}</th>
 						<th class="resize" on:mousedown={resize_start} />
 					{/if}
 				{/each}
@@ -232,10 +214,16 @@
 				<tr>
 					{#each fields as field}
 						{#if !field.hidden}
-							<td class="filter">
+							<td class="filter" style={`width: ${field.width || 'auto'};`}>
 								{#if field.filterable}
 									{#if field.type == 'string'}
-										<Input {mode} size="xs" name={`f_${field.name}`} on:change={filter_change} />
+										<Input
+											{mode}
+											width={field.width}
+											size="xs"
+											name={`f_${field.name}`}
+											on:change={filter_change}
+										/>
 									{:else if field.type == 'number'}
 										<Input
 											{mode}
@@ -292,7 +280,7 @@
 						{#if !field.hidden}
 							<td
 								on:dblclick={(e) => cell_doubleclick(e, row, field.name)}
-								style={`text-align: ${field.align}`}
+								style={`text-align: ${field.align || 'left'}; width: ${field.width || 'auto'};`}
 							>
 								{#if field.render}
 									{#if field.click}
