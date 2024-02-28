@@ -201,7 +201,7 @@
 	}
 
 	.bar {
-		border: 1px solid var(--liwe3-border-width);
+		border: 1px solid var(--liwe3-button-border);
 		padding: 0.5rem;
 		border-radius: var(--liwe3-border-radius);
 

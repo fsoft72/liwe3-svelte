@@ -384,14 +384,13 @@
 		scrollbar-width: thin;
 
 		/* make the scrollbars transparent */
-		/* scrollbar-color: var(--liwe3-border-width) var(--paper); */
 		scrollbar-color: var(--liwe3-dark-900) var(--liwe3-dark-400);
 	}
 
 	table {
 		width: 100%;
 
-		border: 1px solid var(--liwe3-border-width);
+		border: 1px solid var(--liwe3-button-border);
 		border-collapse: collapse;
 		border-radius: var(--liwe3-border-radius);
 

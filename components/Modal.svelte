@@ -92,7 +92,7 @@
 	}
 
 	.modal {
-		border: 2px solid var(--liwe3-border-width);
+		border: 2px solid var(--liwe3-button-border);
 		border-radius: var(--liwe3-border-radius);
 		color: var(--liwe3-color);
 
@@ -107,7 +107,7 @@
 		align-items: center;
 		border-radius: var(--liwe3-border-radius) var(--liwe3-border-radius) 0 0;
 
-		border-bottom: 1px solid var(--liwe3-border-width);
+		border-bottom: 1px solid var(--liwe3-button-border);
 		padding: 0.5rem;
 
 		background-color: var(--liwe3-darker-tertiary-color);
@@ -138,7 +138,7 @@
 
 		border-radius: 0 0 0.5rem 0.5rem;
 
-		border-top: 1px solid var(--liwe3-border-width);
+		border-top: 1px solid var(--liwe3-button-border);
 		padding: 0.5rem;
 
 		background-color: var(--liwe3-dark-tertiary-color);

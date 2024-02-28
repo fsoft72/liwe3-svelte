@@ -49,7 +49,7 @@
 
 	.preview {
 		position: relative;
-		border: 1px solid var(--liwe3-border-width);
+		border: 1px solid var(--liwe3-button-border);
 		height: 100%;
 	}
 

@@ -15,7 +15,7 @@
 	.progress-bar {
 		width: 100%;
 		height: 20px;
-		border: 1px solid var(--liwe3-border-width);
+		border: 1px solid var(--liwe3-button-border);
 		background-color: var(--liwe3-background);
 		border-radius: var(--liwe3-border-radius);
 		overflow: hidden;
