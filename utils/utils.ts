@@ -232,3 +232,33 @@ export const uname = ( username?: string ) => {
 	if ( username.startsWith( 'user.' ) ) return '(deleted)';
 	return username;
 };
+
+/**
+ * Converts a hexadecimal RGB color code to an array of integers representing the RGB values.
+ *
+ * @param rgb - The hexadecimal RGB color code (e.g., "#FF0000" for red).
+ * @returns An array of integers representing the RGB values [r, g, b].
+ */
+export const rgbHexToInt = ( rgb: string ) => {
+	// add the '#' if it's missing
+	if ( rgb.length === 6 ) rgb = `#${ rgb }`;
+
+	const r = parseInt( rgb.slice( 1, 3 ), 16 );
+	const g = parseInt( rgb.slice( 3, 5 ), 16 );
+	const b = parseInt( rgb.slice( 5, 7 ), 16 );
+
+	return [ r, g, b ];
+};
+
+/**
+ * Converts an RGB color array to a hexadecimal color string.
+ * @param rgb - The RGB color array [r, g, b].
+ * @returns The hexadecimal color string.
+ */
+export const intToRGBHex = ( rgb: number[] ) => {
+	const r = rgb[ 0 ].toString( 16 ).padStart( 2, '0' );
+	const g = rgb[ 1 ].toString( 16 ).padStart( 2, '0' );
+	const b = rgb[ 2 ].toString( 16 ).padStart( 2, '0' );
+
+	return `#${ r }${ g }${ b }`;
+};
