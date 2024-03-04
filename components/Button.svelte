@@ -63,6 +63,7 @@
 		--unit-w-size: 15rem;
 		cursor: pointer;
 		transition: all 0.2s ease-in-out;
+		color: var(--liwe3-color);
 	}
 
 	.liwe3-button:disabled {
