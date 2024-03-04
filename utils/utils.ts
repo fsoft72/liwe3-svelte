@@ -240,6 +240,8 @@ export const uname = ( username?: string ) => {
  * @returns An array of integers representing the RGB values [r, g, b].
  */
 export const rgbHexToInt = ( rgb: string ) => {
+	if ( !rgb ) return [ 0, 0, 0 ];
+
 	// add the '#' if it's missing
 	if ( rgb.length === 6 ) rgb = `#${ rgb }`;
 
