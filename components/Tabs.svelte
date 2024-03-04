@@ -90,7 +90,7 @@
 		position: relative;
 		height: auto;
 
-		box-shadow: 0 2px 3px 1px var(--shadow);
+		/* box-shadow: 0 2px 3px 1px #000000; */
 	}
 
 	.tabs {
@@ -108,11 +108,11 @@
 
 	.tab-label {
 		cursor: pointer;
-		background: var(--lighter);
-		border-left: 1px solid var(--darker);
-		border-right: 1px solid var(--darker);
-		border-top: 1px solid var(--darker);
-		color: var(--label);
+		background: var(--liwe3-lighter-primary-color);
+		border-left: 1px solid var(--liwe3-border-color);
+		border-right: 1px solid var(--liwe3-border-color);
+		border-top: 1px solid var(--liwe3-border-color);
+		color: var(--color);
 
 		padding: 1rem;
 
