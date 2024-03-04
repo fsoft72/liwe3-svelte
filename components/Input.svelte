@@ -5,7 +5,6 @@
 	export let label = '';
 	export let id = ($$restProps.name ?? Math.random().toString()) + new Date().getTime().toString();
 	export let size: Size = 'md';
-	export let value: string | number | boolean = '';
 	export let validChars: string = '';
 	export let width: string = 'auto';
 	export let mode: Color = 'mode3';
