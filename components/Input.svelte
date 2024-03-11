@@ -91,10 +91,8 @@
 		flex-direction: column;
 		align-items: flex-start;
 		justify-content: flex-end;
-		padding-top: var(--liwe3-form-padding-x);
-		padding-bottom: var(--liwe3-form-padding-x);
-		padding-left: var(--liwe3-form-padding-y);
-		padding-right: var(--liwe3-form-padding-y);
+		padding-block: var(--liwe3-form-padding-y);
+		padding-inline: var(--liwe3-form-padding-x);
 	}
 	.input {
 		margin-right: var(--liwe3-input-w-unit);
@@ -113,49 +111,42 @@
 		margin: var(--liwe3-input-w-unit) 0;
 	}
 	/* generic size rules for inputs and labels--------------------------*/
-	.input.xxs ~ .label,
 	.xxs {
 		padding: 0.12rem 0.2rem !important;
 		font-size: 0.75rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 4);
 	}
 
-	.input.xs ~ .label,
 	.xs {
 		padding: 0.15rem 0.22rem !important;
 		font-size: 0.75rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 5);
 	}
 
-	.input.sm ~ .label,
 	.sm {
 		padding: 0.18rem 0.24rem !important;
 		font-size: 0.875rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 6);
 	}
 
-	.input.md ~ .label,
 	.md {
 		/* padding is the default value defined in css variables */
 		font-size: 1rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 7);
 	}
 
-	.input.lg ~ .label,
 	.lg {
 		padding: 0.22rem 0.28rem !important;
 		font-size: 1.12rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 8);
 	}
 
-	.input.xl ~ .label,
 	.xl {
 		padding: 0.24rem 0.4rem !important;
 		font-size: 1.25rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 9);
 	}
 
-	.input.xxl ~ .label,
 	.xxl {
 		padding: 0.28rem 0.45rem !important;
 		font-size: 1.5rem;
