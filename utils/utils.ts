@@ -69,6 +69,10 @@ export const has_perm = ( user: UserAuth | null, perm: string ) => {
 };
 
 export const has_one_perm = ( user: UserAuth | null, perms: string[] ) => {
+	// if perms is empty, everyone has access
+	if ( !perms ) return true;
+	if ( !perms.length ) return true;
+
 	if ( !user ) return false;
 	if ( !user.perms ) return false;
 
