@@ -48,7 +48,7 @@
 				{#if showCloseButton}
 					<Button
 						size="sm"
-						mode="info"
+						mode="danger"
 						on:click={() => {
 							dispatch('cancel', false);
 						}}

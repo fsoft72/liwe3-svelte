@@ -15,6 +15,7 @@
 		icon?: IconSource;
 		extra?: Record<string, unknown>;
 		options?: { label: string; value: string }[];
+		default?: any;
 
 		// events
 		onChange?: (name: string, value: any, values: Record<string, any>) => Promise<boolean>;
