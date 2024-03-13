@@ -378,7 +378,7 @@
 	.table {
 		min-width: 100%;
 		overflow: auto;
-		padding-bottom: 1rem;
+		/* padding-bottom: 1rem; */
 
 		/* make the scrollbars smaller */
 		scrollbar-width: thin;
