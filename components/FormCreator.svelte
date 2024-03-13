@@ -17,6 +17,9 @@
 		options?: { label: string; value: string }[];
 		default?: any;
 
+		// list of perms the user must have to see this field
+		perms?: string[];
+
 		// events
 		onChange?: (name: string, value: any, values: Record<string, any>) => Promise<boolean>;
 	};
@@ -51,6 +54,8 @@
 	import { addToast } from '$liwe3/stores/ToastStore';
 	import Select from 'svelte-select';
 	import { _ } from '$liwe3/stores/LocalizationStore';
+	import { has_one_perm, has_perm } from '$liwe3/utils/utils';
+	import { user } from '$modules/user/store';
 
 	export let fields: FormField[] = [];
 	export let values: Record<string, any> = {};
@@ -121,90 +126,92 @@
 			{#each fields as field}
 				<div class={`liwe3-col${field.col ?? 12} ${field.align ? 'align-' + field.align : ''}`}>
 					<div class="space">
-						{#if field?.type === 'strange'}
-							<!-- strange component here -->
-						{:else if getFormCreatorPlugin(field?.type ?? '---')}
-							<div class="title">{field.label}</div>
-							<svelte:component
-								this={getFormCreatorPlugin(field?.type ?? '---').component}
-								{...field}
-								value={(values[field.name] ?? '').toString()}
-								{...field.extra}
-								on:change={(e) => onChangeField(field.name, e)}
-							/>
-						{:else if field?.type === 'text'}
-							<!--<div class="title">{field.label}</div>-->
-							<Input
-								{...field}
-								{...field.extra}
-								name={field.name}
-								value={values[field.name] ?? ''}
-								on:change={(e) => onChangeField(field.name, e)}
-							/>
-						{:else if field?.type === 'title'}
-							<div class="title">{field.label}</div>
-						{:else if field?.type === 'tags'}
-							<TagInput
-								name={field.name}
-								value={values[field.name] ?? ''}
-								{...field.extra}
-								on:change={(e) => onChangeField(field.name, e)}
-							/>
-						{:else if field?.type === 'markdown'}
-							<MarkdownInput
-								name={field.name}
-								value={values[field.name] ?? ''}
-								{...field.extra}
-								on:change={(e) => onChangeField(field.name, e)}
-							/>
-						{:else if field?.type === 'element-list'}
-							<div class="title">{field.label}</div>
-							<ElementList
-								name={field.name}
-								value={values[field.name] ?? ''}
-								{...field.extra}
-								on:change={(e) => onChangeField(field.name, e.detail)}
-							/>
-						{:else if field?.type === 'draggable-tree'}
-							<DraggableTree
-								name={field.name}
-								value={values[field.name] ?? ''}
-								{...field.extra}
-								on:change={(e) => onChangeField(field.name, e)}
-							/>
-						{:else if field?.type === 'checkbox'}
-							<div class="simple-row">
-								<!-- svelte-ignore a11y-label-has-associated-control -->
-								<label>
-									<Input
-										type="checkbox"
-										name={field.name}
-										checked={values[field.name] ?? false}
-										value="on"
-										{...field.extra}
-										on:change={(e) => onChangeField(field.name, e)}
-									/>
-									{field.label}
-								</label>
-							</div>
-						{:else if field?.type === 'hidden'}
-							<input type="hidden" name={field.name} value={values[field.name] ?? ''} />
-						{:else if field?.type === 'select'}
-							<Select
-								name={field.name}
-								value={values[field.name] ?? ''}
-								{...field.extra}
-								on:change={(e) => onChangeField(field.name, e.detail.value)}
-								on:clear={() => onChangeField(field.name, '')}
-								items={field.options ?? []}
-							/>
-						{:else}
-							<Input
-								{...field}
-								value={(values[field.name] ?? '').toString()}
-								{...field.extra}
-								on:change={(e) => onChangeField(field.name, e)}
-							/>
+						{#if has_one_perm($user, field.perms || [])}
+							{#if field?.type === 'strange'}
+								<!-- strange component here -->
+							{:else if getFormCreatorPlugin(field?.type ?? '---')}
+								<div class="title">{field.label}</div>
+								<svelte:component
+									this={getFormCreatorPlugin(field?.type ?? '---').component}
+									{...field}
+									value={(values[field.name] ?? '').toString()}
+									{...field.extra}
+									on:change={(e) => onChangeField(field.name, e)}
+								/>
+							{:else if field?.type === 'text'}
+								<!--<div class="title">{field.label}</div>-->
+								<Input
+									{...field}
+									{...field.extra}
+									name={field.name}
+									value={values[field.name] ?? ''}
+									on:change={(e) => onChangeField(field.name, e)}
+								/>
+							{:else if field?.type === 'title'}
+								<div class="title">{field.label}</div>
+							{:else if field?.type === 'tags'}
+								<TagInput
+									name={field.name}
+									value={values[field.name] ?? ''}
+									{...field.extra}
+									on:change={(e) => onChangeField(field.name, e)}
+								/>
+							{:else if field?.type === 'markdown'}
+								<MarkdownInput
+									name={field.name}
+									value={values[field.name] ?? ''}
+									{...field.extra}
+									on:change={(e) => onChangeField(field.name, e)}
+								/>
+							{:else if field?.type === 'element-list'}
+								<div class="title">{field.label}</div>
+								<ElementList
+									name={field.name}
+									value={values[field.name] ?? ''}
+									{...field.extra}
+									on:change={(e) => onChangeField(field.name, e.detail)}
+								/>
+							{:else if field?.type === 'draggable-tree'}
+								<DraggableTree
+									name={field.name}
+									value={values[field.name] ?? ''}
+									{...field.extra}
+									on:change={(e) => onChangeField(field.name, e)}
+								/>
+							{:else if field?.type === 'checkbox'}
+								<div class="simple-row">
+									<!-- svelte-ignore a11y-label-has-associated-control -->
+									<label>
+										<Input
+											type="checkbox"
+											name={field.name}
+											checked={values[field.name] ?? false}
+											value="on"
+											{...field.extra}
+											on:change={(e) => onChangeField(field.name, e)}
+										/>
+										{field.label}
+									</label>
+								</div>
+							{:else if field?.type === 'hidden'}
+								<input type="hidden" name={field.name} value={values[field.name] ?? ''} />
+							{:else if field?.type === 'select'}
+								<Select
+									name={field.name}
+									value={values[field.name] ?? ''}
+									{...field.extra}
+									on:change={(e) => onChangeField(field.name, e.detail.value)}
+									on:clear={() => onChangeField(field.name, '')}
+									items={field.options ?? []}
+								/>
+							{:else}
+								<Input
+									{...field}
+									value={(values[field.name] ?? '').toString()}
+									{...field.extra}
+									on:change={(e) => onChangeField(field.name, e)}
+								/>
+							{/if}
 						{/if}
 					</div>
 				</div>
