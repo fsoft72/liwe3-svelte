@@ -56,6 +56,7 @@
 	import { _ } from '$liwe3/stores/LocalizationStore';
 	import { has_one_perm, has_perm } from '$liwe3/utils/utils';
 	import { user } from '$modules/user/store';
+	import { isTrue } from '$lib/utils/utils';
 
 	export let fields: FormField[] = [];
 	export let values: Record<string, any> = {};
@@ -118,6 +119,15 @@
 
 		dispatch('change', { name, value });
 	};
+
+	const _v = (field: FormField) => {
+		let v = values[field.name];
+
+		if (v === undefined) v = field.default;
+		if (v === undefined) v = '';
+
+		return v;
+	};
 </script>
 
 <div class="form">
@@ -134,7 +144,7 @@
 								<svelte:component
 									this={getFormCreatorPlugin(field?.type ?? '---').component}
 									{...field}
-									value={(values[field.name] ?? '').toString()}
+									value={_v(field).toString()}
 									{...field.extra}
 									on:change={(e) => onChangeField(field.name, e)}
 								/>
@@ -144,7 +154,7 @@
 									{...field}
 									{...field.extra}
 									name={field.name}
-									value={values[field.name] ?? ''}
+									value={_v(field)}
 									on:change={(e) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'title'}
@@ -152,14 +162,14 @@
 							{:else if field?.type === 'tags'}
 								<TagInput
 									name={field.name}
-									value={values[field.name] ?? ''}
+									value={_v(field)}
 									{...field.extra}
 									on:change={(e) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'markdown'}
 								<MarkdownInput
 									name={field.name}
-									value={values[field.name] ?? ''}
+									value={_v(field)}
 									{...field.extra}
 									on:change={(e) => onChangeField(field.name, e)}
 								/>
@@ -167,14 +177,14 @@
 								<div class="title">{field.label}</div>
 								<ElementList
 									name={field.name}
-									value={values[field.name] ?? ''}
+									value={_v(field)}
 									{...field.extra}
 									on:change={(e) => onChangeField(field.name, e.detail)}
 								/>
 							{:else if field?.type === 'draggable-tree'}
 								<DraggableTree
 									name={field.name}
-									value={values[field.name] ?? ''}
+									value={_v(field)}
 									{...field.extra}
 									on:change={(e) => onChangeField(field.name, e)}
 								/>
@@ -185,7 +195,7 @@
 										<Input
 											type="checkbox"
 											name={field.name}
-											checked={values[field.name] ?? false}
+											checked={isTrue(_v(field))}
 											value="on"
 											{...field.extra}
 											on:change={(e) => onChangeField(field.name, e)}
@@ -194,20 +204,22 @@
 									</label>
 								</div>
 							{:else if field?.type === 'hidden'}
-								<input type="hidden" name={field.name} value={values[field.name] ?? ''} />
+								<input type="hidden" name={field.name} value={_v(field)} />
 							{:else if field?.type === 'select'}
-								<Select
-									name={field.name}
-									value={values[field.name] ?? ''}
-									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e.detail.value)}
-									on:clear={() => onChangeField(field.name, '')}
-									items={field.options ?? []}
-								/>
+								<div class="svelte-select mode3" style="width: 100%">
+									<Select
+										name={field.name}
+										value={_v(field)}
+										{...field.extra}
+										on:change={(e) => onChangeField(field.name, e.detail.value)}
+										on:clear={() => onChangeField(field.name, '')}
+										items={field.options ?? []}
+									/>
+								</div>
 							{:else}
 								<Input
 									{...field}
-									value={(values[field.name] ?? '').toString()}
+									value={_v(field).toString()}
 									{...field.extra}
 									on:change={(e) => onChangeField(field.name, e)}
 								/>
