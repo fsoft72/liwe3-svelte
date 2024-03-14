@@ -384,7 +384,7 @@
 		scrollbar-width: thin;
 
 		/* make the scrollbars transparent */
-		scrollbar-color: var(--liwe3-dark-900) var(--liwe3-dark-400);
+		scrollbar-color: var(--liwe3-darker-primary-color) var(--liwe3-primary-color);
 	}
 
 	table {
