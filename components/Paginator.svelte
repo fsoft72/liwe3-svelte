@@ -40,6 +40,6 @@
 		gap: 1em;
 		justify-content: center;
 		align-items: center;
-		margin: 1rem 0;
+		padding: 0.5rem 0;
 	}
 </style>
