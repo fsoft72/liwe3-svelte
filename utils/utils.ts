@@ -298,3 +298,13 @@ export const downloadFile = ( content: string, file_name: string, type = 'applic
 	document.body.appendChild( element );
 	element.click();
 };
+
+export function values<T> ( obj: any ): T[] {
+	if ( !obj ) return [];
+	return Object.values( obj );
+};
+
+export function keys<T> ( obj: any ): string[] {
+	if ( !obj ) return [];
+	return Object.keys( obj );
+}
