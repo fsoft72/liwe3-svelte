@@ -285,3 +285,16 @@ export function debounce<T extends ( ...args: any[] ) => any> (
 		}, delay );
 	};
 }
+
+export const downloadFile = ( content: string, file_name: string, type = 'application/json' ) => {
+	const element = document.createElement( 'a' );
+	file_name = file_name.toLowerCase();
+
+	const file = new Blob( [ content ], {
+		type
+	} );
+	element.href = URL.createObjectURL( file );
+	element.download = file_name;
+	document.body.appendChild( element );
+	element.click();
+};
