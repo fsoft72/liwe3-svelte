@@ -1,3 +1,12 @@
+<script context="module" lang="ts">
+	import type { IconSource } from 'svelte-hero-icons';
+
+	export type ModalAction = {
+		label: string;
+		action: Function;
+	};
+</script>
+
 <script lang="ts">
 	import type { Color, Size } from '$liwe3/types/types';
 	import Button from './Button.svelte';
@@ -16,6 +25,8 @@
 
 	export let padding = '0.5rem';
 	export let showCloseButton = true;
+
+	export let actions: ModalAction[] = [];
 
 	const onCloseOnOutside = (e: MouseEvent) => {
 		if (closeOnOutsideClick && e.target === e.currentTarget) {
@@ -45,6 +56,20 @@
 		<div class={`modal ${size}`}>
 			<div class="modal-header">
 				<h3>{title}</h3>
+				{#if actions.length}
+					<div class="actions">
+						{#each actions as action}
+							<Button
+								size="sm"
+								on:click={() => {
+									action.action();
+								}}
+							>
+								{action.label}
+							</Button>
+						{/each}
+					</div>
+				{/if}
 				{#if showCloseButton}
 					<Button
 						size="sm"
@@ -162,5 +187,10 @@
 
 	.xl {
 		width: 90vw;
+	}
+
+	.actions {
+		display: flex;
+		gap: 0.5rem;
 	}
 </style>
