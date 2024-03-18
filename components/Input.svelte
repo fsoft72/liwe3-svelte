@@ -9,6 +9,7 @@
 	export let width: string = 'auto';
 	export let mode: Color = 'mode3';
 	export let divClass: string = '';
+	export let value = '';
 
 	const inputClass = `cform cform-custom-input ${$$restProps.class} ${mode} input ${size}`;
 	const checkboxClass = `${mode} cform cform-custom-checkbox-radio ${$$restProps.class} checkbox ${size}`;
@@ -17,6 +18,8 @@
 	let rx = validChars ? new RegExp(`[^${validChars}]*`, 'g') : null;
 
 	const dispatch = createEventDispatcher();
+
+	let isDispatching = false;
 
 	const _dispatchEvent = (event: Event, data: string) => {
 		if (!event || !event.target) return;
@@ -28,22 +31,25 @@
 			composed: true,
 			data
 		});
+		isDispatching = true;
 		event.target.dispatchEvent(inputEvent);
+		isDispatching = false;
 	};
 
 	const handleInput = (event: Event) => {
+		if (isDispatching) return;
 		if (!event || !event.target) return;
+		event.stopImmediatePropagation();
+		event.stopPropagation();
 
 		if (rx) {
-			event.stopImmediatePropagation();
-
 			const inputValue = (event.target as HTMLInputElement).value;
 			const filteredValue: string = inputValue.replace(rx, '');
 
 			if (filteredValue !== inputValue) {
 				(event.target as HTMLInputElement).value = filteredValue;
-				// dispatch standard 'input' event with the new filteredValue
 				_dispatchEvent(event, filteredValue);
+				value = filteredValue;
 			}
 		} else {
 			const el = event.target as HTMLInputElement;
@@ -52,7 +58,8 @@
 				el.value = el.checked ? 'true' : 'false';
 			}
 
-			dispatch('input', el);
+			_dispatchEvent(event, el.value);
+			value = el.value;
 		}
 	};
 
@@ -72,6 +79,7 @@
 		{...$$restProps}
 		class={type === 'checkbox' ? checkboxClass : inputClass}
 		{type}
+		{value}
 		on:blur
 		on:change
 		on:keydown
