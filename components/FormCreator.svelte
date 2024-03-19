@@ -54,9 +54,8 @@
 	import { addToast } from '$liwe3/stores/ToastStore';
 	import Select from 'svelte-select';
 	import { _ } from '$liwe3/stores/LocalizationStore';
-	import { has_one_perm, has_perm } from '$liwe3/utils/utils';
+	import { has_one_perm, has_perm, isTrue } from '$liwe3/utils/utils';
 	import { user } from '$modules/user/store';
-	import { isTrue } from '$lib/utils/utils';
 
 	export let fields: FormField[] = [];
 	export let values: Record<string, any> = {};
