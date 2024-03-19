@@ -308,3 +308,18 @@ export function keys<T> ( obj: any ): string[] {
 	if ( !obj ) return [];
 	return Object.keys( obj );
 }
+
+export const isTrue = ( value: any ): boolean => {
+	if ( typeof value === 'boolean' ) return value;
+
+	if ( typeof value === 'string' ) {
+		if ( value === 'true' ) return true;
+		if ( value === 'false' ) return false;
+		if ( value === '1' ) return true;
+		if ( value === '0' ) return false;
+		if ( value === 'on' ) return true;
+
+	}
+
+	return false;
+};
