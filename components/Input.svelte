@@ -99,8 +99,8 @@
 		flex-direction: column;
 		align-items: flex-start;
 		justify-content: flex-end;
-		padding-block: var(--liwe3-form-padding-y);
-		padding-inline: var(--liwe3-form-padding-x);
+		padding-block: var(--liwe3-input-padding-y);
+		padding-inline: var(--liwe3-input-padding-x);
 	}
 	.input {
 		margin-right: var(--liwe3-input-w-unit);
