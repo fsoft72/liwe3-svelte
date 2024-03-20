@@ -16,7 +16,7 @@
 	export let total = 0;
 
 	// pagination options
-	export let options: number[] = [10, 20, 50, 100];
+	// export let options: number[] = [10, 20, 50, 100];
 
 	export const setPage = (p: number) => {
 		page = p;
