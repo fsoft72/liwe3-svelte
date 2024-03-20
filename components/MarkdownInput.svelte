@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Color } from '$liwe3/types/types';
-	import SvelteMarkdown from 'svelte-markdown';
+	import { marked } from 'marked';
 
 	export let value = '';
 	export let name = '';
@@ -27,7 +27,7 @@
 		<textarea {name} {rows} {cols} bind:value on:change />
 	</div>
 	<div class:show={preview} class="preview">
-		<SvelteMarkdown source={mdtext} />
+		{@html marked.parse(mdtext, { gfm: true })}
 	</div>
 </div>
 
