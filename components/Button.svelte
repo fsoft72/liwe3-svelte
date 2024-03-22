@@ -120,7 +120,7 @@
 	}
 
 	.md {
-		padding: 0.4em 0.5em;
+		padding: var(--liwe3-button-padding-y, 0.35em) var(--liwe3-button-padding-x, 0.5em);
 		font-size: 1rem;
 		/* min-width: calc(var(--unit-w-size) / 2); */
 	}

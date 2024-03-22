@@ -11,8 +11,8 @@
 	export let divClass: string = '';
 	export let value = '';
 
-	const inputClass = `cform cform-custom-input ${$$restProps.class} ${mode} input ${size}`;
-	const checkboxClass = `${mode} cform cform-custom-checkbox-radio ${$$restProps.class} checkbox ${size}`;
+	const inputClass = `liwe3-form liwe3-form-custom-input ${$$restProps.class ? $$restProps.class : ''} ${mode} input ${size}`;
+	const checkboxClass = `${mode} liwe3-form liwe3-form-custom-checkbox-radio ${$$restProps.class ? $$restProps.class : ''} checkbox ${size}`;
 
 	let type = 'checkbox';
 	let rx = validChars ? new RegExp(`[^${validChars}]*`, 'g') : null;
