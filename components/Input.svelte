@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
-	import type { Color, InputVariant, Size } from '$liwe3/types/types';
+	import type { Color, Size } from '$liwe3/types/types';
 
 	export let label = '';
 	export let id = ($$restProps.name ?? Math.random().toString()) + new Date().getTime().toString();
@@ -9,15 +8,13 @@
 	export let width: string = 'auto';
 	export let mode: Color = 'mode3';
 	export let divClass: string = '';
-	export let value = '';
+	export let value: string | boolean | number = '';
 
 	const inputClass = `liwe3-form liwe3-form-custom-input ${$$restProps.class ? $$restProps.class : ''} ${mode} input ${size}`;
 	const checkboxClass = `${mode} liwe3-form liwe3-form-custom-checkbox-radio ${$$restProps.class ? $$restProps.class : ''} checkbox ${size}`;
 
 	let type = 'checkbox';
 	let rx = validChars ? new RegExp(`[^${validChars}]*`, 'g') : null;
-
-	const dispatch = createEventDispatcher();
 
 	let isDispatching = false;
 
