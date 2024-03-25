@@ -1,4 +1,8 @@
 <script context="module" lang="ts">
+	export interface GridFieldExtra {
+		dateFormat?: string;
+	}
+
 	export interface GridField {
 		name: string;
 		type: string;
@@ -11,6 +15,8 @@
 		hidden?: boolean;
 		align?: string;
 		width?: string;
+		nowrap?: boolean;
+		extra?: GridFieldExtra;
 		render?: (value: any, row: any) => any;
 		click?: (row: any) => void;
 	}
@@ -38,7 +44,7 @@
 	import Avatar from './Avatar.svelte';
 	import type { IconSource } from 'svelte-hero-icons';
 	import type { Color, Variant } from '$liwe3/types/types';
-	import { toBool } from '$liwe3/utils/utils';
+	import { format_date, toBool } from '$liwe3/utils/utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -280,7 +286,9 @@
 						{#if !field.hidden}
 							<td
 								on:dblclick={(e) => cell_doubleclick(e, row, field.name)}
-								style={`text-align: ${field.align || 'left'}; width: ${field.width || 'auto'};`}
+								style={`text-align: ${field.align || 'left'}; width: ${
+									field.width || 'auto'
+								}; white-space: ${field.nowrap ? 'nowrap' : 'normal'};`}
 							>
 								{#if field.render}
 									{#if field.click}
@@ -316,6 +324,12 @@
 									>
 										{row[field.name]}
 									</Button>
+								{:else if field.type == 'date'}
+									{#if field.extra?.dateFormat}
+										{format_date(row[field.name], field.extra.dateFormat)}
+									{:else}
+										{row[field.name]}
+									{/if}
 								{:else}
 									{row[field?.name || '']}
 								{/if}
