@@ -37,6 +37,7 @@ export const format_date = ( date?: string | Date, format = 'YYYY-MM-DD HH:mm:ss
 // converts a number like 1000.23  into 1.000,23
 export const format_amount = ( amount?: number ) => {
 	if ( !amount ) return '0,00';
+	amount = Math.round( amount * 100 ) / 100;
 	const [ int, dec ] = amount.toFixed( 2 ).split( '.' );
 	return `${ Number( int ).toLocaleString().replace( /,/g, '.' ) },${ dec }`;
 };
