@@ -4,6 +4,10 @@ import { currentUser } from '$modules/user/store';
 import { app } from '$liwe3/stores/LiWEApp';
 import { addToast } from '$liwe3/stores/ToastStore';
 
+export interface LiWEFetcherOptions {
+	skipError?: boolean;
+};
+
 const url_and_headers = ( url: string ) => {
 	if ( !url.startsWith( 'http' ) ) {
 		url = PUBLIC_LIWE_SERVER + url;
