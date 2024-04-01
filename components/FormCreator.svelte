@@ -205,15 +205,21 @@
 							{:else if field?.type === 'hidden'}
 								<input type="hidden" name={field.name} value={_v(field)} />
 							{:else if field?.type === 'select'}
-								<div class="svelte-select mode3" style="width: 100%">
-									<Select
-										name={field.name}
-										value={_v(field)}
-										{...field.extra}
-										on:change={(e) => onChangeField(field.name, e.detail.value)}
-										on:clear={() => onChangeField(field.name, '')}
-										items={field.options ?? []}
-									/>
+								<div class="custom-select">
+									{#if field.label}
+										<div class="label">{field.label}</div>
+									{/if}
+									<div class="svelte-select mode3" style="width: 100%">
+										<Select
+											name={field.name}
+											value={_v(field)}
+											placeholder={field.placeholder}
+											{...field.extra}
+											on:change={(e) => onChangeField(field.name, e.detail.value)}
+											on:clear={() => onChangeField(field.name, '')}
+											items={field.options ?? []}
+										/>
+									</div>
 								</div>
 							{:else}
 								<Input
@@ -247,6 +253,7 @@
 		user-select: none;
 		gap: 0.5rem;
 	}
+
 	.form {
 		width: 100%;
 	}
@@ -294,5 +301,16 @@
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
+	}
+
+	.custom-select {
+		position: relative;
+		width: 100%;
+		top: -4px;
+	}
+
+	.label {
+		font-size: 0.6rem;
+		margin-bottom: 0.2rem;
 	}
 </style>
