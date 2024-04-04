@@ -16,6 +16,7 @@
 		align?: string;
 		width?: string;
 		nowrap?: boolean;
+		pre?: string;
 		extra?: GridFieldExtra;
 		render?: (value: any, row: any) => any;
 		click?: (row: any) => void;
@@ -330,6 +331,8 @@
 									{:else}
 										{row[field.name]}
 									{/if}
+								{:else if field.pre}
+									<pre>{row[field.name]}</pre>
 								{:else}
 									{row[field?.name || '']}
 								{/if}
