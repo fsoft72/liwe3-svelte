@@ -24,7 +24,7 @@ export const matchFilter = ( obj: Record<string, any>, name: string, value: stri
 
 	switch ( mode ) {
 		case filterModes[ '==' ]: return fld == value;
-		case filterModes.contains: return fld.includes( value );
+		case filterModes.contains: return fld.toLowerCase().includes( value.toLowerCase() );
 		case filterModes[ '<' ]: return fld < value;
 		case filterModes[ '<=' ]: return fld <= value;
 		case filterModes[ '>' ]: return fld > value;
@@ -34,8 +34,8 @@ export const matchFilter = ( obj: Record<string, any>, name: string, value: stri
 		case filterModes[ 'n>' ]: return parseFloat( fld ) > parseFloat( value );
 		case filterModes[ 'n>=' ]: return parseFloat( fld ) >= parseFloat( value );
 		case filterModes[ '!=' ]: return fld != value;
-		case filterModes.starts_with: return fld.startsWith( value );
-		case filterModes.ends_with: return fld.endsWith( value );
+		case filterModes.starts_with: return fld.toLowerCase().startsWith( value.toLowerCase() );
+		case filterModes.ends_with: return fld.toLowerCase().endsWith( value.toLowerCase() );
 
 
 		default:
@@ -48,12 +48,12 @@ interface ValueFilter {
 	value: string;
 };
 
-export const filterObjects = ( objs: Record<string, any>[], filters: Record<string, ValueFilter> ) => {
+export function filterObjects<T> ( objs: Record<string, any>[], filters: Record<string, ValueFilter> ): T[] {
 	return objs.filter( obj => {
 		for ( const name in filters ) {
 			if ( !matchFilter( obj, name, filters[ name ].value, filters[ name ].mode ) ) return false;
 		}
 
 		return true;
-	} );
+	} ) as T[];
 };
