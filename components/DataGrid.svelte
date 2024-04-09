@@ -9,7 +9,7 @@
 		label?: string;
 		sortable?: boolean;
 		filterable?: boolean;
-		searchMode?: string;
+		searchMode?: filterModes;
 		editable?: boolean;
 		deletable?: boolean;
 		hidden?: boolean;
@@ -46,6 +46,7 @@
 	import type { IconSource } from 'svelte-hero-icons';
 	import type { Color, Variant } from '$liwe3/types/types';
 	import { format_date, toBool } from '$liwe3/utils/utils';
+	import { filterModes } from '$liwe3/utils/match_filter';
 
 	const dispatch = createEventDispatcher();
 
@@ -148,14 +149,14 @@
 		const name = input.name.replace('f_', '');
 		const field = fields.find((f) => f.name === name);
 		let value: any = input.value;
-		let mode = field?.searchMode || '==';
+		let mode = field?.searchMode || filterModes.contains;
 
 		console.log('=== FILTER CHANGE: ', { name, field, value, mode, type: input.type });
 
 		if (name.endsWith('_1')) {
-			mode = '>=';
+			mode = filterModes['>='];
 		} else if (name.endsWith('_2')) {
-			mode = '<=';
+			mode = filterModes['<='];
 		}
 
 		// we add to the query only checkboxes that are set to true
