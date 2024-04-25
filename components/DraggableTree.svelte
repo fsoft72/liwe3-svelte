@@ -108,7 +108,7 @@
 
 		if (!newItem) return;
 
-		dispatch('additem', { id: newItem.id });
+		dispatch('additem', { id: newItem.id, item: newItem });
 
 		items = structuredClone(tree_add_item(items, newItem, id_parent));
 		dispatch('change', { items });
@@ -147,7 +147,7 @@
 
 		items.push(newItem);
 
-		dispatch('additem', { id: newItem.id });
+		dispatch('additem', { id: newItem.id, item: newItem });
 
 		tree_set_meta(items, '', 0);
 		items = structuredClone(items);
