@@ -84,11 +84,17 @@
 </div>
 
 <style>
+	.liwe3-tabs {
+		width: 100%;
+	}
+
 	.container {
 		width: 100%;
 		margin: 0 auto;
 		position: relative;
 		height: auto;
+
+		border: 1px solid red;
 
 		/* box-shadow: 0 2px 3px 1px #000000; */
 	}
@@ -98,7 +104,8 @@
 		height: auto;
 		display: flex;
 		padding: 1rem 0.5rem;
-		background: var(--paper);
+		background: var(--liwe3-form-bg);
+		width: 100%;
 	}
 
 	.tabs-buttons {
@@ -120,6 +127,6 @@
 	}
 
 	.tab-label.active {
-		background: var(--paper);
+		background: var(--liwe3-paper);
 	}
 </style>
