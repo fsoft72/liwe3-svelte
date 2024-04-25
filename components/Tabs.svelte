@@ -95,6 +95,7 @@
 		height: auto;
 
 		border: 1px solid var(--liwe3-border-color);
+		border-radius: var(--liwe3-border-radius);
 
 		/* box-shadow: 0 2px 3px 1px #000000; */
 	}
