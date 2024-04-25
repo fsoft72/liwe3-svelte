@@ -168,7 +168,7 @@
 <div class={`container ${mode}`}>
 	{#if showNew}
 		<div class="new-item">
-			<Button {mode} size="xs" on:click={newItem} disabled={!canAdd}>
+			<Button mode="success" size="xs" on:click={newItem} disabled={!canAdd}>
 				{newLabel}
 			</Button>
 		</div>
@@ -197,9 +197,12 @@
 
 		min-width: 8rem;
 
-		background-color: var(--paper);
+		background-color: var(--liwe3-paper);
 
-		padding: 0.5rem;
+		padding: 0.5rem 0.5rem 0.5rem 0;
+
+		border: var(--liwe3-border-width) solid var(--liwe3-button-border);
+		border-radius: var(--liwe3-border-radius);
 	}
 
 	.new-item {

@@ -107,7 +107,7 @@
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="item">
 			<div
-				id={`emp-${item}`}
+				id={`emp-${item.id}`}
 				class="bar mini"
 				class:is-dragging-over={overItem?.id == `emp-${item.id}`}
 				class:dashed-border={overItem?.id == `emp-${item.id}`}
@@ -192,11 +192,11 @@
 <style>
 	.tree {
 		padding-left: 1rem;
-		background-color: var(--paper);
+		background-color: var(--liwe3-paper);
 	}
 
 	.item {
-		background-color: var(--liwe3-background);
+		background-color: var(--liwe3-paper);
 		color: var(--liwe3-color);
 	}
 
@@ -245,5 +245,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+		margin-left: 1rem;
 	}
 </style>
