@@ -94,7 +94,7 @@
 		position: relative;
 		height: auto;
 
-		border: 1px solid red;
+		border: 1px solid var(--liwe3-border-color);
 
 		/* box-shadow: 0 2px 3px 1px #000000; */
 	}
