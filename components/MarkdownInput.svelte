@@ -7,6 +7,7 @@
 	export let mode: Color = 'mode1';
 	export let rows = 10;
 	export let cols = 30;
+	export let height = '300px';
 
 	let mdtext = '';
 	let preview: boolean = false;
@@ -23,7 +24,7 @@
 		<input type="checkbox" bind:checked={preview} id="_chk" />
 		<label for="_chk">Preview</label>
 	</div>
-	<div class="box">
+	<div class="box" style="height: {height}">
 		<div class:show={!preview} class="editor">
 			<textarea {name} {rows} {cols} bind:value on:change />
 		</div>
@@ -45,7 +46,6 @@
 
 	.box {
 		width: 100%;
-		min-height: 300px;
 	}
 
 	.editor,
