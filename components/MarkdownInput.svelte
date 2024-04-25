@@ -23,11 +23,13 @@
 		<input type="checkbox" bind:checked={preview} id="_chk" />
 		<label for="_chk">Preview</label>
 	</div>
-	<div class:show={!preview} class="editor">
-		<textarea {name} {rows} {cols} bind:value on:change />
-	</div>
-	<div class:show={preview} class="preview">
-		{@html marked.parse(mdtext, { gfm: true })}
+	<div class="box">
+		<div class:show={!preview} class="editor">
+			<textarea {name} {rows} {cols} bind:value on:change />
+		</div>
+		<div class:show={preview} class="preview">
+			{@html marked.parse(mdtext, { gfm: true })}
+		</div>
 	</div>
 </div>
 
@@ -41,16 +43,22 @@
 		width: 100%;
 	}
 
+	.box {
+		width: 100%;
+		min-height: 300px;
+	}
+
 	.editor,
 	.preview {
 		width: 100%;
+		height: 100%;
 		display: none;
+		border: 1px solid var(--liwe3-button-border);
 	}
 
 	.preview {
 		position: relative;
-		border: 1px solid var(--liwe3-button-border);
-		height: 100%;
+		padding: 0.5rem;
 	}
 
 	textarea {
