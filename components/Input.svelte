@@ -114,6 +114,7 @@
 		white-space: nowrap;
 		font-size: 0.6rem;
 		margin: var(--liwe3-input-w-unit) 0;
+		user-select: none;
 	}
 	/* generic size rules for inputs and labels--------------------------*/
 	.xxs {
