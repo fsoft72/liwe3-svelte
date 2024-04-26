@@ -104,8 +104,9 @@
 		position: relative;
 		height: auto;
 		display: flex;
-		padding: 1rem 0.5rem;
-		background: var(--liwe3-form-bg);
+		padding: 0;
+
+		background: var(--liwe3-background-color);
 		width: 100%;
 	}
 
