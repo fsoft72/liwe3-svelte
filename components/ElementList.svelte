@@ -91,6 +91,8 @@
 			on:dragstart={(event) => handleDragStart(event, index)}
 			on:drop={(event) => handleDrop(event, index)}
 			on:dragover={handleDragOver}
+			role="listbox"
+			tabindex="-1"
 		>
 			<Input
 				{mode}

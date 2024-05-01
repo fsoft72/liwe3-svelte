@@ -44,7 +44,7 @@
 		</div>
 	{/if}
 	<slot>
-		<div class="button-no-content" />
+		<div class="button-no-content"></div>
 	</slot>
 	{#if iconRight}
 		<div class="liwe3-button-icon-right">

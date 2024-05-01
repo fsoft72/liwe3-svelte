@@ -26,7 +26,7 @@
 	</div>
 	<div class="box" style="height: {height}">
 		<div class:show={!preview} class="editor">
-			<textarea {name} {rows} {cols} bind:value on:change />
+			<textarea {name} {rows} {cols} bind:value on:change></textarea>
 		</div>
 		<div class:show={preview} class="preview">
 			{@html marked.parse(mdtext, { gfm: true })}

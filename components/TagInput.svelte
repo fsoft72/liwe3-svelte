@@ -60,7 +60,7 @@
 				<div class="name">{tag}</div>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				<div class="btn" on:click={() => removeTag(tag)}>x</div>
+				<button class="btn" on:click={() => removeTag(tag)}>x</button>
 			</div>
 		{/each}
 	</div>
