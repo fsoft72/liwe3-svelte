@@ -101,6 +101,7 @@
 	}
 	.input {
 		margin-right: var(--liwe3-input-w-unit);
+		width: 100%;
 	}
 	.checkbox {
 		/* width: 100%; */
