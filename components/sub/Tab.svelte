@@ -1,5 +1,7 @@
 <script lang="ts">
-	export let id: string = new Date().getTime().toString();
+	import { mkid } from '../../utils/utils';
+
+	export let id: string = mkid('tab');
 	export let title: string = 'Tab';
 </script>
 
