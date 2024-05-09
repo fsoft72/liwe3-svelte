@@ -197,6 +197,7 @@
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <div class="table">
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<table class={mode} on:mousemove={mouse_move} on:mouseup={mouse_up} bind:this={table_element}>
 		<tbody>
 			<!-- headers -->
@@ -204,13 +205,13 @@
 				{#each fields as field}
 					{#if !field.hidden}
 						<th style={`width: ${field.width || 'auto'};`}>{field.label || field.name}</th>
-						<th class="resize" on:mousedown={resize_start} />
+						<th class="resize" on:mousedown={resize_start}></th>
 					{/if}
 				{/each}
 				{#if actions.length > 0}
 					<th>Actions</th>
 				{:else}
-					<th />
+					<th></th>
 				{/if}
 				<th>
 					<Button {mode} size="xs" on:click={() => (showFieldsModal = true)}>Fields</Button>
@@ -273,11 +274,11 @@
 									{/if}
 								{/if}
 							</td>
-							<td style="border: 0" />
+							<td style="border: 0"></td>
 						{/if}
 					{/each}
-					<td />
-					<td />
+					<td></td>
+					<td></td>
 				</tr>
 			{/if}
 
@@ -338,7 +339,7 @@
 									{row[field?.name || '']}
 								{/if}
 							</td>
-							<td class="resize" on:mousedown={resize_start} />
+							<td class="resize" on:mousedown={resize_start}></td>
 						{/if}
 					{/each}
 					{#if actions.length > 0}
@@ -356,7 +357,7 @@
 							{/each}
 						</td>
 					{/if}
-					<td />
+					<td></td>
 				</tr>
 			{/each}
 		</tbody>
@@ -426,16 +427,6 @@
 
 	table td {
 		border-right: 1px solid var(--liwe3-tertiary-color);
-	}
-
-	table td .filter {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 0.25rem;
-
-		padding: 0;
-		border-right: none;
 	}
 
 	table tr:last-child td {
