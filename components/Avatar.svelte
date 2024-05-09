@@ -3,18 +3,29 @@
 	import { media_url } from '$liwe3/utils/utils';
 	import { onMount } from 'svelte';
 
-	export let value: any = null;
+	interface _props {
+		value?: any;
+		url?: string;
+		name?: string;
+		size?: string;
+		mode?: Color;
+		shape?: 'circle' | 'square';
+		shadow?: boolean;
+		border?: string;
+	}
 
-	export let url: string = '';
-	export let name: string = 'A';
-	export let size: string;
-	export let mode: Color = 'mode1';
-	export let shape: 'circle' | 'square' = 'circle';
-	export let shadow: boolean = false;
+	let {
+		value = null,
+		url = '',
+		name = 'A',
+		size,
+		mode = 'mode1',
+		shape = 'circle',
+		shadow = false,
+		border = 'none'
+	}: _props = $props();
 
-	export let border: string = 'none';
-
-	let src = url;
+	let src = $state(url);
 
 	onMount(() => {
 		if (value) {
