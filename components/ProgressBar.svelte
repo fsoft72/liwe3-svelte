@@ -7,7 +7,7 @@
 </script>
 
 <div class={`progress-bar ${mode}`}>
-	<div class="progress-bar-fill" style={`width: ${percentage}%`} />
+	<div class="progress-bar-fill" style={`width: ${percentage}%`}></div>
 	<div class="text">{text}</div>
 </div>
 
