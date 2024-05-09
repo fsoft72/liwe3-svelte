@@ -1,19 +1,35 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-
 	import type { Color, Size, Variant } from '$liwe3/types/types';
 	import { Icon } from 'svelte-hero-icons';
 	import type { IconSource } from 'svelte-hero-icons';
 
-	export let size: Size = 'md';
-	export let cssClass: string = '';
-	export let mode: Color = 'mode1';
-	export let variant: Variant = 'solid';
-	export let icon: IconSource | null = null;
-	export let iconRight: IconSource | null = null;
-	export let solid: boolean = true;
+	interface _props {
+		size?: Size;
+		cssClass?: string;
+		mode?: Color;
+		variant?: Variant;
+		icon?: IconSource;
+		iconRight?: IconSource;
+		solid?: boolean;
 
-	const dispatch = createEventDispatcher();
+		onclick?: (e: MouseEvent) => void;
+
+		children?: any;
+		restProps?: any;
+	}
+
+	let {
+		size = 'md',
+		cssClass = '',
+		mode = 'mode1',
+		variant = 'solid',
+		icon = null,
+		iconRight = null,
+		solid = true,
+		onclick,
+		children,
+		...restProps
+	}: _props = $props();
 
 	const iconSizes = {
 		xxs: '0.6rem',
@@ -29,23 +45,22 @@
 		e.preventDefault();
 
 		// emit the event
-		dispatch('click');
+		onclick && onclick(e);
 	};
 </script>
 
 <button
-	{...$$restProps}
+	{...restProps}
 	class={`liwe3-button ${mode} ${variant ? 'liwe3-' + variant : ''} ${size} ${cssClass}`}
-	on:click={onClick}
+	onclick={onClick}
 >
 	{#if icon}
 		<div class="liwe3-button-icon-left">
 			<Icon src={icon} size={iconSizes[size]} {solid} />
 		</div>
 	{/if}
-	<slot>
-		<div class="button-no-content"></div>
-	</slot>
+	{@render children()}
+	<div class="button-no-content"></div>
 	{#if iconRight}
 		<div class="liwe3-button-icon-right">
 			<Icon src={iconRight} size={iconSizes[size]} {solid} />
