@@ -10,10 +10,10 @@
 		mode = 'mode3',
 		children
 	}: {
-		active: string;
-		minHeight: string;
-		height: string;
-		mode: Color;
+		active?: string;
+		minHeight?: string;
+		height?: string;
+		mode?: Color;
 		children: any;
 	} = $props();
 
