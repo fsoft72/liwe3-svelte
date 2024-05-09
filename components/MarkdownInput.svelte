@@ -2,21 +2,29 @@
 	import type { Color } from '$liwe3/types/types';
 	import { marked } from 'marked';
 
-	export let value = '';
-	export let name = '';
-	export let mode: Color = 'mode1';
-	export let rows = 10;
-	export let cols = 30;
-	export let height = '300px';
+	interface _props {
+		value?: string;
+		name?: string;
+		mode?: Color;
+		rows?: number;
+		cols?: number;
+		height?: string;
 
-	let mdtext = '';
-	let preview: boolean = false;
-
-	$: if (preview) {
-		mdtext = value;
-	} else {
-		mdtext = '';
+		onchange?: (e: Event) => void;
 	}
+
+	let {
+		value = '',
+		name = '',
+		mode = 'mode1',
+		rows = 10,
+		cols = 30,
+		height = '300px',
+		onchange
+	}: _props = $props();
+
+	let preview: boolean = $state(false);
+	let mdtext = $derived(preview ? value : '');
 </script>
 
 <div class={`container ${mode}`}>
@@ -26,7 +34,7 @@
 	</div>
 	<div class="box" style="height: {height}">
 		<div class:show={!preview} class="editor">
-			<textarea {name} {rows} {cols} bind:value on:change></textarea>
+			<textarea {name} {rows} {cols} bind:value {onchange}></textarea>
 		</div>
 		<div class:show={preview} class="preview">
 			{@html marked.parse(mdtext, { gfm: true })}
