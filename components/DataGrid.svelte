@@ -18,6 +18,7 @@
 		nowrap?: boolean;
 		pre?: string;
 		extra?: GridFieldExtra;
+
 		render?: (value: any, row: any) => any;
 		click?: (row: any) => void;
 	}
@@ -40,7 +41,6 @@
 <script lang="ts">
 	import Button from './Button.svelte';
 	import Input from './Input.svelte';
-	import { createEventDispatcher } from 'svelte';
 	import Modal from './Modal.svelte';
 	import Avatar from './Avatar.svelte';
 	import type { IconSource } from 'svelte-hero-icons';
@@ -48,15 +48,35 @@
 	import { format_date, toBool } from '$liwe3/utils/utils';
 	import { filterModes } from '$liwe3/utils/match_filter';
 
-	const dispatch = createEventDispatcher();
-
 	type UpdateFieldCallback = (row: GridDataRow, field_name: string, value: any) => void;
 
-	export let fields: GridField[] = [];
-	export let data: GridDataRow[] = [];
-	export let actions: GridAction[] = [];
-	export let updateField: UpdateFieldCallback | null = null;
-	export let mode: Color = 'mode1';
+	interface Props {
+		fields: GridField[];
+		data: GridDataRow[];
+		actions?: GridAction[];
+		mode?: Color;
+
+		// events
+		onupdatefield?: UpdateFieldCallback | null;
+		onfilterchange?: (filters: { [key: string]: any }) => void;
+
+		// restProps
+		[k: string]: any;
+	}
+
+	let {
+		fields = [],
+		data = [],
+		actions = [],
+		mode = 'mode1',
+
+		// events
+		onupdatefield,
+		onfilterchange,
+
+		// restProps
+		...restProps
+	}: Props = $props();
 
 	let is_resizing = false;
 	let td: HTMLTableCellElement | null = null;
@@ -67,7 +87,7 @@
 	// the has_filters is true if at least one field is filterable
 	let has_filters = fields.some((f) => f.filterable);
 
-	let showFieldsModal = false;
+	let showFieldsModal = $state(false);
 
 	const resize_start = (e: MouseEvent) => {
 		// get the td element before this one
@@ -135,13 +155,11 @@
 			if (!do_update) return;
 
 			// update the field
-			updateField && updateField(row, field_name, row[field_name]);
+			onupdatefield && onupdatefield(row, field_name, row[field_name]);
 		});
 
 		// focus the input
 		input.focus();
-
-		console.log('Edit', row, field_name);
 	};
 
 	const filter_change = (e: Event) => {
@@ -151,7 +169,7 @@
 		let value: any = input.value;
 		let mode = field?.searchMode || filterModes.contains;
 
-		console.log('=== FILTER CHANGE: ', { name, field, value, mode, type: input.type });
+		// console.log('=== FILTER CHANGE: ', { name, field, value, mode, type: input.type });
 
 		if (name.endsWith('_1')) {
 			mode = filterModes['>='];
@@ -165,7 +183,7 @@
 			delete nf[name];
 
 			filters = nf;
-			dispatch('filterchange', filters);
+			onfilterchange && onfilterchange(filters);
 			return;
 		} else if (input.type == 'checkbox' && toBool(value) == true) {
 			value = true;
@@ -189,7 +207,7 @@
 
 		console.log('=== FILTER CHANGE: ', filters);
 
-		dispatch('filterchange', filters);
+		onfilterchange && onfilterchange(filters);
 	};
 
 	let table_element: HTMLTableElement | null = null;
@@ -198,14 +216,15 @@
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <div class="table">
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<table class={mode} on:mousemove={mouse_move} on:mouseup={mouse_up} bind:this={table_element}>
+	<!-- svelte-ignore event_directive_deprecated -->
+	<table class={mode} onmousemove={mouse_move} onmouseup={mouse_up} bind:this={table_element}>
 		<tbody>
 			<!-- headers -->
 			<tr>
 				{#each fields as field}
 					{#if !field.hidden}
 						<th style={`width: ${field.width || 'auto'};`}>{field.label || field.name}</th>
-						<th class="resize" on:mousedown={resize_start}></th>
+						<th class="resize" onmousedown={resize_start}></th>
 					{/if}
 				{/each}
 				{#if actions.length > 0}
@@ -214,7 +233,7 @@
 					<th></th>
 				{/if}
 				<th>
-					<Button {mode} size="xs" on:click={() => (showFieldsModal = true)}>Fields</Button>
+					<Button {mode} size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
 				</th>
 			</tr>
 
@@ -231,7 +250,7 @@
 											width={field.width}
 											size="xs"
 											name={`f_${field.name}`}
-											on:change={filter_change}
+											onchange={filter_change}
 										/>
 									{:else if field.type == 'number'}
 										<Input
@@ -239,14 +258,14 @@
 											size="xs"
 											type="number"
 											name={`f_${field.name}_1`}
-											on:change={filter_change}
+											onchange={filter_change}
 										/>
 										<Input
 											{mode}
 											size="xs"
 											type="number"
 											name={`f_${field.name}_2`}
-											on:change={filter_change}
+											onchange={filter_change}
 										/>
 									{:else if field.type == 'date'}
 										<Input
@@ -254,14 +273,14 @@
 											size="xs"
 											type="date"
 											name={`f_${field.name}_1`}
-											on:change={filter_change}
+											onchange={filter_change}
 										/>
 										<Input
 											{mode}
 											size="xs"
 											type="date"
 											name={`f_${field.name}_2`}
-											on:change={filter_change}
+											onchange={filter_change}
 										/>
 									{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
 										<Input
@@ -269,7 +288,7 @@
 											name={`f_${field.name}`}
 											size="xs"
 											type="checkbox"
-											on:change={filter_change}
+											onchange={filter_change}
 										/>
 									{/if}
 								{/if}
@@ -288,7 +307,7 @@
 					{#each fields as field}
 						{#if !field.hidden}
 							<td
-								on:dblclick={(e) => cell_doubleclick(e, row, field.name)}
+								ondblclick={(e) => cell_doubleclick(e, row, field.name)}
 								style={`text-align: ${field.align || 'left'}; width: ${
 									field.width || 'auto'
 								}; white-space: ${field.nowrap ? 'nowrap' : 'normal'};`}
@@ -299,7 +318,7 @@
 											mode="mode4"
 											size="sm"
 											variant="outline"
-											on:click={() => field.click && field.click(row)}
+											onclick={() => field.click && field.click(row)}
 										>
 											{@html field.render(row[field.name], row)}
 										</Button>
@@ -311,9 +330,9 @@
 										{mode}
 										type="checkbox"
 										checked={toBool(row[field.name])}
-										on:change={(e) => {
+										onchange={(e: any) => {
 											row[field.name] = e.target?.checked;
-											updateField && updateField(row, field.name, row[field.name]);
+											onupdatefield && onupdatefield(row, field.name, row[field.name]);
 										}}
 									/>
 								{:else if field.type == 'avatar'}
@@ -323,7 +342,7 @@
 										mode="mode4"
 										size="sm"
 										variant="outline"
-										on:click={() => field.click && field.click(row)}
+										onclick={() => field.click && field.click(row)}
 									>
 										{row[field.name]}
 									</Button>
@@ -339,7 +358,7 @@
 									{row[field?.name || '']}
 								{/if}
 							</td>
-							<td class="resize" on:mousedown={resize_start}></td>
+							<td class="resize" onmousedown={resize_start}></td>
 						{/if}
 					{/each}
 					{#if actions.length > 0}
@@ -350,7 +369,7 @@
 									mode={action.mode || mode}
 									variant={action.variant}
 									icon={action.icon}
-									on:click={() => action.action(row)}
+									onclick={() => action.action(row)}
 								>
 									{action.label ? action.label : ''}
 								</Button>
@@ -367,7 +386,7 @@
 {#if showFieldsModal}
 	<Modal
 		title="Fields"
-		on:cancel={() => (showFieldsModal = false)}
+		oncancel={() => (showFieldsModal = false)}
 		closeOnEsc={true}
 		closeOnOutsideClick={true}
 	>
