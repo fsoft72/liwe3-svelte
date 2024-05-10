@@ -1,33 +1,43 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type { TreeItem } from '$liwe3/utils/tree';
 	import type { Color } from '$liwe3/types/types';
 
-	export let name: string = '';
-	export let tree: TreeItem[] = [];
-	export let level: number = 0;
-	export let fontSize: string = '1.2em';
-	export let addEmpty: boolean = true;
-	export let value: string = '';
-	export let mode: Color = 'mode1';
+	interface SelectTreeProps {
+		name: string;
+		tree: TreeItem[];
+		level: number;
+		fontSize: string;
+		addEmpty: boolean;
+		value: string;
+		mode: Color;
 
-	let spaces = '';
+		onchange: (id: string) => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		name = '',
+		tree = [],
+		level = 0,
+		fontSize = '1.2em',
+		addEmpty = true,
+		value = '',
+		mode = 'mode1',
+		onchange
+	}: SelectTreeProps = $props();
+
+	let spaces = $derived('&nbsp;'.repeat(level * 4));
 
 	const onChange = (e: Event) => {
 		const select = e.target as HTMLSelectElement;
 		const id = select.value;
 
-		dispatch('change', { id });
+		onchange && onchange(id);
 	};
-
-	$: spaces = '&nbsp;'.repeat(level * 4);
 </script>
 
 <div class={mode}>
 	{#if level == 0}
-		<select {name} style={`font-size: ${fontSize}`} on:change={onChange}>
+		<select {name} style={`font-size: ${fontSize}`} onchange={onChange}>
 			{#if addEmpty}
 				<option value="">-</option>
 			{/if}
