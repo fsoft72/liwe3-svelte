@@ -21,7 +21,7 @@
 		perms?: string[];
 
 		// events
-		onChange?: (name: string, value: any, values: Record<string, any>) => Promise<boolean>;
+		onchange?: (name: string, value: any, values: Record<string, any>) => Promise<boolean>;
 	};
 
 	type FormCreatorPlugin = {
@@ -43,7 +43,6 @@
 </script>
 
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import Input from './Input.svelte';
 	import Button from './Button.svelte';
 	import TagInput from './TagInput.svelte';
@@ -57,14 +56,31 @@
 	import { has_one_perm, has_perm, isTrue } from '$liwe3/utils/utils';
 	import { user } from '$modules/user/store';
 
-	export let fields: FormField[] = [];
-	export let values: Record<string, any> = {};
-	export let submitLabel: string = 'Submit';
-	export let resetLabel: string = 'Reset';
-	export let showButtons: boolean = true;
-	export let showReset: boolean = true;
+	interface Props {
+		fields: FormField[];
+		values: Record<string, any>;
+		submitLabel?: string;
+		resetLabel?: string;
+		showButtons?: boolean;
+		showReset?: boolean;
 
-	const dispatch = createEventDispatcher();
+		// events
+		onsubmit?: (values: Record<string, any>) => void;
+		onchange?: (name: string, value: any) => void;
+	}
+
+	let {
+		fields = [],
+		values = {},
+		submitLabel = 'Submit',
+		resetLabel = 'Reset',
+		showButtons = true,
+		showReset = true,
+
+		// events
+		onsubmit,
+		onchange
+	}: Props = $props();
 
 	const _check_required_fields = () => {
 		const required: string[] = [];
@@ -79,6 +95,10 @@
 	};
 
 	const handleSubmit = (e: Event) => {
+		e.preventDefault();
+		e.stopImmediatePropagation();
+		e.stopPropagation();
+
 		const missing = _check_required_fields();
 
 		// verify required fields
@@ -94,7 +114,7 @@
 			return;
 		}
 
-		dispatch('submit', values);
+		onsubmit && onsubmit(values);
 	};
 
 	const onChangeField = async (name: string, e: any) => {
@@ -109,14 +129,14 @@
 		}
 
 		const field = fields.find((f) => f.name === name);
-		const onChange = field?.onChange;
+		const onChange = field?.onchange;
 		const valid = onChange ? await onChange(name, value, values) : true;
 
 		if (!valid) return;
 
 		if (valid) values[name] = value;
 
-		dispatch('change', { name, value });
+		onchange && onchange(name, value);
 	};
 
 	const _v = (field: FormField) => {
@@ -130,7 +150,7 @@
 </script>
 
 <div class="form">
-	<form on:submit|preventDefault|stopPropagation={handleSubmit}>
+	<form onsubmit={handleSubmit}>
 		<div class="liwe3-row">
 			{#each fields as field}
 				<div class={`liwe3-col${field.col ?? 12} ${field.align ? 'align-' + field.align : ''}`}>
@@ -145,7 +165,7 @@
 									{...field}
 									value={_v(field).toString()}
 									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e)}
+									onchange={(e: any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'text'}
 								<!--<div class="title">{field.label}</div>-->
@@ -154,7 +174,7 @@
 									{...field.extra}
 									name={field.name}
 									value={_v(field)}
-									on:change={(e) => onChangeField(field.name, e)}
+									onchange={(e:any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'title'}
 								<div class="title">{field.label}</div>
@@ -163,14 +183,14 @@
 									name={field.name}
 									value={_v(field)}
 									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e)}
+									onchange={(e:any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'markdown'}
 								<MarkdownInput
 									name={field.name}
 									value={_v(field)}
 									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e)}
+									onchange={(e:any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'element-list'}
 								<div class="title">{field.label}</div>
@@ -178,14 +198,14 @@
 									name={field.name}
 									value={_v(field)}
 									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e.detail)}
+									onchange={(e:any) => onChangeField(field.name, e.detail)}
 								/>
 							{:else if field?.type === 'draggable-tree'}
 								<DraggableTree
 									name={field.name}
 									value={_v(field)}
 									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e)}
+									onchange={(e:any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'checkbox'}
 								<div class="simple-row">
@@ -197,7 +217,7 @@
 											checked={isTrue(_v(field))}
 											value="on"
 											{...field.extra}
-											on:change={(e) => onChangeField(field.name, e)}
+											onchange={(e:any) => onChangeField(field.name, e)}
 										/>
 										{field.label}
 									</label>
@@ -215,7 +235,7 @@
 											value={_v(field)}
 											placeholder={field.placeholder}
 											{...field.extra}
-											on:change={(e) => onChangeField(field.name, e.detail.value)}
+											on:change={(e:any) => onChangeField(field.name, e.detail.value)}
 											on:clear={() => onChangeField(field.name, '')}
 											items={field.options ?? []}
 										/>
@@ -226,7 +246,7 @@
 									{...field}
 									value={_v(field).toString()}
 									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e)}
+									onchange={(e:any) => onChangeField(field.name, e)}
 								/>
 							{/if}
 						{/if}
@@ -239,7 +259,7 @@
 				{#if showReset}
 					<Button mode="danger" type="reset">{resetLabel}</Button>
 				{/if}
-				<Button mode="success" type="submit" on:click={handleSubmit}>{submitLabel}</Button>
+				<Button mode="success" type="submit" onclick={handleSubmit}>{submitLabel}</Button>
 			</div>
 		{/if}
 	</form>

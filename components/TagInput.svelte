@@ -13,7 +13,7 @@
 
 		onchange?: (value: string[]) => void;
 
-		restProps: any;
+		[key: string]: any;
 	}
 
 	let {
