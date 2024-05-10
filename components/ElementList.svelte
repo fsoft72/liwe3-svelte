@@ -1,20 +1,22 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { createEventDispatcher } from 'svelte';
 
 	import Input from './Input.svelte';
 	import Button from './Button.svelte';
 	import { Icon, Trash } from 'svelte-hero-icons';
 	import type { Color } from '$liwe3/types/types';
 
-	const dispatch = createEventDispatcher();
+	interface Props {
+		mode?: Color;
+		name?: string;
+		value?: string | string[];
 
-	export let value: string = '';
-	export let name: string = '';
-	export let mode: Color = 'mode1';
+		onchange?: (value: string) => void;
+	}
 
-	let items: string[] = [];
-	let jitems: string = '';
+	let { mode = 'mode1', name = '', value, onchange }: Props = $props();
+
+	let items: string[] = $state([]);
 
 	function addItem(e: any = null) {
 		if (e) {
@@ -22,7 +24,7 @@
 			e.stopImmediatePropagation();
 		}
 
-		items = [...items, ''];
+		items.push('');
 	}
 
 	function removeItem(index: number) {
@@ -64,7 +66,7 @@
 		addItem();
 	});
 
-	$: {
+	$effect(() => {
 		if (Array.isArray(value)) {
 			items = value;
 		} else {
@@ -75,22 +77,25 @@
 
 			items = p;
 		}
-	}
+	});
 
-	$: jitems = items.join('|').replace(/\|$/, '');
-	$: dispatch('change', jitems);
+	let jitems = $derived(items.join('|').replace(/\|$/, ''));
+
+	$effect(() => {
+		onchange && onchange(jitems);
+	});
 </script>
 
 <div class={mode}>
-	<input type="hidden" {name} bind:value={jitems} />
+	<input type="hidden" {name} value={jitems} />
 	{#each items as item, index (index)}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
 			class="row"
 			draggable="true"
-			on:dragstart={(event) => handleDragStart(event, index)}
-			on:drop={(event) => handleDrop(event, index)}
-			on:dragover={handleDragOver}
+			ondragstart={(event) => handleDragStart(event, index)}
+			ondrop={(event) => handleDrop(event, index)}
+			ondragover={handleDragOver}
 			role="listbox"
 			tabindex="-1"
 		>
@@ -98,16 +103,16 @@
 				{mode}
 				type="text"
 				autofocus
-				bind:value={item}
-				on:input={() => updateItem(index, item)}
-				on:keypress={onKeyPress}
+				bind:value={items[index]}
+				oninput={() => updateItem(index, item)}
+				onkeypress={onKeyPress}
 			/>
-			<Button mode="error" on:click={(e) => removeItem(index)}>
+			<Button mode="error" onclick={(e) => removeItem(index)}>
 				<Icon src={Trash} size="24" />
 			</Button>
 		</div>
 	{/each}
-	<Button {mode} on:click={addItem}>Add</Button>
+	<Button {mode} onclick={addItem}>Add</Button>
 </div>
 
 <style>
