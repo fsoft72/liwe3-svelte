@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	export let lightTheme = 'liwe3-light-theme';
-	export let darkTheme = 'liwe3-dark-theme';
+	interface ThemeSwitcherProps {
+		lightTheme: string;
+		darkTheme: string;
+	}
 
-	let is_dark = false;
+	let { lightTheme = 'liwe3-light-theme', darkTheme = 'liwe3-dark-theme' }: ThemeSwitcherProps =
+		$props();
+
+	let is_dark = $state(false);
 
 	const toggleTheme = (e: any) => {
 		const body = document.querySelector('body');
@@ -39,8 +44,8 @@
 </script>
 
 <label class="liwe3-themeswitch">
-	<input type="checkbox" on:change={toggleTheme} checked={is_dark} />
-	<span class="liwe3-themeswitch-slider" />
+	<input type="checkbox" onchange={toggleTheme} checked={is_dark} />
+	<span class="liwe3-themeswitch-slider"></span>
 </label>
 
 <style>
@@ -103,6 +108,8 @@
 		left: calc(100% - (var(--size-of-icon, 1.4em) + var(--slider-offset, 0.3em)));
 		background: #303136;
 		/* change the value of second inset in box-shadow to change the angle and direction of the moon  */
-		box-shadow: inset -3px -2px 5px -2px #8983f7, inset -10px -4px 0 0 #a3dafb;
+		box-shadow:
+			inset -3px -2px 5px -2px #8983f7,
+			inset -10px -4px 0 0 #a3dafb;
 	}
 </style>
