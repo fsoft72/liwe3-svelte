@@ -1,32 +1,53 @@
 <script lang="ts">
 	import { mkid } from '$liwe3/utils/utils';
-	import { onMount, createEventDispatcher } from 'svelte';
+	import { onMount } from 'svelte';
 	import YouTubePlayer from 'youtube-player';
 
-	export let url: string = 'https://www.youtube.com/watch?v=mbQa2VWcFiI';
+	interface YoutubeVideoProps {
+		/** Whether to start playback of the video automatically. This feature might not work on all devices. */
+		autoplay: boolean;
+		/** Whether to display the player's interactive elements, including the play bar and sharing buttons. Set this option to false for a chromeless experience. To control playback when the play/pause button is hidden, set autoplay to true, use keyboard controls (which remain active), or implement our player SDK. */
+		controls: boolean;
+		/** Whether to enable keyboard input to trigger player events. This setting doesn't affect tab control. */
+		keyboard: boolean;
+		/** Setting of 1 causes the player to play the initial video again and again. */
+		loop: boolean;
+		/** Delta (in seconds) to fire a timeupdate event. */
+		updateDelta: number;
+		url: string;
+		width: number;
+		height: number;
 
-	/** Whether to start playback of the video automatically. This feature might not work on all devices. */
-	export let autoplay: boolean = false;
-	/** Whether to display the player's interactive elements, including the play bar and sharing buttons. Set this option to false for a chromeless experience. To control playback when the play/pause button is hidden, set autoplay to true, use keyboard controls (which remain active), or implement our player SDK. */
-	export let controls: boolean = true;
-	/** Whether to enable keyboard input to trigger player events. This setting doesn't affect tab control. */
-	export let keyboard: boolean = true;
+		// events
+		onplay?: (data: any) => void;
+		onpause?: (data: any) => void;
+		onended?: (data: any) => void;
+		ontimeupdate?: (data: any) => void;
+		onduration?: (duration: number) => void;
+	}
 
-	/** Setting of 1 causes the player to play the initial video again and again. */
-	export let loop: boolean = false;
+	let {
+		autoplay = false,
+		controls = true,
+		keyboard = true,
+		loop = false,
+		updateDelta = 1,
+		url = 'https://www.youtube.com/watch?v=mbQa2VWcFiI',
+		width = 640,
+		height = 360,
 
-	/** Delta (in seconds) to fire a timeupdate event. */
-	export let updateDelta: number = 1;
-
-	export let width: number = 640;
-	export let height: number = 360;
+		// events
+		onplay,
+		onpause,
+		onended,
+		ontimeupdate,
+		onduration
+	}: YoutubeVideoProps = $props();
 
 	let vid: HTMLDivElement;
 	let id: string = mkid('vid');
 	let player: any;
 	let lastTime: number = 0;
-
-	const dispatch = createEventDispatcher();
 
 	onMount(() => {
 		if (!url) return;
@@ -60,20 +81,20 @@
 
 		player.on('ready', (e: any) => {
 			player.getDuration().then((duration: number) => {
-				dispatch('duration', duration);
+				onduration && onduration(duration);
 			});
 		});
 
 		player.on('stateChange', (e: any) => {
 			switch (e.data) {
 				case 0:
-					dispatch('ended', e);
+					onended && onended(e);
 					break;
 				case 1:
-					dispatch('play', e);
+					onplay && onplay(e);
 					break;
 				case 2:
-					dispatch('pause', e);
+					onpause && onpause(e);
 					break;
 			}
 		});
@@ -81,7 +102,7 @@
 		setInterval(() => {
 			player.getCurrentTime().then((time: number) => {
 				if (Math.abs(time - lastTime) > updateDelta) {
-					dispatch('timeupdate', time);
+					ontimeupdate && ontimeupdate(time);
 					lastTime = time;
 				}
 			});

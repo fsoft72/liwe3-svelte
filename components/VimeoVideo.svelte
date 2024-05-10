@@ -19,10 +19,11 @@
 		height?: number; // The height of the player.
 		updateDelta?: number; // Delta (in seconds) to fire a timeupdate event.
 
+		// events
 		onplay?: (data: any) => void;
 		onpause?: (data: any) => void;
 		onended?: (data: any) => void;
-		timeupdate?: (data: any) => void;
+		ontimeupdate?: (data: any) => void;
 	}
 
 	let {
@@ -45,7 +46,7 @@
 		onplay,
 		onpause,
 		onended,
-		timeupdate
+		ontimeupdate
 	}: VimeoVideoProps = $props();
 
 	let vid: HTMLDivElement;
@@ -87,7 +88,7 @@
 		player.on('timeupdate', function (data: any) {
 			const time = data.seconds;
 			if (Math.abs(time - lastTime) > updateDelta) {
-				timeupdate && timeupdate(data);
+				ontimeupdate && ontimeupdate(data);
 				lastTime = time;
 			}
 		});
