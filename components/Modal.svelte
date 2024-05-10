@@ -1,6 +1,4 @@
 <script context="module" lang="ts">
-	import type { IconSource } from 'svelte-hero-icons';
-
 	export type ModalAction = {
 		label: string;
 		action: Function;
@@ -9,34 +7,47 @@
 
 <script lang="ts">
 	import type { Color, Size } from '$liwe3/types/types';
+	import { onMount } from 'svelte';
 	import Button from './Button.svelte';
-	import { createEventDispatcher, onMount } from 'svelte';
 	import { XCircle } from 'svelte-hero-icons';
 
-	const dispatch = createEventDispatcher();
-	type ModalCallback = (show: boolean) => void;
+	interface ModalProps {
+		title: string;
+		size?: Size | string;
+		mode?: Color;
+		closeOnEsc?: boolean;
+		closeOnOutsideClick?: boolean;
+		padding?: string;
+		showCloseButton?: boolean;
+		actions?: ModalAction[];
 
-	export let title: string = '';
-	export let size: Size | string | undefined = 'md';
-	export let mode: Color = 'mode1';
+		oncancel?: (cancel: boolean) => void;
 
-	export let closeOnEsc: boolean = true;
-	export let closeOnOutsideClick: boolean = true;
+		children?: any;
+	}
 
-	export let padding = '0.5rem';
-	export let showCloseButton = true;
-
-	export let actions: ModalAction[] = [];
+	let {
+		title = '',
+		size = 'md',
+		mode = 'mode1',
+		closeOnEsc = true,
+		closeOnOutsideClick = true,
+		padding = '0.5rem',
+		showCloseButton = true,
+		actions = [],
+		oncancel,
+		children
+	}: ModalProps = $props();
 
 	const onCloseOnOutside = (e: MouseEvent) => {
 		if (closeOnOutsideClick && e.target === e.currentTarget) {
-			dispatch('cancel', false);
+			oncancel && oncancel(false);
 		}
 	};
 
 	const onCloseOnEsc = (e: KeyboardEvent) => {
 		if (closeOnEsc && e.key === 'Escape') {
-			dispatch('cancel', false);
+			oncancel && oncancel(false);
 		}
 	};
 
@@ -52,7 +63,9 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="liwe3-theme">
-	<div class={`modal-container ${mode}`} on:click={onCloseOnOutside}>
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class={`modal-container ${mode}`} onclick={onCloseOnOutside}>
 		<div class={`modal ${size}`}>
 			<div class="modal-header">
 				<h3>{title}</h3>
@@ -75,20 +88,18 @@
 						size="sm"
 						mode="danger"
 						on:click={() => {
-							dispatch('cancel', false);
+							oncancel && oncancel(false);
 						}}
 						icon={XCircle}
 					/>
 				{/if}
 			</div>
 			<div class="modal-body" style:padding>
-				<slot />
+				{@render children()}
 			</div>
-			{#if $$slots.footer}
-				<div class="modal-footer">
-					<slot name="footer" />
-				</div>
-			{/if}
+			<div class="modal-footer">
+				{@render children('footer')}
+			</div>
 		</div>
 	</div>
 </div>
