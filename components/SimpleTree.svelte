@@ -1,19 +1,31 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
-
 	import { Icon, ChevronDown, ChevronRight } from 'svelte-hero-icons';
 	import Button from './Button.svelte';
 	import { tree_set_meta, type TreeItem } from '$liwe3/utils/tree';
+	import { onMount } from 'svelte';
 
-	const dispatch = createEventDispatcher();
+	interface SimpleTreeProps {
+		items: TreeItem[];
+		level?: number;
+		multipleSelection?: boolean;
+		selected?: string[];
+		actions?: { label: string; cback: (item: TreeItem) => void }[];
+		maxLevel?: number;
+		fontSize?: string;
 
-	export let level = 0;
-	export let maxLevel: number = 2;
-	export let items: TreeItem[];
-	export let multipleSelection: boolean = false;
-	export let selected: string[] = [];
-	export let actions: { label: string; cback: (item: TreeItem) => void }[] = [];
-	export let fontSize: string = '24';
+		onselect?: (selected: string[]) => void;
+	}
+
+	let {
+		items,
+		level = 0,
+		multipleSelection = false,
+		selected = [],
+		actions = [],
+		maxLevel = 2,
+		fontSize = '24',
+		onselect
+	}: SimpleTreeProps = $props();
 
 	// takes an id and returns it with ":" appended in both ends
 	const sid = (str: string = '') => {
@@ -30,7 +42,7 @@
 
 		selected = selected;
 
-		dispatch('select', { selected });
+		onselect && onselect(selected);
 	};
 
 	const selectItem = (e: MouseEvent, item: TreeItem) => {
@@ -46,7 +58,7 @@
 
 	const onSelect = (e: CustomEvent<{ selected: string[] }>) => {
 		selected = e.detail.selected;
-		dispatch('select', { selected });
+		onselect && onselect(selected);
 	};
 
 	onMount(() => {
@@ -60,10 +72,12 @@
 		<li>
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
 				class="tree-item"
-				on:dblclick={(e) => selectItem(e, item)}
-				on:click={() => toggle(item)}
+				ondblclick={(e) => selectItem(e, item)}
+				onclick={() => toggle(item)}
 				style={`font-size: ${fontSize}px`}
 			>
 				<div class:selected={selected.includes(sid(item.id))} class="row">
@@ -74,7 +88,7 @@
 							<Icon src={ChevronRight} size={fontSize} />
 						{/if}
 					{:else}
-						<div style="width: 24px; display: inline-block" />
+						<div style="width: 24px; display: inline-block"></div>
 					{/if}
 
 					{#if item.icon}
@@ -90,25 +104,13 @@
 						<Button
 							size="xxs"
 							variant="outline"
-							on:click={(e) => {
+							onclick={(e) => {
 								e.preventDefault();
 								e.stopImmediatePropagation();
 								action.cback(item);
 							}}>{action.label}</Button
 						>
 					{/each}
-					<!--
-					{#if typeof item.level != 'undefined' && item.level < maxLevel}
-						<Button
-							size="xxs"
-							variant="primary"
-							on:click={(e) => {
-								e.stopImmediatePropagation();
-								dispatch('add', { id_parent: item.id });
-							}}>Add</Button
-						>
-					{/if}
-						-->
 				</div>
 			</div>
 			{#if item.isOpen && item.children && item.children.length > 0}
@@ -120,7 +122,7 @@
 					{actions}
 					{maxLevel}
 					{fontSize}
-					on:select={onSelect}
+					onselect={onSelect}
 				/>
 			{/if}
 		</li>
