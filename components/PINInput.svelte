@@ -1,9 +1,13 @@
 <script lang="ts">
 	import type { Color } from '$liwe3/types/types';
 
-	export let value = '';
-	export let size = 6;
-	export let mode: Color = 'mode1';
+	interface PINInputProps {
+		value?: string;
+		size?: number;
+		mode?: Color;
+	}
+
+	let { value = '', size = 6, mode = 'mode1' }: PINInputProps = $props();
 
 	let fields: any[] = [];
 
@@ -81,8 +85,8 @@
 			maxLength={1}
 			minLength={1}
 			inputMode="numeric"
-			on:input={updatePIN}
-			on:keyup={onKeyPress}
+			oninput={updatePIN}
+			onkeyup={onKeyPress}
 		/>
 	{/each}
 </div>
