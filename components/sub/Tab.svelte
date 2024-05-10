@@ -1,13 +1,19 @@
 <script lang="ts">
 	import { mkid } from '../../utils/utils';
 
-	export let id: string = mkid('tab');
-	export let title: string = 'Tab';
+	interface TabProps {
+		id?: string;
+		title?: string;
+
+		children?: any;
+	}
+
+	let { id = mkid('tab'), title = 'Tab', children }: TabProps = $props();
 </script>
 
 <div class="tab" data-id={id} data-title={title}>
 	<div class="tab-content">
-		<slot />
+		{@render children()}
 	</div>
 </div>
 

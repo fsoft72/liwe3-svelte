@@ -6,20 +6,40 @@
 	import Button from '../Button.svelte';
 	import type { Color } from '$liwe3/types/types';
 
-	export let items: TreeItem[] = [];
+	interface DraggableTreeItemProps {
+		items: TreeItem[];
+		mode: Color;
+		canAdd: boolean;
+		canDelete: boolean;
+		canEdit: boolean;
+		maxDepth: number;
 
-	export let mode: Color = 'mode1';
+		// events
+		onreorder: (data: any) => void;
+		onadditem: (data: any) => void;
+		onedititem: (data: any) => void;
+		ondelitem: (data: any) => void;
+		onchange: (data: any) => void;
+	}
 
-	export let canAdd: boolean = true;
-	export let canDelete: boolean = true;
-	export let canEdit: boolean = true;
+	let {
+		items = [],
+		mode = 'mode1',
+		canAdd = true,
+		canDelete = true,
+		canEdit = true,
+		maxDepth = 2,
 
-	export let maxDepth: number = 2;
+		// events
+		onreorder,
+		onadditem,
+		onedititem,
+		ondelitem,
+		onchange
+	}: DraggableTreeItemProps = $props();
 
-	let dragItem: TreeItem | null;
-	let overItem: TreeItem | null;
-
-	const dispatch = createEventDispatcher();
+	let dragItem: TreeItem | null = $state(null);
+	let overItem: TreeItem | null = $state(null);
 
 	function onDragStart(event: DragEvent, item: TreeItem) {
 		dragItem = item;
@@ -51,11 +71,7 @@
 
 		if (sourceId === targetId) return;
 
-		dispatch('reorder', {
-			sourceId,
-			targetId,
-			pos: -1
-		});
+		onreorder && onreorder({ sourceId, targetId, pos: -1 });
 	}
 
 	function onOverEmpty(event: DragEvent, nextItem: TreeItem) {
@@ -77,11 +93,7 @@
 
 		if (sourceId === targetId) return;
 
-		dispatch('reorder', {
-			sourceId,
-			targetId,
-			pos: item.pos
-		});
+		onreorder && onreorder({ sourceId, targetId, pos: item.pos });
 	}
 
 	const toggleOpen = (item: TreeItem) => {
@@ -90,15 +102,15 @@
 	};
 
 	const addItem = (item: TreeItem) => {
-		dispatch('additem', { id_parent: item.id });
+		onadditem && onadditem({ id_parent: item.id });
 	};
 
 	const deleteItem = (item: TreeItem) => {
-		dispatch('delitem', { id: item.id });
+		ondelitem && ondelitem({ id: item.id });
 	};
 
 	const editItem = (item: TreeItem) => {
-		dispatch('edititem', { id: item.id });
+		onedititem && onedititem({ id: item.id });
 	};
 </script>
 
@@ -106,28 +118,31 @@
 	{#each items as item (item.id)}
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="item">
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
 				id={`emp-${item.id}`}
 				class="bar mini"
 				class:is-dragging-over={overItem?.id == `emp-${item.id}`}
 				class:dashed-border={overItem?.id == `emp-${item.id}`}
-				on:dragover={(event) => onOverEmpty(event, item)}
-				on:drop={(event) => onDropEmpty(event, item)}
-			/>
+				ondragover={(event) => onOverEmpty(event, item)}
+				ondrop={(event) => onDropEmpty(event, item)}
+			></div>
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
 				draggable="true"
 				class="bar"
 				class:is-dragging-over={overItem == item}
-				on:dragstart={(event) => onDragStart(event, item)}
-				on:dragover={(event) => onDragOver(event, item)}
-				on:dragleave={(event) => onDragLeave(event, item)}
-				on:drop={(event) => onDrop(event, item)}
+				ondragstart={(event) => onDragStart(event, item)}
+				ondragover={(event) => onDragOver(event, item)}
+				ondragleave={(event) => onDragLeave(event, item)}
+				ondrop={(event) => onDrop(event, item)}
 			>
 				<div class="bar-options">
 					<div class="btn">
 						{#if item.children && item.children.length}
 							<!-- svelte-ignore a11y-click-events-have-key-events -->
-							<div on:click={() => toggleOpen(item)}>
+							<!-- svelte-ignore a11y_click_events_have_key_events -->
+							<div onclick={() => toggleOpen(item)}>
 								{#if item.isOpen}
 									<Icon src={ChevronDown} />
 								{:else}
