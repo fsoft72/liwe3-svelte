@@ -1,24 +1,32 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import ACItem from './sub/AutoCompleteItem.svelte';
 	import Input from '$liwe3/components/Input.svelte';
 	import type { Color } from '$liwe3/types/types';
 
-	export let items: string[] = [];
-	export let selectedItems: string[] = [];
-	export let mode: Color = 'mode1';
+	interface Props {
+		mode?: Color;
+		items: string[];
+		selectedItems: string[];
+
+		// events
+		onset?: (value: string) => void;
+
+		// restProps
+		[k: string]: any;
+	}
+
+	let { mode = 'mode1', items = [], selectedItems = [], onset, ...restProps }: Props = $props();
 
 	/* FILTERING items DATA BASED ON INPUT */
-	let filteredItems: string[] = [];
-	let value = '';
-	let hlIndex: number | null = null;
-	let input: any;
+	let filteredItems: string[] = $state([]);
+	let value = $state('');
+	let hlIndex: number | null = $state(null);
 
-	const dispatch = createEventDispatcher();
-
-	const filter = (e: any) => {
-		const input = e.detail;
+	const filter = (e: InputEvent) => {
+		const input = e.target as any;
 		let storageArr: string[] = [];
+
+		if (!input) return;
 
 		if (input.value) {
 			const val = input.value.toLocaleLowerCase();
@@ -39,7 +47,7 @@
 
 	const setInput = (itemName: string) => {
 		value = removeBold(itemName);
-		dispatch('set', value);
+		onset && onset(value);
 
 		filteredItems = [];
 		hlIndex = null;
@@ -67,10 +75,12 @@
 
 	/* NAVIGATING OVER THE LIST OF ITEMS W HIGHLIGHTING */
 
-	$: if (!value) {
-		filteredItems = [];
-		hlIndex = null;
-	}
+	$effect(() => {
+		if (!value) {
+			filteredItems = [];
+			hlIndex = null;
+		}
+	});
 </script>
 
 <div class={`container ${mode}`}>
@@ -78,12 +88,12 @@
 		<Input
 			{mode}
 			class="input"
-			{...$$restProps}
+			{...restProps}
 			type="text"
 			bind:value
-			on:change
-			on:keypress={onKeyPress}
-			on:input={filter}
+			{onchange}
+			onkeypress={onKeyPress}
+			oninput={filter}
 		/>
 	</div>
 
@@ -92,7 +102,7 @@
 		<div class={`items ${mode}`}>
 			<ul class="autocomplete-items-list">
 				{#each filteredItems as item, i}
-					<ACItem itemLabel={item} highlighted={i === hlIndex} on:click={() => setInput(item)} />
+					<ACItem itemLabel={item} highlighted={i === hlIndex} onclick={() => setInput(item)} />
 				{/each}
 			</ul>
 		</div>
