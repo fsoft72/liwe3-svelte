@@ -11,6 +11,7 @@
 		icon?: IconSource;
 		iconRight?: IconSource;
 		solid?: boolean;
+		disabled?: boolean;
 
 		onclick?: (e: MouseEvent) => void;
 
@@ -23,6 +24,7 @@
 		cssClass = '',
 		mode = 'mode1',
 		variant = 'solid',
+		disabled = false,
 		icon = null,
 		iconRight = null,
 		solid = true,
