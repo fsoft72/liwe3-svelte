@@ -1,52 +1,56 @@
 <script lang="ts">
 	import { mkid } from '$liwe3/utils/utils';
 	import Player from '@vimeo/player';
-	import { onMount, createEventDispatcher } from 'svelte';
+	import { onMount } from 'svelte';
 
-	export let url: string = '';
-	/** Whether to start playback of the video automatically. This feature might not work on all devices. */
-	export let autoplay: boolean = false;
+	interface VimeoVideoProps {
+		url: string;
+		autoplay?: boolean; // Whether to start playback of the video automatically. This feature might not work on all devices.
+		byline?: boolean; // Whether to display the video owner's name.
+		title?: boolean; // Whether the player displays the title overlay.
+		controls?: boolean; // Whether to display the player's interactive elements, including the play bar and sharing buttons. Set this option to false for a chromeless experience. To control playback when the play/pause button is hidden, set autoplay to true, use keyboard controls (which remain active), or implement our player SDK.
+		colors?: string[] | null; // The hexadecimal color values of the player. The embed settings of the video might override these values. The order of the player colors is [Primary, Accent, Text/Icon, Background], with corresponding default values of ["000000", "00ADEF", "FFFFFF", "000000"].
+		keyboard?: boolean; // Whether to enable keyboard input to trigger player events. This setting doesn't affect tab control.
+		background?: boolean; // Whether the player is in background mode, which hides the playback controls, enables autoplay, and loops the video.
+		loop?: boolean; // Setting of 1 causes the player to play the initial video again and again.
+		responsive?: boolean; // Whether to return a responsive embed code, or one that provides intelligent adjustments based on viewing conditions. We recommend this option for mobile-optimized sites.
+		speed?: boolean; // Whether the player displays speed controls in the preferences menu and enables the playback rate API.
+		width?: number; // The width of the player.
+		height?: number; // The height of the player.
+		updateDelta?: number; // Delta (in seconds) to fire a timeupdate event.
 
-	/** Whether to display the video owner's name. */
-	export let byline: boolean = false;
+		onplay?: (data: any) => void;
+		onpause?: (data: any) => void;
+		onended?: (data: any) => void;
+		timeupdate?: (data: any) => void;
+	}
 
-	/** Whether the player displays the title overlay. */
-	export let title: boolean = false;
+	let {
+		url = '',
+		autoplay = false,
+		byline = false,
+		title = false,
+		controls = true,
+		colors = null,
+		keyboard = true,
+		background = false,
+		loop = false,
+		responsive = false,
+		speed = false,
+		width = 640,
+		height = 360,
+		updateDelta = 1,
 
-	/** Whether to display the player's interactive elements, including the play bar and sharing buttons. Set this option to false for a chromeless experience. To control playback when the play/pause button is hidden, set autoplay to true, use keyboard controls (which remain active), or implement our player SDK. */
-	export let controls: boolean = true;
-
-	/** The hexadecimal color values of the player. The embed settings of the video might override these values.
-	 * The order of the player colors is [Primary, Accent, Text/Icon, Background],
-	 * with corresponding default values of ["000000", "00ADEF", "FFFFFF", "000000"]. */
-	export let colors: string[] | null = null;
-
-	/** Whether to enable keyboard input to trigger player events. This setting doesn't affect tab control. */
-	export let keyboard: boolean = true;
-
-	/** Whether the player is in background mode, which hides the playback controls, enables autoplay, and loops the video. */
-	export let background: boolean = false;
-
-	/** Setting of 1 causes the player to play the initial video again and again. */
-	export let loop: boolean = false;
-
-	/** Whether to return a responsive embed code, or one that provides intelligent adjustments based on viewing conditions. We recommend this option for mobile-optimized sites. */
-	export let responsive: boolean = false;
-
-	/** 	Whether the player displays speed controls in the preferences menu and enables the playback rate API. */
-	export let speed: boolean = false;
-
-	export let width: number = 640;
-	export let height: number = 360;
-
-	/** Delta (in seconds) to fire a timeupdate event. */
-	export let updateDelta: number = 1;
+		// events
+		onplay,
+		onpause,
+		onended,
+		timeupdate
+	}: VimeoVideoProps = $props();
 
 	let vid: HTMLDivElement;
 	let id: string = mkid('vid');
 	let lastTime: number = 0;
-
-	const dispatch = createEventDispatcher();
 
 	onMount(() => {
 		const options = {
@@ -68,22 +72,26 @@
 
 		const player = new Player(vid, options);
 
-		const events = ['play', 'pause', 'ended'];
+		player.on('play', function (data: any) {
+			onplay && onplay(data);
+		});
 
-		events.forEach((event: string) => {
-			player.on(event, function (data: any) {
-				dispatch(event, data);
-			});
+		player.on('pause', function (data: any) {
+			onpause && onpause(data);
+		});
+
+		player.on('ended', function (data: any) {
+			onended && onended(data);
 		});
 
 		player.on('timeupdate', function (data: any) {
 			const time = data.seconds;
 			if (Math.abs(time - lastTime) > updateDelta) {
-				dispatch('timeupdate', data);
+				timeupdate && timeupdate(data);
 				lastTime = time;
 			}
 		});
 	});
 </script>
 
-<div bind:this={vid} {id} />
+<div bind:this={vid} {id}></div>
