@@ -6,22 +6,33 @@
 </script>
 
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-
 	import Button from './Button.svelte';
 	import { XCircle } from 'svelte-hero-icons';
 
-	export let name: string = '';
-	export let items: SvelteItem[] | string[] = [];
-	export let value: string | string[] = '';
-	export let placeholder: string = '';
-	export let readonly: boolean = false;
-	export let multiple: boolean = false;
-	export let dropdownOnly: boolean = false;
+	interface SelectProps {
+		name: string;
+		items: SvelteItem[] | string[];
+		value: string | string[];
+		placeholder: string;
+		readonly: boolean;
+		multiple: boolean;
+		dropdownOnly: boolean;
 
-	let showClear: boolean = false;
+		onchange: (value: string | string[]) => void;
+	}
 
-	let dispatch = createEventDispatcher();
+	let {
+		name = '',
+		items = [],
+		value = '',
+		placeholder = '',
+		readonly = false,
+		multiple = false,
+		dropdownOnly = false,
+		onchange
+	}: SelectProps = $props();
+
+	let showClear: boolean = $derived(!readonly && value !== '');
 
 	const get = (obj: any, path: string) => {
 		if (typeof obj === 'string') return obj;
@@ -35,15 +46,14 @@
 
 	const selectChange = (e: any) => {
 		value = e.target.value;
-	};
 
-	$: showClear = !readonly && value !== '';
-	$: dispatch('change', value);
+		onchange && onchange(value);
+	};
 </script>
 
 <div class="container">
 	{#if dropdownOnly}
-		<select class="dropdown" {name} {value} {placeholder} on:change={selectChange}>
+		<select class="dropdown" {name} {value} {placeholder} onchange={selectChange}>
 			<option value="" disabled selected hidden>{placeholder}</option>
 			{#each items as item}
 				<option value={get(item, 'value')}>{get(item, 'label')}</option>
@@ -55,7 +65,7 @@
 	{#if showClear}
 		<Button icon={XCircle} size="xs" variant="link" on:click={clear} />
 	{:else}
-		<div style="width: 24px" />
+		<div style="width: 24px"></div>
 	{/if}
 </div>
 
