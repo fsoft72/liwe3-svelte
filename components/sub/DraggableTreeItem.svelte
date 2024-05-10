@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-
 	import { Icon, ChevronDown, ChevronRight, Trash, Plus, PencilSquare } from 'svelte-hero-icons';
 	import type { TreeItem } from '$liwe3/utils/tree';
 	import Button from '../Button.svelte';
@@ -15,11 +13,11 @@
 		maxDepth: number;
 
 		// events
-		onreorder: (data: any) => void;
-		onadditem: (data: any) => void;
-		onedititem: (data: any) => void;
-		ondelitem: (data: any) => void;
-		onchange: (data: any) => void;
+		onreorder?: (event: { sourceId: string; targetId: string; pos: number }) => void;
+		onchange?: (items: TreeItem[]) => void;
+		onadditem?: (id_item: string, newItem?: TreeItem) => void;
+		onedititem?: (id_item: string) => void;
+		ondelitem?: (id_item: string) => void;
 	}
 
 	let {
@@ -93,7 +91,7 @@
 
 		if (sourceId === targetId) return;
 
-		onreorder && onreorder({ sourceId, targetId, pos: item.pos });
+		onreorder && onreorder({ sourceId, targetId, pos: item.pos || 0 });
 	}
 
 	const toggleOpen = (item: TreeItem) => {
@@ -102,15 +100,15 @@
 	};
 
 	const addItem = (item: TreeItem) => {
-		onadditem && onadditem({ id_parent: item.id });
+		onadditem && onadditem(item.id);
 	};
 
 	const deleteItem = (item: TreeItem) => {
-		ondelitem && ondelitem({ id: item.id });
+		ondelitem && ondelitem(item.id);
 	};
 
 	const editItem = (item: TreeItem) => {
-		onedititem && onedititem({ id: item.id });
+		onedititem && onedititem(item.id);
 	};
 </script>
 
@@ -159,7 +157,7 @@
 							size="xs"
 							mode="error"
 							icon={Trash}
-							on:click={() => deleteItem(item)}
+							onclick={() => deleteItem(item)}
 							title="Delete Item"
 						/>
 					{/if}
@@ -168,7 +166,7 @@
 							{mode}
 							size="xs"
 							icon={PencilSquare}
-							on:click={() => editItem(item)}
+							onclick={() => editItem(item)}
 							title="Edit Item"
 						/>
 					{/if}
@@ -177,7 +175,7 @@
 							size="xs"
 							mode="success"
 							icon={Plus}
-							on:click={() => addItem(item)}
+							onclick={() => addItem(item)}
 							title="Add new Item"
 						/>
 					{/if}
@@ -192,11 +190,11 @@
 						{canEdit}
 						{canDelete}
 						{maxDepth}
-						on:reorder
-						on:additem
-						on:edititem
-						on:delitem
-						on:change
+						{onreorder}
+						{onadditem}
+						{onedititem}
+						{ondelitem}
+						{onchange}
 					/>
 				{/if}
 			{/if}
