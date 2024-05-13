@@ -78,6 +78,8 @@
 		...restProps
 	}: Props = $props();
 
+	let showFieldsModal = $state(false);
+
 	let is_resizing = false;
 	let td: HTMLTableCellElement | null = null;
 	let is_editing = false;
@@ -86,8 +88,6 @@
 
 	// the has_filters is true if at least one field is filterable
 	let has_filters = fields.some((f) => f.filterable);
-
-	let showFieldsModal = $state(false);
 
 	const resize_start = (e: MouseEvent) => {
 		// get the td element before this one

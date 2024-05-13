@@ -12,10 +12,12 @@
 		iconRight?: IconSource;
 		solid?: boolean;
 		disabled?: boolean;
-		children?: any;
 
 		// events
 		onclick?: (e: MouseEvent) => void;
+
+		// children
+		children?: any;
 
 		// restProps
 		[key: string]: any; // for restProps
