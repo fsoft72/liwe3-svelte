@@ -50,7 +50,7 @@
 	import DraggableTree from './DraggableTree.svelte';
 	import type { Size } from '$liwe3/types/types';
 	import ElementList from './ElementList.svelte';
-	import { addToast } from '$liwe3/stores/ToastStore';
+	import { addToast } from '$liwe3/stores/ToastStore.svelte';
 	import Select from 'svelte-select';
 	import { _ } from '$liwe3/stores/LocalizationStore';
 	import { has_one_perm, has_perm, isTrue } from '$liwe3/utils/utils';
