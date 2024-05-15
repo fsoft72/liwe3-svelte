@@ -2,7 +2,7 @@
 import { PUBLIC_LIWE_SERVER } from '$env/static/public';
 import { currentUser } from '$modules/user/store';
 import { app } from '$liwe3/stores/LiWEApp';
-import { addToast } from '$liwe3/stores/ToastStore';
+import { addToast } from '$liwe3/stores/ToastStore.svelte';
 
 export interface LiWEFetcherOptions {
 	skipError?: boolean;

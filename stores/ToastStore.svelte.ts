@@ -1,5 +1,3 @@
-import { writable } from "svelte/store";
-
 interface Toast {
   id?: number;
   type?: 'success' | 'info' | 'error';
@@ -9,7 +7,8 @@ interface Toast {
   timeout?: number;
 }
 
-export const toasts = writable<Toast[]>( [] );
+// export const toasts = writable<Toast[]>( [] );
+export const toasts = $state<Toast[]>( [] );
 
 export const addToast = ( toast: Toast ) => {
   // Create a unique ID so we can easily find/remove it
@@ -29,13 +28,14 @@ export const addToast = ( toast: Toast ) => {
 
   if ( !toast.title ) toast.title = toast.type?.toUpperCase();
 
-  // Push the toast to the top of the list of toasts
-  toasts.update( ( all ) => [ { ...toast }, ...all ] );
+  // Push the toast to the top of the list []
+  toasts.unshift( toast );
 
   // If toast is dismissible, dismiss it after "timeout" amount of time.
   if ( toast.timeout ) setTimeout( () => dismissToast( id ), toast.timeout );
 };
 
 export const dismissToast = ( id: number ) => {
-  toasts.update( ( all ) => all.filter( ( t ) => t.id !== id ) );
+  // delete toast with id inplace
+  toasts.splice( toasts.findIndex( ( t ) => t.id === id ), 1 );
 };
