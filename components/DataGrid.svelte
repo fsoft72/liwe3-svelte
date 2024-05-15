@@ -94,7 +94,7 @@
 		td = (e.target as HTMLTableCellElement)?.previousElementSibling as HTMLTableCellElement;
 
 		if (!td) return;
-
+		console.log('=== RESIZE START:', td);
 		is_resizing = true;
 	};
 
@@ -103,7 +103,7 @@
 		if (!td) return;
 
 		const width = e.clientX - td.getBoundingClientRect().left;
-
+		console.log('=== RESIZE MOVE:', width);
 		td.style.width = `${width}px`;
 		td.style.maxWidth = `${width}px`;
 	};
@@ -211,6 +211,7 @@
 	};
 
 	let table_element: HTMLTableElement | null = null;
+	let table_header: HTMLTableRowElement | null = null;
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
@@ -220,21 +221,28 @@
 	<table class={mode} onmousemove={mouse_move} onmouseup={mouse_up} bind:this={table_element}>
 		<tbody>
 			<!-- headers -->
-			<tr>
-				{#each fields as field}
+			<tr bind:this={table_header}>
+				{#each fields as field, idx}
 					{#if !field.hidden}
-						<th style={`width: ${field.width || 'auto'};`}>{field.label || field.name}</th>
+						<th style={`width: ${field.width || 'auto'};`} class:buttons-aside={idx === fields.length-1 && actions.length == 0}>
+							{field.label || field.name}
+							{#if actions.length === 0 && idx === fields.length - 1}
+								<div class="buttons">
+									<Button {mode} size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
+								</div>
+							{/if}
+						</th>
 						<th class="resize" onmousedown={resize_start}></th>
 					{/if}
 				{/each}
 				{#if actions.length > 0}
-					<th>Actions</th>
-				{:else}
-					<th></th>
+					<th class="buttons-aside">
+						<div class="label">Actions</div>
+						<div class="buttons">
+							<Button {mode} size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
+						</div>
+					</th>
 				{/if}
-				<th>
-					<Button {mode} size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
-				</th>
 			</tr>
 
 			<!-- filters -->
@@ -296,7 +304,6 @@
 							<td style="border: 0"></td>
 						{/if}
 					{/each}
-					<td></td>
 					<td></td>
 				</tr>
 			{/if}
@@ -376,7 +383,6 @@
 							{/each}
 						</td>
 					{/if}
-					<td></td>
 				</tr>
 			{/each}
 		</tbody>
@@ -414,7 +420,9 @@
 	}
 
 	.table {
-		min-width: 100%;
+		position: relative;
+		max-width: 100%;
+		max-height: 100%;
 		overflow: auto;
 		/* padding-bottom: 1rem; */
 
@@ -439,6 +447,10 @@
 		font-family: var(--table-font-family);
 	}
 
+	table tr:first-child {
+		background-color: var(--liwe3-tertiary-color);
+	}
+
 	table tr {
 		border-bottom: 1px solid var(--liwe3-tertiary-color);
 		max-height: 2rem;
@@ -456,6 +468,7 @@
 		border-right: none;
 	}
 
+	table tr:first,
 	table th {
 		text-align: left;
 		background-color: var(--liwe3-lighter-tertiary-color);
@@ -468,7 +481,14 @@
 		padding: 0.5rem;
 	}
 
-	table tr:hover td {
+	.buttons-aside {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	table tr:hover {
 		background-color: var(--liwe3-tertiary-color);
 	}
 
