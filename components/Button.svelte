@@ -104,7 +104,7 @@
 	}
 	.button-no-content {
 		flex: 0;
-		margin-right: -0.5em;
+		/* margin-right: -0.5em; */
 	}
 
 	.liwe3-button.liwe3-link {
