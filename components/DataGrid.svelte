@@ -68,7 +68,7 @@
 		fields = [],
 		data = [],
 		actions = [],
-		mode = 'mode1',
+		mode = 'mode3',
 
 		// events
 		onupdatefield,
@@ -123,6 +123,8 @@
 
 		// create an input element
 		const input = document.createElement('input');
+		input.type = 'text'; //field.type;
+		input.classList.add('liwe3-form','liwe3-form-custom-input',mode,'input','xs');
 		input.value = row[field_name];
 
 		// replace the td content with the input
@@ -228,7 +230,7 @@
 							{field.label || field.name}
 							{#if actions.length === 0 && idx === fields.length - 1}
 								<div class="buttons">
-									<Button {mode} size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
+									<Button mode='mode4' size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
 								</div>
 							{/if}
 						</th>
@@ -239,7 +241,7 @@
 					<th class="buttons-aside">
 						<div class="label">Actions</div>
 						<div class="buttons">
-							<Button {mode} size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
+							<Button mode='mode4' size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
 						</div>
 					</th>
 				{/if}
@@ -396,12 +398,14 @@
 		closeOnEsc={true}
 		closeOnOutsideClick={true}
 	>
-		{#each fields as field (field.name)}
-			<div class="fields-chk">
-				<input type="checkbox" bind:checked={field.hidden} />
-				{field.name}
-			</div>
-		{/each}
+		<div class="fields-chk-container">
+			{#each fields as field (field.name)}
+				<div class="fields-chk">
+					<input type="checkbox" bind:checked={field.hidden} />
+					{field.name}
+				</div>
+			{/each}
+		</div>
 	</Modal>
 {/if}
 
@@ -412,10 +416,9 @@
 		--table-font-family: var(--liwe3-main-font-family);
 	}
 
-	.fields-chk {
-		display: flex;
-		align-items: center;
-		align-content: center;
+	.fields-chk-container {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(24%, 1fr));
 		gap: 0.5rem;
 	}
 
@@ -425,12 +428,10 @@
 		max-height: 100%;
 		overflow: auto;
 		/* padding-bottom: 1rem; */
-
 		/* make the scrollbars smaller */
 		scrollbar-width: thin;
-
 		/* make the scrollbars transparent */
-		scrollbar-color: var(--liwe3-darker-primary-color) var(--liwe3-primary-color);
+		scrollbar-color: var(--liwe3-darker-paper) var(--liwe3-paper);
 	}
 
 	table {
@@ -448,12 +449,13 @@
 	}
 
 	table tr:first-child {
-		background-color: var(--liwe3-tertiary-color);
+		background-color: var(--liwe3-darker-paper);
 	}
 
 	table tr {
 		border-bottom: 1px solid var(--liwe3-tertiary-color);
 		max-height: 2rem;
+		transition: background-color 0.3s;
 	}
 
 	table td {
