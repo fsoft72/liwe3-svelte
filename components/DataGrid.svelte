@@ -90,52 +90,93 @@
 	// the has_filters is true if at least one field is filterable
 	let has_filters = fields.some((f) => f.filterable);
 
-	const debounce = (func:Function, wait:number) => {
-		let timeout:number;
-		return function(...args:any[]) {
-			const context:any = this;
+	const debounce = (func: Function, wait: number) => {
+		let timeout: number;
+		return function (...args: any[]) {
+			const context: any = this;
 			clearTimeout(timeout);
 			timeout = setTimeout(() => func.apply(context, args), wait);
 		};
-	}
+	};
 
 	const cloneHeader = () => {
 		if (!table_element || !table_fixed || !table_header) return;
-		let idx:number = 0;
-		const w:string[] = [];
-		const cloned = table_element.cloneNode(true) as HTMLTableElement;
+
+		// const cloned = table_element.cloneNode(true) as HTMLTableElement;
 		const header_width = table_header.getBoundingClientRect().width;
 
-		// remove all rows except the header
-		while (cloned.rows.length > 1) {
-			cloned.deleteRow(1);
+		const table = document.createElement('table');
+		const tbody = document.createElement('tbody');
+		table.className = table_element.className;
+		table.appendChild(tbody);
+		table.style.width = `100%`;
+
+		let elem_tbody = table_element.querySelector('tbody');
+		if (!elem_tbody) return;
+
+		let row = elem_tbody.firstChild;
+		if (row) {
+			elem_tbody.removeChild(row);
+			tbody.appendChild(row);
 		}
+
+		if (has_filters) {
+			row = elem_tbody.firstChild;
+			if (row) {
+				elem_tbody.removeChild(row);
+				tbody.appendChild(row);
+			}
+		}
+
 		// get cloned element height
 		table_fixed.innerHTML = '';
 		table_fixed.style.left = `0px`;
-		table_fixed.style.width = `${header_width}px`;
-		table_fixed.appendChild(cloned);
-		table_element.style.marginTop = `-${table_header.getBoundingClientRect().height}px`;
+		table_fixed.style.width = `100%`;
+		table_fixed.appendChild(table);
+		table_fixed.style.height = '80px';
+		// table_element.style.marginTop = `-${table_header.getBoundingClientRect().height}px`;
+
+		if (has_filters) setTableMinWidth();
+
 		resizeHeaderCells();
 	};
 
+	const setTableMinWidth = () => {
+		if (!table_fixed || !table_element) return;
+
+		const table = table_fixed.querySelector('table');
+		if (!table) return;
+
+		const filters_row = table.rows[1];
+		let idx = 0;
+		while (filters_row.cells.length > 0) {
+			if (idx > filters_row.cells.length - 1) break;
+			const cell = filters_row.cells[idx];
+			if (cell.childNodes.length) {
+				const ch = cell.childNodes[0] as HTMLElement;
+				table_element.rows[0].cells[idx].style.minWidth = ch.clientWidth + 'px';
+			}
+			idx++;
+		}
+	};
+
 	const resizeHeaderCells = () => {
-		if (!table_element || !table_fixed || !table_header) return;
-		const cloned = table_fixed.querySelector('table');
-		if (!cloned) return;
-		let idx:number = 0;
-		const header_width = table_header.getBoundingClientRect().width;
+		if (!table_element || !table_fixed) return;
+
+		let idx = 0;
+		const main_row = table_element.rows[0];
+		const table = table_fixed.querySelector('table');
+
+		if (!table) return;
 
 		// get the width of original header cells
-		while (table_header.cells.length > 0 ) {
-			if (idx > table_header.cells.length -1)
-				break;
-			const cell = table_header.cells[idx];
-			cloned.rows[0].cells[idx].style.width = cell.getBoundingClientRect().width + 'px';
-			cloned.rows[0].cells[idx].style.minWidth = cell.getBoundingClientRect().width + 'px';
-			idx ++;
+		while (main_row.cells.length > 0) {
+			if (idx > main_row.cells.length - 1) break;
+			const cell = main_row.cells[idx];
+			table.rows[0].cells[idx].style.width = cell.getBoundingClientRect().width + 'px';
+			table.rows[1].cells[idx].style.width = cell.getBoundingClientRect().width + 'px';
+			idx++;
 		}
-		table_fixed.style.width = `${header_width}px`;
 	};
 
 	const resizeHeaderDebounced = debounce(resizeHeaderCells, 100);
@@ -177,7 +218,7 @@
 		// create an input element
 		const input = document.createElement('input');
 		input.type = 'text'; //field.type;
-		input.classList.add('liwe3-form','liwe3-form-custom-input',mode,'input','xs');
+		input.classList.add('liwe3-form', 'liwe3-form-custom-input', mode, 'input', 'xs');
 		input.value = row[field_name];
 
 		// replace the td content with the input
@@ -269,8 +310,13 @@
 	let table_fixed: HTMLDivElement | null = null;
 	let table_header: HTMLTableRowElement | null = null;
 
-	onMount( () => {
+	onMount(() => {
 		cloneHeader();
+		window.addEventListener('resize', resizeHeaderDebounced);
+
+		return () => {
+			window.removeEventListener('resize', resizeHeaderDebounced);
+		};
 	});
 </script>
 
@@ -280,17 +326,27 @@
 		<div class="fixed-header" bind:this={table_fixed}></div>
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<!-- svelte-ignore event_directive_deprecated -->
-		<table class={`data-table ${mode}`} onmousemove={mouse_move} onmouseup={mouse_up} bind:this={table_element}>
+		<table
+			class={`data-table ${mode}`}
+			onmousemove={mouse_move}
+			onmouseup={mouse_up}
+			bind:this={table_element}
+		>
 			<tbody>
 				<!-- headers -->
 				<tr bind:this={table_header}>
 					{#each fields as field, idx}
 						{#if !field.hidden}
-							<th style={`width: ${field.width || 'auto'};`} class:buttons-aside={idx === fields.length-1 && actions.length == 0}>
+							<th
+								style={`width: ${field.width || 'auto'};`}
+								class:buttons-aside={idx === fields.length - 1 && actions.length == 0}
+							>
 								{field.label || field.name}
 								{#if actions.length === 0 && idx === fields.length - 1}
 									<div class="buttons">
-										<Button mode='mode4' size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
+										<Button mode="mode4" size="xs" onclick={() => (showFieldsModal = true)}
+											>Fields</Button
+										>
 									</div>
 								{/if}
 							</th>
@@ -301,7 +357,9 @@
 						<th class="buttons-aside">
 							<div class="label">Actions</div>
 							<div class="buttons">
-								<Button mode='mode4' size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
+								<Button mode="mode4" size="xs" onclick={() => (showFieldsModal = true)}
+									>Fields</Button
+								>
 							</div>
 						</th>
 					{/if}
@@ -312,7 +370,7 @@
 					<tr>
 						{#each fields as field}
 							{#if !field.hidden}
-								<td class="filter" style={`width: ${field.width || 'auto'};`}>
+								<td class="filter" style={`width: ${field.width || 'min-content'};`}>
 									{#if field.filterable}
 										{#if field.type == 'string'}
 											<Input
@@ -486,10 +544,11 @@
 	.fixed-header {
 		position: sticky;
 		top: 0;
-		left:0;
+		left: 0;
 		width: 100%;
 		z-index: 1;
 	}
+
 	.wrapper,
 	.table {
 		position: relative;
@@ -541,7 +600,6 @@
 		border-right: none;
 	}
 
-	.data-table tr:first,
 	.data-table th {
 		text-align: left;
 		background-color: var(--liwe3-lighter-tertiary-color);
@@ -561,19 +619,19 @@
 		align-items: center;
 	}
 
-	table tr:hover {
+	.data-table tr:hover {
 		background-color: var(--liwe3-tertiary-color);
 	}
 
-	table td.actions {
+	.data-table td.actions {
 		display: flex;
 		justify-content: flex-start;
 		gap: 1rem;
 	}
 
 	/* table th borders can be dragged, make the pointer with the right cursor arrows */
-	table th.resize,
-	table td.resize {
+	.data-table th.resize,
+	.data-table td.resize {
 		cursor: ew-resize;
 		width: 2px;
 		max-width: 2px;
