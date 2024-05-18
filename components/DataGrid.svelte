@@ -99,11 +99,14 @@
 		};
 	};
 
+	/**
+	 * Clone the header of the table and append it to the fixed header div
+	 * must be called after the table is rendered to initialize fixed header
+	 *
+	 * @returns void
+	 */
 	const cloneHeader = () => {
-		if (!table_element || !table_fixed || !table_header) return;
-
-		// const cloned = table_element.cloneNode(true) as HTMLTableElement;
-		const header_width = table_header.getBoundingClientRect().width;
+		if (!table_element || !table_fixed) return;
 
 		const table = document.createElement('table');
 		const tbody = document.createElement('tbody');
@@ -111,55 +114,98 @@
 		table.appendChild(tbody);
 		table.style.width = `100%`;
 
-		let elem_tbody = table_element.querySelector('tbody');
-		if (!elem_tbody) return;
-
-		let row = elem_tbody.firstChild;
-		if (row) {
-			elem_tbody.removeChild(row);
-			tbody.appendChild(row);
-		}
-
-		if (has_filters) {
-			row = elem_tbody.firstChild;
-			if (row) {
+		function moveFirstRow (){
+			if (elem_tbody && elem_tbody.rows.length > 0) {
+				const row = elem_tbody.rows[0];
 				elem_tbody.removeChild(row);
 				tbody.appendChild(row);
 			}
 		}
+
+		let elem_tbody = table_element.querySelector('tbody');
+		if (!elem_tbody) return;
+
+
+		moveFirstRow();
+
+		if (has_filters)
+			moveFirstRow();
 
 		// get cloned element height
 		table_fixed.innerHTML = '';
 		table_fixed.style.left = `0px`;
 		table_fixed.style.width = `100%`;
 		table_fixed.appendChild(table);
-		table_fixed.style.height = '80px';
-		// table_element.style.marginTop = `-${table_header.getBoundingClientRect().height}px`;
 
-		if (has_filters) setTableMinWidth();
-
+		setTableMinWidth();
 		resizeHeaderCells();
 	};
 
+	/**
+	 * Set the min-width of each cell based on the text content and filters row
+	 * must be called after the table is rendered and during fixed header initialization
+	 *
+	 * @returns void
+	 */
 	const setTableMinWidth = () => {
 		if (!table_fixed || !table_element) return;
 
 		const table = table_fixed.querySelector('table');
 		if (!table) return;
-
-		const filters_row = table.rows[1];
-		let idx = 0;
-		while (filters_row.cells.length > 0) {
-			if (idx > filters_row.cells.length - 1) break;
-			const cell = filters_row.cells[idx];
-			if (cell.childNodes.length) {
-				const ch = cell.childNodes[0] as HTMLElement;
-				table_element.rows[0].cells[idx].style.minWidth = ch.clientWidth + 'px';
-			}
-			idx++;
+		const minWidthArray: number[] = [];
+		// create a dummy dom element to calculate the computed width of the cell based on its innerHTML
+		function _getComputedWidth(el: HTMLElement) {
+			const computedStyle = getComputedStyle(el);
+			const dummy = document.createElement('div');
+			document.body.appendChild(dummy);
+			dummy.style.visibility = 'hidden';
+			dummy.style.position = 'absolute';
+			dummy.style.top = '-9999px';
+			dummy.style.fontFamily = computedStyle.fontFamily;
+            dummy.style.fontSize = computedStyle.fontSize;
+            dummy.style.fontWeight = computedStyle.fontWeight;
+            dummy.style.fontStyle = computedStyle.fontStyle;
+            dummy.style.letterSpacing = computedStyle.letterSpacing;
+            dummy.style.textTransform = computedStyle.textTransform;
+            dummy.style.padding = computedStyle.padding;
+			dummy.innerHTML = el.innerHTML;
+			const minWidth = dummy.offsetWidth;
+			document.body.removeChild(dummy);
+			return minWidth;
 		}
+		// iterate over the cells of the row and set the min-width of each cell.
+		// If compare is true, we compare the width of the cell with the existing min-width
+		function _loopCells(row: HTMLTableRowElement, compare: boolean) {
+			if ( !table_element || table_element.rows.length < 1 ) return;
+			let idx = 0;
+			while (idx < row.cells.length) {
+				const cell = row.cells[idx];
+				const width = _getComputedWidth(cell);
+				if (compare) {
+					if (width > minWidthArray[idx]) {
+						minWidthArray[idx] = width;
+					}
+				} else {
+					minWidthArray.push(width);
+				}
+				table_element.rows[0].cells[idx].style.minWidth = minWidthArray[idx] + 'px';
+				idx++;
+			}
+		}
+
+		// define cells min width based on header cells' text
+		_loopCells(table.rows[0], false);
+		// define cells min width based on fliters row and compare with header cells' text
+		if (has_filters)
+			_loopCells(table.rows[1], true);
 	};
 
+	/**
+	 * Resize the fixed header cells based on the data table first row cells width
+	 * It is called during the fixed header initialization and on window and cells resize
+	 *
+	 * @returns void
+	 */
 	const resizeHeaderCells = () => {
 		if (!table_element || !table_fixed) return;
 
@@ -170,11 +216,14 @@
 		if (!table) return;
 
 		// get the width of original header cells
-		while (main_row.cells.length > 0) {
-			if (idx > main_row.cells.length - 1) break;
-			const cell = main_row.cells[idx];
-			table.rows[0].cells[idx].style.width = cell.getBoundingClientRect().width + 'px';
-			table.rows[1].cells[idx].style.width = cell.getBoundingClientRect().width + 'px';
+		while (idx < main_row.cells.length) {
+			const width = main_row.cells[idx].getBoundingClientRect().width + 'px';
+			table.rows[0].cells[idx].style.width = width;
+			table.rows[0].cells[idx].style.minWidth = width;
+			if (has_filters){
+				table.rows[1].cells[idx].style.width = width;
+				table.rows[1].cells[idx].style.minWidth = width;
+			}
 			idx++;
 		}
 	};
@@ -308,7 +357,6 @@
 
 	let table_element: HTMLTableElement | null = null;
 	let table_fixed: HTMLDivElement | null = null;
-	let table_header: HTMLTableRowElement | null = null;
 
 	onMount(() => {
 		cloneHeader();
@@ -334,7 +382,7 @@
 		>
 			<tbody>
 				<!-- headers -->
-				<tr bind:this={table_header}>
+				<tr>
 					{#each fields as field, idx}
 						{#if !field.hidden}
 							<th
@@ -547,6 +595,7 @@
 		left: 0;
 		width: 100%;
 		z-index: 1;
+
 	}
 
 	.wrapper,
@@ -578,7 +627,7 @@
 		font-family: var(--table-font-family);
 	}
 
-	.data-table tr:first-child {
+	.data-table th {
 		background-color: var(--liwe3-darker-paper);
 	}
 
@@ -602,7 +651,6 @@
 
 	.data-table th {
 		text-align: left;
-		background-color: var(--liwe3-lighter-tertiary-color);
 		/* disable selection */
 		user-select: none;
 	}
