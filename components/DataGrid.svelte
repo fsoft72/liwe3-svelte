@@ -47,6 +47,7 @@
 	import type { Color, Variant } from '$liwe3/types/types';
 	import { format_date, toBool } from '$liwe3/utils/utils';
 	import { filterModes } from '$liwe3/utils/match_filter';
+	import { onMount } from 'svelte';
 
 	type UpdateFieldCallback = (row: GridDataRow, field_name: string, value: any) => void;
 
@@ -89,6 +90,56 @@
 	// the has_filters is true if at least one field is filterable
 	let has_filters = fields.some((f) => f.filterable);
 
+	const debounce = (func:Function, wait:number) => {
+		let timeout:number;
+		return function(...args:any[]) {
+			const context:any = this;
+			clearTimeout(timeout);
+			timeout = setTimeout(() => func.apply(context, args), wait);
+		};
+	}
+
+	const cloneHeader = () => {
+		if (!table_element || !table_fixed || !table_header) return;
+		let idx:number = 0;
+		const w:string[] = [];
+		const cloned = table_element.cloneNode(true) as HTMLTableElement;
+		const header_width = table_header.getBoundingClientRect().width;
+
+		// remove all rows except the header
+		while (cloned.rows.length > 1) {
+			cloned.deleteRow(1);
+		}
+		// get cloned element height
+		table_fixed.innerHTML = '';
+		table_fixed.style.left = `0px`;
+		table_fixed.style.width = `${header_width}px`;
+		table_fixed.appendChild(cloned);
+		table_element.style.marginTop = `-${table_header.getBoundingClientRect().height}px`;
+		resizeHeaderCells();
+	};
+
+	const resizeHeaderCells = () => {
+		if (!table_element || !table_fixed || !table_header) return;
+		const cloned = table_fixed.querySelector('table');
+		if (!cloned) return;
+		let idx:number = 0;
+		const header_width = table_header.getBoundingClientRect().width;
+
+		// get the width of original header cells
+		while (table_header.cells.length > 0 ) {
+			if (idx > table_header.cells.length -1)
+				break;
+			const cell = table_header.cells[idx];
+			cloned.rows[0].cells[idx].style.width = cell.getBoundingClientRect().width + 'px';
+			cloned.rows[0].cells[idx].style.minWidth = cell.getBoundingClientRect().width + 'px';
+			idx ++;
+		}
+		table_fixed.style.width = `${header_width}px`;
+	};
+
+	const resizeHeaderDebounced = debounce(resizeHeaderCells, 100);
+
 	const resize_start = (e: MouseEvent) => {
 		// get the td element before this one
 		td = (e.target as HTMLTableCellElement)?.previousElementSibling as HTMLTableCellElement;
@@ -106,11 +157,13 @@
 		console.log('=== RESIZE MOVE:', width);
 		td.style.width = `${width}px`;
 		td.style.maxWidth = `${width}px`;
+		resizeHeaderDebounced();
 	};
 
 	const mouse_up = () => {
 		is_resizing = false;
 		td = null;
+		resizeHeaderDebounced();
 	};
 
 	const cell_doubleclick = (e: MouseEvent, row: GridDataRow, field_name: string) => {
@@ -213,182 +266,190 @@
 	};
 
 	let table_element: HTMLTableElement | null = null;
+	let table_fixed: HTMLDivElement | null = null;
 	let table_header: HTMLTableRowElement | null = null;
+
+	onMount( () => {
+		cloneHeader();
+	});
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <div class="table">
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<!-- svelte-ignore event_directive_deprecated -->
-	<table class={mode} onmousemove={mouse_move} onmouseup={mouse_up} bind:this={table_element}>
-		<tbody>
-			<!-- headers -->
-			<tr bind:this={table_header}>
-				{#each fields as field, idx}
-					{#if !field.hidden}
-						<th style={`width: ${field.width || 'auto'};`} class:buttons-aside={idx === fields.length-1 && actions.length == 0}>
-							{field.label || field.name}
-							{#if actions.length === 0 && idx === fields.length - 1}
-								<div class="buttons">
-									<Button mode='mode4' size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
-								</div>
-							{/if}
-						</th>
-						<th class="resize" onmousedown={resize_start}></th>
-					{/if}
-				{/each}
-				{#if actions.length > 0}
-					<th class="buttons-aside">
-						<div class="label">Actions</div>
-						<div class="buttons">
-							<Button mode='mode4' size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
-						</div>
-					</th>
-				{/if}
-			</tr>
-
-			<!-- filters -->
-			{#if has_filters}
-				<tr>
-					{#each fields as field}
+	<div class="wrapper">
+		<div class="fixed-header" bind:this={table_fixed}></div>
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+		<!-- svelte-ignore event_directive_deprecated -->
+		<table class={`data-table ${mode}`} onmousemove={mouse_move} onmouseup={mouse_up} bind:this={table_element}>
+			<tbody>
+				<!-- headers -->
+				<tr bind:this={table_header}>
+					{#each fields as field, idx}
 						{#if !field.hidden}
-							<td class="filter" style={`width: ${field.width || 'auto'};`}>
-								{#if field.filterable}
-									{#if field.type == 'string'}
-										<Input
-											{mode}
-											width={field.width}
-											size="xs"
-											name={`f_${field.name}`}
-											onchange={filter_change}
-										/>
-									{:else if field.type == 'number'}
-										<Input
-											{mode}
-											size="xs"
-											type="number"
-											name={`f_${field.name}_1`}
-											onchange={filter_change}
-										/>
-										<Input
-											{mode}
-											size="xs"
-											type="number"
-											name={`f_${field.name}_2`}
-											onchange={filter_change}
-										/>
-									{:else if field.type == 'date'}
-										<Input
-											{mode}
-											size="xs"
-											type="date"
-											name={`f_${field.name}_1`}
-											onchange={filter_change}
-										/>
-										<Input
-											{mode}
-											size="xs"
-											type="date"
-											name={`f_${field.name}_2`}
-											onchange={filter_change}
-										/>
+							<th style={`width: ${field.width || 'auto'};`} class:buttons-aside={idx === fields.length-1 && actions.length == 0}>
+								{field.label || field.name}
+								{#if actions.length === 0 && idx === fields.length - 1}
+									<div class="buttons">
+										<Button mode='mode4' size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
+									</div>
+								{/if}
+							</th>
+							<th class="resize" onmousedown={resize_start}></th>
+						{/if}
+					{/each}
+					{#if actions.length > 0}
+						<th class="buttons-aside">
+							<div class="label">Actions</div>
+							<div class="buttons">
+								<Button mode='mode4' size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
+							</div>
+						</th>
+					{/if}
+				</tr>
+
+				<!-- filters -->
+				{#if has_filters}
+					<tr>
+						{#each fields as field}
+							{#if !field.hidden}
+								<td class="filter" style={`width: ${field.width || 'auto'};`}>
+									{#if field.filterable}
+										{#if field.type == 'string'}
+											<Input
+												{mode}
+												width={field.width}
+												size="xs"
+												name={`f_${field.name}`}
+												onchange={filter_change}
+											/>
+										{:else if field.type == 'number'}
+											<Input
+												{mode}
+												size="xs"
+												type="number"
+												name={`f_${field.name}_1`}
+												onchange={filter_change}
+											/>
+											<Input
+												{mode}
+												size="xs"
+												type="number"
+												name={`f_${field.name}_2`}
+												onchange={filter_change}
+											/>
+										{:else if field.type == 'date'}
+											<Input
+												{mode}
+												size="xs"
+												type="date"
+												name={`f_${field.name}_1`}
+												onchange={filter_change}
+											/>
+											<Input
+												{mode}
+												size="xs"
+												type="date"
+												name={`f_${field.name}_2`}
+												onchange={filter_change}
+											/>
+										{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
+											<Input
+												{mode}
+												name={`f_${field.name}`}
+												size="xs"
+												type="checkbox"
+												onchange={filter_change}
+											/>
+										{/if}
+									{/if}
+								</td>
+								<td style="border: 0"></td>
+							{/if}
+						{/each}
+						<td></td>
+					</tr>
+				{/if}
+
+				<!-- rows -->
+				{#each data as row}
+					<tr>
+						{#each fields as field}
+							{#if !field.hidden}
+								<td
+									ondblclick={(e) => cell_doubleclick(e, row, field.name)}
+									style={`text-align: ${field.align || 'left'}; width: ${
+										field.width || 'auto'
+									}; white-space: ${field.nowrap ? 'nowrap' : 'normal'};`}
+								>
+									{#if field.render}
+										{#if field.click}
+											<Button
+												mode="mode4"
+												size="sm"
+												variant="outline"
+												onclick={() => field.click && field.click(row)}
+											>
+												{@html field.render(row[field.name], row)}
+											</Button>
+										{:else}
+											{@html field.render(row[field.name], row)}
+										{/if}
 									{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
 										<Input
 											{mode}
-											name={`f_${field.name}`}
-											size="xs"
 											type="checkbox"
-											onchange={filter_change}
+											checked={toBool(row[field.name])}
+											onchange={(e: any) => {
+												row[field.name] = e.target?.checked;
+												onupdatefield && onupdatefield(row, field.name, row[field.name]);
+											}}
 										/>
-									{/if}
-								{/if}
-							</td>
-							<td style="border: 0"></td>
-						{/if}
-					{/each}
-					<td></td>
-				</tr>
-			{/if}
-
-			<!-- rows -->
-			{#each data as row}
-				<tr>
-					{#each fields as field}
-						{#if !field.hidden}
-							<td
-								ondblclick={(e) => cell_doubleclick(e, row, field.name)}
-								style={`text-align: ${field.align || 'left'}; width: ${
-									field.width || 'auto'
-								}; white-space: ${field.nowrap ? 'nowrap' : 'normal'};`}
-							>
-								{#if field.render}
-									{#if field.click}
+									{:else if field.type == 'avatar'}
+										<Avatar size="64px" value={row} />
+									{:else if field.click}
 										<Button
 											mode="mode4"
 											size="sm"
 											variant="outline"
 											onclick={() => field.click && field.click(row)}
 										>
-											{@html field.render(row[field.name], row)}
+											{row[field.name]}
 										</Button>
+									{:else if field.type == 'date'}
+										{#if field.extra?.dateFormat}
+											{format_date(row[field.name], field.extra.dateFormat)}
+										{:else}
+											{row[field.name]}
+										{/if}
+									{:else if field.pre}
+										<pre>{row[field.name]}</pre>
 									{:else}
-										{@html field.render(row[field.name], row)}
+										{row[field?.name || '']}
 									{/if}
-								{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
-									<Input
-										{mode}
-										type="checkbox"
-										checked={toBool(row[field.name])}
-										onchange={(e: any) => {
-											row[field.name] = e.target?.checked;
-											onupdatefield && onupdatefield(row, field.name, row[field.name]);
-										}}
-									/>
-								{:else if field.type == 'avatar'}
-									<Avatar size="64px" value={row} />
-								{:else if field.click}
+								</td>
+								<td class="resize" onmousedown={resize_start}></td>
+							{/if}
+						{/each}
+						{#if actions.length > 0}
+							<td class="actions">
+								{#each actions as action}
 									<Button
-										mode="mode4"
-										size="sm"
-										variant="outline"
-										onclick={() => field.click && field.click(row)}
+										size="xs"
+										mode={action.mode || mode}
+										variant={action.variant}
+										icon={action.icon}
+										onclick={() => action.action(row)}
 									>
-										{row[field.name]}
+										{action.label ? action.label : ''}
 									</Button>
-								{:else if field.type == 'date'}
-									{#if field.extra?.dateFormat}
-										{format_date(row[field.name], field.extra.dateFormat)}
-									{:else}
-										{row[field.name]}
-									{/if}
-								{:else if field.pre}
-									<pre>{row[field.name]}</pre>
-								{:else}
-									{row[field?.name || '']}
-								{/if}
+								{/each}
 							</td>
-							<td class="resize" onmousedown={resize_start}></td>
 						{/if}
-					{/each}
-					{#if actions.length > 0}
-						<td class="actions">
-							{#each actions as action}
-								<Button
-									size="xs"
-									mode={action.mode || mode}
-									variant={action.variant}
-									icon={action.icon}
-									onclick={() => action.action(row)}
-								>
-									{action.label ? action.label : ''}
-								</Button>
-							{/each}
-						</td>
-					{/if}
-				</tr>
-			{/each}
-		</tbody>
-	</table>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
 </div>
 
 {#if showFieldsModal}
@@ -422,10 +483,20 @@
 		gap: 0.5rem;
 	}
 
+	.fixed-header {
+		position: sticky;
+		top: 0;
+		left:0;
+		width: 100%;
+		z-index: 1;
+	}
+	.wrapper,
 	.table {
 		position: relative;
 		max-width: 100%;
 		max-height: 100%;
+	}
+	.table {
 		overflow: auto;
 		/* padding-bottom: 1rem; */
 		/* make the scrollbars smaller */
@@ -434,7 +505,7 @@
 		scrollbar-color: var(--liwe3-darker-paper) var(--liwe3-paper);
 	}
 
-	table {
+	.data-table {
 		width: 100%;
 
 		border: 1px solid var(--liwe3-button-border);
@@ -448,38 +519,38 @@
 		font-family: var(--table-font-family);
 	}
 
-	table tr:first-child {
+	.data-table tr:first-child {
 		background-color: var(--liwe3-darker-paper);
 	}
 
-	table tr {
+	.data-table tr {
 		border-bottom: 1px solid var(--liwe3-tertiary-color);
 		max-height: 2rem;
 		transition: background-color 0.3s;
 	}
 
-	table td {
+	.data-table td {
 		border-right: 1px solid var(--liwe3-tertiary-color);
 	}
 
-	table tr:last-child td {
+	.data-table tr:last-child td {
 		border-bottom: none;
 	}
 
-	table tr td:last-child {
+	.data-table tr td:last-child {
 		border-right: none;
 	}
 
-	table tr:first,
-	table th {
+	.data-table tr:first,
+	.data-table th {
 		text-align: left;
 		background-color: var(--liwe3-lighter-tertiary-color);
 		/* disable selection */
 		user-select: none;
 	}
 
-	table td,
-	table th {
+	.data-table td,
+	.data-table th {
 		padding: 0.5rem;
 	}
 
