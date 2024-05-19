@@ -74,7 +74,7 @@
 						{#each actions as action}
 							<Button
 								size="sm"
-								on:click={() => {
+								onclick={() => {
 									action.action();
 								}}
 							>
@@ -87,7 +87,7 @@
 					<Button
 						size="sm"
 						mode="danger"
-						on:click={() => {
+						onclick={() => {
 							oncancel && oncancel(false);
 						}}
 						icon={XCircle}
