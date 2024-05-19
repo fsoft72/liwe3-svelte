@@ -22,6 +22,7 @@
 
 		// events
 		onchange?: (name: string, value: any, values: Record<string, any>) => Promise<boolean>;
+		onsubmit?: (values: Record<string, any>) => void;
 	};
 
 	type FormCreatorPlugin = {
