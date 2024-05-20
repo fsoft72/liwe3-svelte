@@ -189,7 +189,6 @@
 					table.rows[0].cells[idx].style.maxWidth = width + 'px';
 					table.rows[1].cells[idx].style.width = width + 'px';
 				}
-				//table_element.rows[0].cells[idx].style.minWidth = minWidthArray[idx] + 'px';
 				idx++;
 			}
 		}
@@ -415,6 +414,7 @@
 							<th
 								style={`width: ${field.width || 'auto'};`}
 								class:buttons-aside={idx === fieldsUI.length - 1 && actions.length == 0}
+								title={field.label || field.name}
 							>
 								{field.label || field.name}
 								{#if actions.length === 0 && idx === fieldsUI.length - 1}
@@ -658,6 +658,7 @@
 	}
 
 	.data-table th {
+		position:relative;
 		background-color: var(--liwe3-darker-paper);
 		overflow-x: hidden;
 	}
