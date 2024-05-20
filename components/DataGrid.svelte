@@ -45,7 +45,7 @@
 	import Avatar from './Avatar.svelte';
 	import type { IconSource } from 'svelte-hero-icons';
 	import type { Color, Variant } from '$liwe3/types/types';
-	import { format_date, toBool } from '$liwe3/utils/utils';
+	import { debounce, format_date, toBool } from '$liwe3/utils/utils';
 	import { filterModes } from '$liwe3/utils/match_filter';
 	import { onMount } from 'svelte';
 
@@ -92,15 +92,6 @@
 
 	// the has_filters is true if at least one field is filterable
 	let has_filters = fieldsUI.some((f) => f.filterable);
-
-	const debounce = (func: Function, wait: number) => {
-		let timeout: number;
-		return function (...args: any[]) {
-			const context: any = this;
-			clearTimeout(timeout);
-			timeout = setTimeout(() => func.apply(context, args), wait);
-		};
-	};
 
 	/**
 	 * Clone the header of the table and append it to the fixed header div
@@ -637,8 +628,10 @@
 		max-width: 100%;
 		max-height: 100%;
 	}
+
 	.table {
-		overflow: auto;
+		/* overflow: auto; */
+
 		/* padding-bottom: 1rem; */
 		/* make the scrollbars smaller */
 		scrollbar-width: thin;
