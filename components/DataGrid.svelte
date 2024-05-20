@@ -350,6 +350,7 @@
 
 			filters = nf;
 			onfilterchange && onfilterchange(filters);
+			resizeHeaderDebounced();
 			return;
 		} else if (input.type == 'checkbox' && toBool(value) == true) {
 			value = true;
@@ -374,6 +375,7 @@
 		console.log('=== FILTER CHANGE: ', filters);
 
 		onfilterchange && onfilterchange(filters);
+		resizeHeaderDebounced();
 	};
 
 	let table_element: HTMLTableElement | null = null;
