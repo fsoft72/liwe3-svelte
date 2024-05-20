@@ -134,8 +134,9 @@
 	};
 
 	/**
-	 * Set the min-width of each cell based on the text content and filters row
-	 * must be called after the table is rendered and during fixed header initialization
+	 * Define header cells width and max-width based on first row of data table
+	 * max-width is necessary to apply overflow-x on the header cells
+	 * and data table cells min width based on filters row and compare with header cells' text
 	 *
 	 * @returns void
 	 */
@@ -147,6 +148,7 @@
 		// create a dummy dom element to calculate the computed width of the cell based on its innerHTML
 		function _getComputedWidth(el: HTMLElement) {
 			if (el.classList.contains('resize')) return 0;
+			if (el.innerHTML === '' || el.innerHTML === '<!---->') return 0;
 
 			const computedStyle = getComputedStyle(el);
 			const dummy = document.createElement('div');
@@ -167,10 +169,10 @@
 			document.body.removeChild(dummy);
 			return minWidth; // + 5;
 		}
-		// iterate over the cells of the row and set the min-width of each cell.
+		// iterate over the cells set appropriate width, min-width and max-width
 		// If compare is true, we compare the width of the cell with the existing min-width
 		function _loopCells(row: HTMLTableRowElement, compare: boolean) {
-			if (!table_element || table_element.rows.length < 1) return;
+			if (!table_element || !table || table_element.rows.length < 1) return;
 
 			let idx = 0;
 
@@ -180,18 +182,20 @@
 				if (compare) {
 					if (width > minWidthArray[idx]) {
 						minWidthArray[idx] = width;
+						table_element.rows[0].cells[idx].style.minWidth = width + 'px';
 					}
 				} else {
 					minWidthArray.push(width);
+					table.rows[0].cells[idx].style.maxWidth = width + 'px';
+					table.rows[1].cells[idx].style.width = width + 'px';
 				}
-				table_element.rows[0].cells[idx].style.minWidth = minWidthArray[idx] + 'px';
+				//table_element.rows[0].cells[idx].style.minWidth = minWidthArray[idx] + 'px';
 				idx++;
 			}
 		}
 
-		// define cells min width based on header cells' text
-		_loopCells(table.rows[0], false);
-		// define cells min width based on fliters row and compare with header cells' text
+		// define header cells width and max-width  based on first row of data table
+		_loopCells(table_element.rows[0], false);
 		if (has_filters) _loopCells(table.rows[1], true);
 	};
 
@@ -214,10 +218,10 @@
 		while (idx < main_row.cells.length) {
 			const width = main_row.cells[idx].getBoundingClientRect().width + 'px';
 			table.rows[0].cells[idx].style.width = width;
-			table.rows[0].cells[idx].style.minWidth = width;
+			table.rows[0].cells[idx].style.maxWidth = width;
 			if (has_filters) {
 				table.rows[1].cells[idx].style.width = width;
-				table.rows[1].cells[idx].style.minWidth = width;
+				table.rows[1].cells[idx].style.maxWidth = width;
 			}
 			idx++;
 		}
@@ -655,6 +659,7 @@
 
 	.data-table th {
 		background-color: var(--liwe3-darker-paper);
+		overflow-x: hidden;
 	}
 
 	.data-table tr {
