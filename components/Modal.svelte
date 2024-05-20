@@ -22,6 +22,7 @@
 		actions?: ModalAction[];
 
 		oncancel?: (cancel: boolean) => void;
+		onclose?: (close: boolean) => void;
 
 		children?: any;
 	}
@@ -36,6 +37,7 @@
 		showCloseButton = true,
 		actions = [],
 		oncancel,
+		onclose,
 		children
 	}: ModalProps = $props();
 
@@ -97,9 +99,11 @@
 			<div class="modal-body" style:padding>
 				{@render children()}
 			</div>
+			<!--
 			<div class="modal-footer">
 				{@render children('footer')}
 			</div>
+		-->
 		</div>
 	</div>
 </div>
