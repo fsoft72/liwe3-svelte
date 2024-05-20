@@ -80,6 +80,7 @@
 	}: Props = $props();
 
 	let showFieldsModal = $state(false);
+	let fieldsUI = $state(fields);
 
 	let is_resizing = false;
 	let td: HTMLTableCellElement | null = null;
@@ -87,8 +88,10 @@
 	// here we save the current grid filters
 	let filters: { [key: string]: any } = {};
 
+	const minWidthArray: number[] = [];
+
 	// the has_filters is true if at least one field is filterable
-	let has_filters = fields.some((f) => f.filterable);
+	let has_filters = fieldsUI.some((f) => f.filterable);
 
 	const debounce = (func: Function, wait: number) => {
 		let timeout: number;
@@ -150,12 +153,12 @@
 
 		const table = table_fixed.querySelector('table');
 		if (!table) return;
-		const minWidthArray: number[] = [];
 		// create a dummy dom element to calculate the computed width of the cell based on its innerHTML
 		function _getComputedWidth(el: HTMLElement) {
+			if (el.classList.contains('resize')) return 0;
+
 			const computedStyle = getComputedStyle(el);
 			const dummy = document.createElement('div');
-			document.body.appendChild(dummy);
 			dummy.style.visibility = 'hidden';
 			dummy.style.position = 'absolute';
 			dummy.style.top = '-9999px';
@@ -167,6 +170,8 @@
 			dummy.style.textTransform = computedStyle.textTransform;
 			dummy.style.padding = computedStyle.padding;
 			dummy.innerHTML = el.innerHTML;
+			document.body.appendChild(dummy);
+
 			const minWidth = dummy.offsetWidth;
 			document.body.removeChild(dummy);
 			return minWidth; // + 5;
@@ -175,7 +180,9 @@
 		// If compare is true, we compare the width of the cell with the existing min-width
 		function _loopCells(row: HTMLTableRowElement, compare: boolean) {
 			if (!table_element || table_element.rows.length < 1) return;
+
 			let idx = 0;
+
 			while (idx < row.cells.length) {
 				const cell = row.cells[idx];
 				const width = _getComputedWidth(cell);
@@ -204,7 +211,7 @@
 	 * @returns void
 	 */
 	const resizeHeaderCells = () => {
-		if (!table_element || !table_fixed) return;
+		if (!table_element || table_element.rows.length < 1 || !table_fixed) return;
 
 		let idx = 0;
 		const main_row = table_element.rows[0];
@@ -280,7 +287,7 @@
 	};
 
 	const cell_doubleclick = (e: MouseEvent, row: GridDataRow, field_name: string) => {
-		const field = fields.find((f) => f.name === field_name);
+		const field = fieldsUI.find((f) => f.name === field_name);
 		if (!field) return;
 
 		if (!field.editable) return;
@@ -333,7 +340,7 @@
 	const filter_change = (e: Event) => {
 		const input = e.target as HTMLInputElement;
 		const name = input.name.replace('f_', '');
-		const field = fields.find((f) => f.name === name);
+		const field = fieldsUI.find((f) => f.name === name);
 		let value: any = input.value;
 		let mode = field?.searchMode || filterModes.contains;
 
@@ -406,14 +413,14 @@
 			<tbody>
 				<!-- headers -->
 				<tr>
-					{#each fields as field, idx}
+					{#each fieldsUI as field, idx}
 						{#if !field.hidden}
 							<th
 								style={`width: ${field.width || 'auto'};`}
-								class:buttons-aside={idx === fields.length - 1 && actions.length == 0}
+								class:buttons-aside={idx === fieldsUI.length - 1 && actions.length == 0}
 							>
 								{field.label || field.name}
-								{#if actions.length === 0 && idx === fields.length - 1}
+								{#if actions.length === 0 && idx === fieldsUI.length - 1}
 									<div class="buttons">
 										<Button mode="mode4" size="xs" onclick={() => (showFieldsModal = true)}
 											>Fields</Button
@@ -439,7 +446,7 @@
 				<!-- filters -->
 				{#if has_filters}
 					<tr>
-						{#each fields as field}
+						{#each fieldsUI as field}
 							{#if !field.hidden}
 								<td class="filter" style={`width: ${field.width || 'min-content'};`}>
 									{#if field.filterable}
@@ -492,7 +499,7 @@
 										{/if}
 									{/if}
 								</td>
-								<td style="border: 0"></td>
+								<td class="resize" style="border: 0"></td>
 							{/if}
 						{/each}
 						<td></td>
@@ -502,7 +509,7 @@
 				<!-- rows -->
 				{#each data as row}
 					<tr>
-						{#each fields as field}
+						{#each fieldsUI as field}
 							{#if !field.hidden}
 								<td
 									ondblclick={(e) => cell_doubleclick(e, row, field.name)}
@@ -589,10 +596,14 @@
 		closeOnOutsideClick={true}
 	>
 		<div class="fields-chk-container">
-			{#each fields as field (field.name)}
+			{#each fieldsUI as field (field.name)}
 				<div class="fields-chk">
-					<input type="checkbox" bind:checked={field.hidden} />
-					{field.name}
+					<Input
+						type="checkbox"
+						checked={field.hidden}
+						label={field.name}
+						onchange={(e: any) => (field.hidden = e.target.checked)}
+					/>
 				</div>
 			{/each}
 		</div>
