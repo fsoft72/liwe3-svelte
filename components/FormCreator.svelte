@@ -59,7 +59,7 @@
 
 	interface Props {
 		fields: FormField[];
-		values: Record<string, any>;
+		values?: Record<string, any>;
 		submitLabel?: string;
 		resetLabel?: string;
 		showButtons?: boolean;
