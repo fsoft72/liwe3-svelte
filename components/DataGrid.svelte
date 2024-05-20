@@ -114,7 +114,7 @@
 		table.appendChild(tbody);
 		table.style.width = `100%`;
 
-		function moveFirstRow (){
+		function moveFirstRow() {
 			if (elem_tbody && elem_tbody.rows.length > 0) {
 				const row = elem_tbody.rows[0];
 				elem_tbody.removeChild(row);
@@ -125,11 +125,9 @@
 		let elem_tbody = table_element.querySelector('tbody');
 		if (!elem_tbody) return;
 
-
 		moveFirstRow();
 
-		if (has_filters)
-			moveFirstRow();
+		if (has_filters) moveFirstRow();
 
 		// get cloned element height
 		table_fixed.innerHTML = '';
@@ -162,21 +160,21 @@
 			dummy.style.position = 'absolute';
 			dummy.style.top = '-9999px';
 			dummy.style.fontFamily = computedStyle.fontFamily;
-            dummy.style.fontSize = computedStyle.fontSize;
-            dummy.style.fontWeight = computedStyle.fontWeight;
-            dummy.style.fontStyle = computedStyle.fontStyle;
-            dummy.style.letterSpacing = computedStyle.letterSpacing;
-            dummy.style.textTransform = computedStyle.textTransform;
-            dummy.style.padding = computedStyle.padding;
+			dummy.style.fontSize = computedStyle.fontSize;
+			dummy.style.fontWeight = computedStyle.fontWeight;
+			dummy.style.fontStyle = computedStyle.fontStyle;
+			dummy.style.letterSpacing = computedStyle.letterSpacing;
+			dummy.style.textTransform = computedStyle.textTransform;
+			dummy.style.padding = computedStyle.padding;
 			dummy.innerHTML = el.innerHTML;
 			const minWidth = dummy.offsetWidth;
 			document.body.removeChild(dummy);
-			return minWidth;
+			return minWidth; // + 5;
 		}
 		// iterate over the cells of the row and set the min-width of each cell.
 		// If compare is true, we compare the width of the cell with the existing min-width
 		function _loopCells(row: HTMLTableRowElement, compare: boolean) {
-			if ( !table_element || table_element.rows.length < 1 ) return;
+			if (!table_element || table_element.rows.length < 1) return;
 			let idx = 0;
 			while (idx < row.cells.length) {
 				const cell = row.cells[idx];
@@ -196,8 +194,7 @@
 		// define cells min width based on header cells' text
 		_loopCells(table.rows[0], false);
 		// define cells min width based on fliters row and compare with header cells' text
-		if (has_filters)
-			_loopCells(table.rows[1], true);
+		if (has_filters) _loopCells(table.rows[1], true);
 	};
 
 	/**
@@ -220,7 +217,7 @@
 			const width = main_row.cells[idx].getBoundingClientRect().width + 'px';
 			table.rows[0].cells[idx].style.width = width;
 			table.rows[0].cells[idx].style.minWidth = width;
-			if (has_filters){
+			if (has_filters) {
 				table.rows[1].cells[idx].style.width = width;
 				table.rows[1].cells[idx].style.minWidth = width;
 			}
@@ -230,11 +227,35 @@
 
 	const resizeHeaderDebounced = debounce(resizeHeaderCells, 100);
 
+	const _getTable = (el: HTMLElement | null): HTMLElement | null => {
+		if (el && el.tagName === 'TABLE') return el;
+		if (el && el.tagName !== 'BODY') return _getTable(el.parentElement);
+		return null;
+	};
+
+	const _preventUserSelect = (el: HTMLElement) => {
+		const table = _getTable(td);
+		if (!table) return;
+
+		(table as any)._userSelect = table.style.userSelect;
+		table.style.userSelect = 'none';
+	};
+
+	const _revertUserSelect = (el: HTMLElement) => {
+		const table = _getTable(td);
+		if (!table) return;
+
+		table.style.userSelect = (table as any)._userSelect;
+	};
+
 	const resize_start = (e: MouseEvent) => {
 		// get the td element before this one
 		td = (e.target as HTMLTableCellElement)?.previousElementSibling as HTMLTableCellElement;
 
 		if (!td) return;
+
+		_preventUserSelect(td);
+
 		console.log('=== RESIZE START:', td);
 		is_resizing = true;
 	};
@@ -242,6 +263,8 @@
 	const mouse_move = (e: MouseEvent) => {
 		if (!is_resizing) return;
 		if (!td) return;
+
+		_revertUserSelect(td);
 
 		const width = e.clientX - td.getBoundingClientRect().left;
 		console.log('=== RESIZE MOVE:', width);
@@ -595,7 +618,6 @@
 		left: 0;
 		width: 100%;
 		z-index: 1;
-
 	}
 
 	.wrapper,
