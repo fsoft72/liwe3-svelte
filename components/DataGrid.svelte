@@ -630,9 +630,7 @@
 	}
 
 	.table {
-		/* overflow: auto; */
-
-		/* padding-bottom: 1rem; */
+		overflow: auto;
 		/* make the scrollbars smaller */
 		scrollbar-width: thin;
 		/* make the scrollbars transparent */
