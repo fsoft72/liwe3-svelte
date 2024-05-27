@@ -394,7 +394,6 @@
 	});
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <div class="table">
 	<div class="wrapper">
 		<div class="fixed-header" bind:this={table_fixed}></div>

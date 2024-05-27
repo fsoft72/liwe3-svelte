@@ -89,7 +89,6 @@
 <div class={mode}>
 	<input type="hidden" {name} value={jitems} />
 	{#each items as item, index (index)}
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
 			class="row"
 			draggable="true"

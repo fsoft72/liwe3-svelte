@@ -70,8 +70,6 @@
 		{#each selected as tag (tag)}
 			<div class="tag">
 				<div class="name">{tag}</div>
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<button class="btn" onclick={() => removeTag(tag)}>x</button>
 			</div>
 		{/each}

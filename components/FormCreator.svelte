@@ -210,7 +210,6 @@
 								/>
 							{:else if field?.type === 'checkbox'}
 								<div class="simple-row">
-									<!-- svelte-ignore a11y-label-has-associated-control -->
 									<label for={field.name}>
 										<Input
 											type="checkbox"
