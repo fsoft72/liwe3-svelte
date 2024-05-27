@@ -257,7 +257,7 @@
 
 		_preventUserSelect(td);
 
-		console.log('=== RESIZE START:', td);
+		// console.log('=== RESIZE START:', td);
 		is_resizing = true;
 	};
 
@@ -268,7 +268,7 @@
 		_revertUserSelect(td);
 
 		const width = e.clientX - td.getBoundingClientRect().left;
-		console.log('=== RESIZE MOVE:', width);
+		// console.log('=== RESIZE MOVE:', width);
 		td.style.width = `${width}px`;
 		td.style.maxWidth = `${width}px`;
 		resizeHeaderDebounced();
@@ -658,7 +658,7 @@
 	}
 
 	.data-table th {
-		position:relative;
+		position: relative;
 		background-color: var(--liwe3-darker-paper);
 		overflow-x: hidden;
 	}
