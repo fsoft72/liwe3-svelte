@@ -223,7 +223,7 @@
 		align-items: center;
 		justify-content: space-between;
 
-		max-width: 300px;
+		/* max-width: 300px; */
 	}
 
 	.btn {
