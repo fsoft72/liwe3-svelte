@@ -114,7 +114,6 @@
 
 <div class={`tree ${mode}`}>
 	{#each items as item (item.id)}
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="item">
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
@@ -122,6 +121,7 @@
 				class="bar mini"
 				class:is-dragging-over={overItem?.id == `emp-${item.id}`}
 				class:dashed-border={overItem?.id == `emp-${item.id}`}
+				ondragleave={(event) => onDragLeave(event, item)}
 				ondragover={(event) => onOverEmpty(event, item)}
 				ondrop={(event) => onDropEmpty(event, item)}
 			></div>
@@ -138,7 +138,6 @@
 				<div class="bar-options">
 					<div class="btn">
 						{#if item.children && item.children.length}
-							<!-- svelte-ignore a11y-click-events-have-key-events -->
 							<!-- svelte-ignore a11y_click_events_have_key_events -->
 							<div onclick={() => toggleOpen(item)}>
 								{#if item.isOpen}
@@ -250,7 +249,7 @@
 	}
 
 	.is-dragging-over {
-		border: 2px dashed var(--darker);
+		border: 2px dashed yellow; /* var(--darker); */
 		padding: 1rem;
 	}
 

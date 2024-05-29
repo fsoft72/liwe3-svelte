@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { tree_add_item, tree_del_item, tree_find_item, type TreeItem } from '$liwe3/utils/tree';
 	import DraggableTreeItem from './sub/DraggableTreeItem.svelte';
 	import Button from './Button.svelte';
@@ -40,7 +40,7 @@
 		mode = 'mode1',
 		name = '',
 		maxDepth = 2,
-		items = [],
+		items = $bindable([]),
 		canAdd = true,
 		canEdit = true,
 		canDelete = true,
@@ -55,7 +55,7 @@
 				resolve({
 					id: new Date().getTime().toString(),
 					id_parent: parentItem?.id ?? '',
-					name: 'New Item',
+					name: `New Item ${items.length ?? 0}`,
 					children: []
 				});
 			});
@@ -115,11 +115,15 @@
 		// update the items
 		items = structuredClone(newItems);
 
+		tree_set_meta(items, '', 0);
+
 		onreorder && onreorder({ sourceId, targetId, pos });
 	};
 
 	const onChange = (newItems: TreeItem[]) => {
 		items = structuredClone(newItems);
+
+		tree_set_meta(items, '', 0);
 
 		onchange && onchange(items);
 	};
@@ -132,11 +136,15 @@
 		onadditem && onadditem(newItem.id, newItem);
 
 		items = structuredClone(tree_add_item(items, newItem, id_parent));
+
+		tree_set_meta(items, '', 0);
 		onchange && onchange(items);
 	};
 
 	const onEditItem = (id: string) => {
 		onedititem && onedititem(id);
+
+		tree_set_meta(items, '', 0);
 
 		onchange && onchange(items);
 	};
@@ -145,6 +153,8 @@
 		ondelitem && ondelitem(id);
 
 		items = structuredClone(tree_del_item(items, id));
+
+		tree_set_meta(items, '', 0);
 
 		onchange && onchange(items);
 	};
@@ -173,11 +183,14 @@
 	onMount(() => {
 		if (!value) return;
 		items = JSON.parse(value);
+		tree_set_meta(items, '', 0);
 	});
 
+	/*
 	$effect(() => {
 		tree_set_meta(items, '', 0);
 	});
+	*/
 </script>
 
 <div class={`container ${mode}`}>
