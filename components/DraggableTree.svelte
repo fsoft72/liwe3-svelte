@@ -70,7 +70,7 @@
 
 	const onReorder = (event: reorderEvent) => {
 		const { sourceId, targetId, pos } = event;
-		let newItems = structuredClone(items);
+		let newItems = [...items];
 
 		const sourceItem = tree_find_item(newItems, sourceId);
 		const targetItem = tree_find_item(newItems, targetId);
@@ -113,7 +113,8 @@
 		}
 
 		// update the items
-		items = structuredClone(newItems);
+		// items = structuredClone(newItems);
+		items = [...newItems];
 
 		tree_set_meta(items, '', 0);
 
@@ -121,7 +122,7 @@
 	};
 
 	const onChange = (newItems: TreeItem[]) => {
-		items = structuredClone(newItems);
+		// items = structuredClone(newItems);
 
 		tree_set_meta(items, '', 0);
 
@@ -135,7 +136,8 @@
 
 		onadditem && onadditem(newItem.id, newItem);
 
-		items = structuredClone(tree_add_item(items, newItem, id_parent));
+		// items = structuredClone(tree_add_item(items, newItem, id_parent));
+		tree_add_item(items, newItem, id_parent);
 
 		tree_set_meta(items, '', 0);
 		onchange && onchange(items);
@@ -152,9 +154,10 @@
 	const onDelItem = (id: string) => {
 		ondelitem && ondelitem(id);
 
-		items = structuredClone(tree_del_item(items, id));
+		// items = structuredClone(tree_del_item(items, id));
+		items = tree_del_item(items, id);
 
-		tree_set_meta(items, '', 0);
+		// tree_set_meta(items, '', 0);
 
 		onchange && onchange(items);
 	};
@@ -172,10 +175,12 @@
 
 		items.push(newItem);
 
+		console.log('=== NEW ITEM: ', { newItem, items });
+
 		onadditem && onadditem(newItem.id, newItem);
 
 		tree_set_meta(items, '', 0);
-		items = structuredClone(items);
+		// items = structuredClone(items);
 
 		onchange && onchange(items);
 	};
