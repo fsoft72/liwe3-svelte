@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PUBLIC_LIWE_SERVER } from '$env/static/public';
-import { userStore } from '$modules/user/store';
+import { userStore } from '$modules/user/store.svelte';
 import { app } from '$liwe3/stores/LiWEApp';
 import { addToast } from '$liwe3/stores/ToastStore.svelte';
 
