@@ -310,6 +310,13 @@ export function keys<T> ( obj: any ): string[] {
 	return Object.keys( obj );
 }
 
+export function clearObject ( obj: any ) {
+	for ( const prop in obj ) {
+		delete obj[ prop ];
+	}
+}
+
+
 export const isTrue = ( value: any ): boolean => {
 	if ( typeof value === 'boolean' ) return value;
 
