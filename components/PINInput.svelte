@@ -7,7 +7,7 @@
 		mode?: Color;
 	}
 
-	let { value = '', size = 6, mode = 'mode1' }: PINInputProps = $props();
+	let { value = $bindable(''), size = 6, mode = 'mode1' }: PINInputProps = $props();
 
 	let fields: any[] = [];
 
