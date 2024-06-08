@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PUBLIC_LIWE_SERVER } from '$env/static/public';
-import { currentUser } from '$modules/user/store';
+import { userStore } from '$modules/user/store';
 import { app } from '$liwe3/stores/LiWEApp';
 import { addToast } from '$liwe3/stores/ToastStore.svelte';
 
@@ -17,7 +17,7 @@ const url_and_headers = ( url: string ) => {
 		'Content-Type': 'application/json;charset=utf-8',
 	};
 
-	headers.Authorization = `Bearer ${ currentUser?.token }`;
+	headers.Authorization = `Bearer ${ userStore.token }`;
 
 	return { url, headers };
 };
