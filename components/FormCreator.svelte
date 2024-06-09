@@ -32,12 +32,12 @@
 
 	const formCreatorPlugins: Record<string, FormCreatorPlugin> = {};
 
-	export const registerFormCreatorPlugin = (name: string, component: any) => {
+	export const formCreatorPluginRegister = (name: string, component: any) => {
 		name = name.toLowerCase();
 		formCreatorPlugins[name] = { name, component };
 	};
 
-	export const getFormCreatorPlugin = (name: string) => {
+	export const formCreatorPluginGet = (name: string) => {
 		name = name.toLowerCase();
 		return formCreatorPlugins[name];
 	};
@@ -159,22 +159,23 @@
 						{#if has_one_perm(userStore, field.perms || [])}
 							{#if field?.type === 'strange'}
 								<!-- strange component here -->
-							{:else if getFormCreatorPlugin(field?.type ?? '---')}
+							{:else if formCreatorPluginGet(field?.type ?? '---')}
 								<div class="title">{field.label}</div>
 								<svelte:component
-									this={getFormCreatorPlugin(field?.type ?? '---').component}
+									this={formCreatorPluginGet(field?.type ?? '---').component}
 									{...field}
 									value={_v(field).toString()}
 									{...field.extra}
 									onchange={(e: any) => onChangeField(field.name, e)}
 								/>
-							{:else if field?.type === 'text'}
+							{:else if ['text', 'string'].indexOf(field?.type ?? '') > -1}
 								<!--<div class="title">{field.label}</div>-->
 								<Input
 									{...field}
 									{...field.extra}
 									name={field.name}
 									value={_v(field)}
+									type="text"
 									onchange={(e:any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'title'}

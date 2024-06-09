@@ -11,7 +11,7 @@
 		icon?: IconSource;
 		iconRight?: IconSource;
 		solid?: boolean;
-		disabled?: boolean;
+		disabled?: boolean | number;
 
 		// events
 		onclick?: (e: MouseEvent) => void;

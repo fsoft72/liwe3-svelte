@@ -5,7 +5,7 @@
 	export let id = ($$restProps.name ?? Math.random().toString()) + new Date().getTime().toString();
 	export let size: Size = 'md';
 	export let validChars: string = '';
-	export let width: string = 'auto';
+	export let width: string = '100%'; // 'auto';
 	export let mode: Color = 'mode3';
 	export let divClass: string = '';
 	export let value: string | boolean | number = '';
@@ -101,6 +101,7 @@
 	}
 	.input {
 		margin-right: var(--liwe3-input-w-unit);
+		width: 100%;
 	}
 	.checkbox {
 		/* width: 100%; */
