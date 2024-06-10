@@ -33,7 +33,7 @@
 		onchange?: (items: TreeItem[]) => void;
 		onadditem?: (id_item: string, newItem?: TreeItem) => void;
 		onedititem?: (id_item: string) => void;
-		ondelitem?: (id_item: string) => void;
+		ondelitem?: (TreeItem: TreeItem) => void;
 	}
 
 	let {
@@ -151,13 +151,17 @@
 		onchange && onchange(items);
 	};
 
-	const onDelItem = (id: string) => {
-		ondelitem && ondelitem(id);
+	const onDelItem = async (id: string) => {
+		const item = tree_find_item(items, id);
 
-		// items = structuredClone(tree_del_item(items, id));
+		if (!item) return;
+
+		// ondelitem can return `true` to prevent the default behavior
+		const res = ondelitem?.(item);
+
+		if (res) return;
+
 		items = tree_del_item(items, id);
-
-		// tree_set_meta(items, '', 0);
 
 		onchange && onchange(items);
 	};
