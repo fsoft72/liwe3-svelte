@@ -162,16 +162,13 @@
 		onchange && onchange(items);
 	};
 
-	const newItem = (e: Event) => {
+	const newItem = async (e: Event) => {
 		e.preventDefault();
 		e.stopPropagation();
 
-		const newItem: TreeItem = {
-			id: new Date().getTime().toString(),
-			id_parent: '',
-			name: 'New Item',
-			children: []
-		};
+		const newItem: TreeItem | undefined = await oncreatenewitem();
+
+		if (!newItem) return;
 
 		items.push(newItem);
 

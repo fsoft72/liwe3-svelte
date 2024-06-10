@@ -21,7 +21,7 @@
 	}
 
 	let {
-		items = [],
+		items = $bindable([]),
 		mode = 'mode1',
 		canAdd = true,
 		canDelete = true,
