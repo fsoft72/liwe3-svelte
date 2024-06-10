@@ -31,9 +31,9 @@
 		ondraginto?: (sourceId: string, targetId: string, pos: number) => void;
 		onreorder?: (event: reorderEvent) => void;
 		onchange?: (items: TreeItem[]) => void;
-		onadditem?: (id_item: string, newItem?: TreeItem) => void;
-		onedititem?: (id_item: string) => void;
-		ondelitem?: (TreeItem: TreeItem) => void;
+		onadditem?: (item: TreeItem) => void;
+		onedititem?: (item: TreeItem) => void;
+		ondelitem?: (item: TreeItem) => void;
 	}
 
 	let {
@@ -134,7 +134,7 @@
 
 		if (!newItem) return;
 
-		onadditem && onadditem(newItem.id, newItem);
+		onadditem && onadditem(newItem);
 
 		// items = structuredClone(tree_add_item(items, newItem, id_parent));
 		tree_add_item(items, newItem, id_parent);
@@ -144,7 +144,11 @@
 	};
 
 	const onEditItem = (id: string) => {
-		onedititem && onedititem(id);
+		const item = tree_find_item(items, id);
+
+		if (!item) return;
+
+		onedititem && onedititem(item);
 
 		tree_set_meta(items, '', 0);
 
@@ -178,7 +182,7 @@
 
 		console.log('=== NEW ITEM: ', { newItem, items });
 
-		onadditem && onadditem(newItem.id, newItem);
+		onadditem && onadditem(newItem);
 
 		tree_set_meta(items, '', 0);
 		// items = structuredClone(items);
