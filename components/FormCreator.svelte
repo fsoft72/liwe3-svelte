@@ -55,7 +55,7 @@
 	import Select from 'svelte-select';
 	import { _ } from '$liwe3/stores/LocalizationStore';
 	import { has_one_perm, has_perm, isTrue } from '$liwe3/utils/utils';
-	import { userStore } from '$modules/user/store.svelte';
+	import { storeUser } from '$modules/user/store.svelte';
 
 	interface Props {
 		fields: FormField[];
@@ -156,7 +156,7 @@
 			{#each fields as field}
 				<div class={`liwe3-col${field.col ?? 12} ${field.align ? 'align-' + field.align : ''}`}>
 					<div class="space">
-						{#if has_one_perm(userStore, field.perms || [])}
+						{#if has_one_perm(storeUser, field.perms || [])}
 							{#if field?.type === 'strange'}
 								<!-- strange component here -->
 							{:else if formCreatorPluginGet(field?.type ?? '---')}
