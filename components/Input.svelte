@@ -61,6 +61,7 @@
 	};
 
 	$: type = $$restProps.type || 'text';
+	$: if (type == 'checkbox' && width == '100%') width = 'auto';
 </script>
 
 <div
