@@ -42,6 +42,11 @@ export const format_amount = ( amount?: number ) => {
 	return `${ Number( int ).toLocaleString().replace( /,/g, '.' ) },${ dec }`;
 };
 
+export const toFixed = ( amount?: number | string, decimals = 2 ) => {
+	if ( !amount ) return 0.00;
+	return parseFloat( parseFloat( amount.toString() ).toFixed( decimals ) );
+};
+
 export const format_size = ( size: number ) => {
 	const units = [ 'B', 'KB', 'MB', 'GB', 'TB', 'PB' ];
 	let i = 0;
