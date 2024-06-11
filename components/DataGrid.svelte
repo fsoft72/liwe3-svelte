@@ -93,6 +93,11 @@
 	// the has_filters is true if at least one field is filterable
 	let has_filters = fieldsUI.some((f) => f.filterable);
 
+	$effect(() => {
+		const n = data;
+		resizeHeaderDebounced();
+	});
+
 	/**
 	 * Clone the header of the table and append it to the fixed header div
 	 * must be called after the table is rendered to initialize fixed header
