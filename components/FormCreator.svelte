@@ -17,6 +17,9 @@
 		options?: { label: string; value: string }[];
 		default?: any;
 
+		// if true, the field will not be displayed
+		hide?: boolean;
+
 		// list of perms the user must have to see this field
 		perms?: string[];
 
@@ -156,7 +159,7 @@
 			{#each fields as field}
 				<div class={`liwe3-col${field.col ?? 12} ${field.align ? 'align-' + field.align : ''}`}>
 					<div class="space">
-						{#if has_one_perm(storeUser, field.perms || [])}
+						{#if has_one_perm(storeUser, field.perms || []) && !field.hide}
 							{#if field?.type === 'strange'}
 								<!-- strange component here -->
 							{:else if formCreatorPluginGet(field?.type ?? '---')}
