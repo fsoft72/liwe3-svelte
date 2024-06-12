@@ -36,6 +36,15 @@
 		variant?: Variant;
 		action: (row: GridDataRow) => void;
 	}
+
+	export interface GridOptions {
+		id: string;
+		label?: string;
+		icon?: IconSource;
+		mode?: Color;
+		variant?: Variant;
+		action: () => void;
+	}
 </script>
 
 <script lang="ts">
@@ -55,6 +64,7 @@
 		fields: GridField[];
 		data: GridDataRow[];
 		actions?: GridAction[];
+		options?: GridOptions[];
 		mode?: Color;
 
 		// events
@@ -69,6 +79,7 @@
 		fields = [],
 		data = [],
 		actions = [],
+		options = [],
 		mode = 'mode3',
 
 		// events
@@ -423,6 +434,20 @@
 								{field.label || field.name}
 								{#if actions.length === 0 && idx === fieldsUI.length - 1}
 									<div class="buttons">
+										{#if options.length > 0}
+											{#each options as option}
+												<Button
+													key={option.id}
+													size="xs"
+													mode={option.mode || mode}
+													variant={option.variant}
+													icon={option.icon}
+													onclick={() => option.action()}
+												>
+													{option.label ? option.label : ''}
+												</Button>
+											{/each}
+										{/if}
 										<Button mode="mode4" size="xs" onclick={() => (showFieldsModal = true)}
 											>Fields</Button
 										>
@@ -434,8 +459,33 @@
 					{/each}
 					{#if actions.length > 0}
 						<th class="buttons-aside">
-							<div class="label">Actions</div>
-							<div class="buttons">
+							<div class="buttons-aside">
+								{#if options?.length > 0}
+									{#each options as option}
+										<Button
+											key={option.id}
+											size="xs"
+											mode={option.mode || mode}
+											variant={option.variant}
+											icon={option.icon}
+											onclick={() => option.action()}
+										>
+											{option.label ? option.label : ''}
+										</Button>
+									{/each}
+									{#each options as option}
+										<Button
+											key={option.id}
+											size="xs"
+											mode={option.mode || mode}
+											variant={option.variant}
+											icon={option.icon}
+											onclick={() => option.action()}
+										>
+											{option.label ? option.label : ''}
+										</Button>
+									{/each}
+								{/if}
 								<Button mode="mode4" size="xs" onclick={() => (showFieldsModal = true)}
 									>Fields</Button
 								>
