@@ -37,7 +37,7 @@
 		action: (row: GridDataRow) => void;
 	}
 
-	export interface GridOptions {
+	export interface GridOption {
 		id: string;
 		label?: string;
 		icon?: IconSource;
@@ -64,7 +64,7 @@
 		fields: GridField[];
 		data: GridDataRow[];
 		actions?: GridAction[];
-		options?: GridOptions[];
+		options?: GridOption[];
 		mode?: Color;
 
 		// events
@@ -203,7 +203,9 @@
 				} else {
 					minWidthArray.push(width);
 					table.rows[0].cells[idx].style.maxWidth = width + 'px';
-					table.rows[1].cells[idx].style.width = width + 'px';
+					if (table.rows[1]) {
+						table.rows[1].cells[idx].style.width = width + 'px';
+					}
 				}
 				idx++;
 			}
@@ -410,6 +412,23 @@
 	});
 </script>
 
+{#snippet optionButtons(options)}
+	{#if options?.length > 0}
+		{#each options as option}
+			<Button
+				key={option.id}
+				size="xs"
+				mode={option.mode || mode}
+				variant={option.variant}
+				icon={option.icon}
+				onclick={() => option.action()}
+			>
+				{option.label ?? ''}
+			</Button>
+		{/each}
+	{/if}
+{/snippet}
+
 <div class="table">
 	<div class="wrapper">
 		<div class="fixed-header" bind:this={table_fixed}></div>
@@ -433,21 +452,8 @@
 							>
 								{field.label || field.name}
 								{#if actions.length === 0 && idx === fieldsUI.length - 1}
-									<div class="buttons">
-										{#if options.length > 0}
-											{#each options as option}
-												<Button
-													key={option.id}
-													size="xs"
-													mode={option.mode || mode}
-													variant={option.variant}
-													icon={option.icon}
-													onclick={() => option.action()}
-												>
-													{option.label ? option.label : ''}
-												</Button>
-											{/each}
-										{/if}
+									<div class="buttons-aside">
+										{@render optionButtons(options)}
 										<Button mode="mode4" size="xs" onclick={() => (showFieldsModal = true)}
 											>Fields</Button
 										>
@@ -459,37 +465,10 @@
 					{/each}
 					{#if actions.length > 0}
 						<th class="buttons-aside">
-							<div class="buttons-aside">
-								{#if options?.length > 0}
-									{#each options as option}
-										<Button
-											key={option.id}
-											size="xs"
-											mode={option.mode || mode}
-											variant={option.variant}
-											icon={option.icon}
-											onclick={() => option.action()}
-										>
-											{option.label ? option.label : ''}
-										</Button>
-									{/each}
-									{#each options as option}
-										<Button
-											key={option.id}
-											size="xs"
-											mode={option.mode || mode}
-											variant={option.variant}
-											icon={option.icon}
-											onclick={() => option.action()}
-										>
-											{option.label ? option.label : ''}
-										</Button>
-									{/each}
-								{/if}
-								<Button mode="mode4" size="xs" onclick={() => (showFieldsModal = true)}
-									>Fields</Button
-								>
-							</div>
+							<div class="label">Actions</div>
+							{@render optionButtons(options)}
+							<Button mode="mode4" size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button
+							>
 						</th>
 					{/if}
 				</tr>
