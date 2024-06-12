@@ -37,7 +37,7 @@
 		action: (row: GridDataRow) => void;
 	}
 
-	export interface GridOption {
+	export interface GridButton {
 		id: string;
 		label?: string;
 		icon?: IconSource;
@@ -64,7 +64,7 @@
 		fields: GridField[];
 		data: GridDataRow[];
 		actions?: GridAction[];
-		options?: GridOption[];
+		buttons?: GridButton[];
 		mode?: Color;
 
 		// events
@@ -79,7 +79,7 @@
 		fields = [],
 		data = [],
 		actions = [],
-		options = [],
+		buttons = [],
 		mode = 'mode3',
 
 		// events
@@ -453,7 +453,7 @@
 								{field.label || field.name}
 								{#if actions.length === 0 && idx === fieldsUI.length - 1}
 									<div class="buttons-aside">
-										{@render optionButtons(options)}
+										{@render optionButtons(buttons)}
 										<Button mode="mode4" size="xs" onclick={() => (showFieldsModal = true)}
 											>Fields</Button
 										>
@@ -466,7 +466,7 @@
 					{#if actions.length > 0}
 						<th class="buttons-aside">
 							<div class="label">Actions</div>
-							{@render optionButtons(options)}
+							{@render optionButtons(buttons)}
 							<Button mode="mode4" size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button
 							>
 						</th>
