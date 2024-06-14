@@ -57,7 +57,7 @@
 	import { addToast } from '$liwe3/stores/ToastStore.svelte';
 	import Select from 'svelte-select';
 	import { _ } from '$liwe3/stores/LocalizationStore';
-	import { has_one_perm, has_perm, isTrue } from '$liwe3/utils/utils';
+	import { has_one_perm, isTrue } from '$liwe3/utils/utils';
 	import { storeUser } from '$modules/user/store.svelte';
 
 	interface Props {
@@ -144,9 +144,9 @@
 	};
 
 	const _v = (field: FormField) => {
-		let v = values[field.name];
+		let v = values[field?.name];
 
-		if (v === undefined) v = field.default;
+		if (v === undefined) v = field?.default;
 		if (v === undefined) v = '';
 
 		return v;
@@ -157,59 +157,56 @@
 	<form onsubmit={handleSubmit}>
 		<div class="liwe3-row">
 			{#each fields as field}
-				<div class={`liwe3-col${field.col ?? 12} ${field.align ? 'align-' + field.align : ''}`}>
+				<div class={`liwe3-col${field?.col ?? 12} ${field?.align ? 'align-' + field?.align : ''}`}>
 					<div class="space">
-						{#if has_one_perm(storeUser, field.perms || []) && !field.hide}
-							{#if field?.type === 'strange'}
-								<!-- strange component here -->
-							{:else if formCreatorPluginGet(field?.type ?? '---')}
-								<div class="title">{field.label}</div>
+						{#if has_one_perm(storeUser, field?.perms ?? []) && !field?.hide}
+							{#if formCreatorPluginGet(field?.type ?? '---')}
+								<div class="title">{field?.label ?? ''}</div>
 								<svelte:component
 									this={formCreatorPluginGet(field?.type ?? '---').component}
 									{...field}
 									value={_v(field).toString()}
-									{...field.extra}
+									{...field?.extra ?? {}}
 									onchange={(e: any) => onChangeField(field.name, e)}
 								/>
 							{:else if ['text', 'string'].indexOf(field?.type ?? '') > -1}
-								<!--<div class="title">{field.label}</div>-->
 								<Input
 									{...field}
-									{...field.extra}
+									{...field?.extra ?? {}}
 									name={field.name}
 									value={_v(field)}
 									type="text"
 									onchange={(e:any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'title'}
-								<div class="title">{field.label}</div>
+								<div class="title">{field?.label ?? ''}</div>
 							{:else if field?.type === 'tags'}
 								<TagInput
 									name={field.name}
 									value={_v(field)}
-									{...field.extra}
+									{...field?.extra ?? {}}
 									onchange={(e:any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'markdown'}
 								<MarkdownInput
 									name={field.name}
 									value={_v(field)}
-									{...field.extra}
+									{...field?.extra ?? {}}
 									onchange={(e:any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'element-list'}
-								<div class="title">{field.label}</div>
+								<div class="title">{field?.label ?? ''}</div>
 								<ElementList
 									name={field.name}
 									value={_v(field)}
-									{...field.extra}
+									{...field?.extra ?? {}}
 									onchange={(e:any) => onChangeField(field.name, e.detail)}
 								/>
 							{:else if field?.type === 'draggable-tree'}
 								<DraggableTree
 									name={field.name}
 									value={_v(field)}
-									{...field.extra}
+									{...field?.extra ?? {}}
 									onchange={(e:any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'checkbox'}
@@ -220,25 +217,25 @@
 											name={field.name}
 											checked={isTrue(_v(field))}
 											value="on"
-											{...field.extra}
+											{...field?.extra ?? {}}
 											onchange={(e:any) => onChangeField(field.name, e)}
 										/>
-										{field.label}
+										{field?.label ?? ''}
 									</label>
 								</div>
 							{:else if field?.type === 'hidden'}
 								<input type="hidden" name={field.name} value={_v(field)} />
 							{:else if field?.type === 'select'}
 								<div class="custom-select">
-									{#if field.label}
-										<div class="label">{field.label}</div>
+									{#if field?.label ?? ''}
+										<div class="label">{field?.label ?? ''}</div>
 									{/if}
 									<div class="svelte-select mode3" style="width: 100%">
 										<Select
 											name={field.name}
 											value={_v(field)}
 											placeholder={field.placeholder}
-											{...field.extra}
+											{...field?.extra ?? {}}
 											on:change={(e:any) => onChangeField(field.name, e.detail.value)}
 											on:clear={() => onChangeField(field.name, '')}
 											items={field.options ?? []}
@@ -249,7 +246,7 @@
 								<Input
 									{...field}
 									value={_v(field).toString()}
-									{...field.extra}
+									{...field?.extra ?? {}}
 									onchange={(e:any) => onChangeField(field.name, e)}
 								/>
 							{/if}
