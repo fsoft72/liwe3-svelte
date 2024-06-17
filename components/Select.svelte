@@ -13,12 +13,12 @@
 		name: string;
 		items: SvelteItem[] | string[];
 		value: string | string[];
-		placeholder: string;
-		readonly: boolean;
-		multiple: boolean;
-		dropdownOnly: boolean;
+		placeholder?: string;
+		readonly?: boolean;
+		multiple?: boolean;
+		dropdownOnly?: boolean;
 
-		onchange: (value: string | string[]) => void;
+		onchange?: (value: string | string[]) => void;
 	}
 
 	let {
