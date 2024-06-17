@@ -26,6 +26,7 @@
 		// events
 		onchange?: (name: string, value: any, values: Record<string, any>) => Promise<boolean>;
 		onsubmit?: (values: Record<string, any>) => void;
+		onclick?: () => void;
 	};
 
 	type FormCreatorPlugin = {
@@ -242,6 +243,10 @@
 										/>
 									</div>
 								</div>
+							{:else if field?.type === 'button'}
+								<Button {...field} {...field?.extra ?? {}} onclick={field?.onclick}>
+									{field.label}
+								</Button>
 							{:else}
 								<Input
 									{...field}
