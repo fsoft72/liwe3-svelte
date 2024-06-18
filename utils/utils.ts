@@ -336,3 +336,7 @@ export const isTrue = ( value: any ): boolean => {
 
 	return false;
 };
+
+export const toInt = ( value: any ): number => {
+	return parseInt( value.toString(), 10 );
+};
