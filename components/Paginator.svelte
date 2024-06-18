@@ -8,16 +8,18 @@
 		rows?: number; // rows per page
 		total?: number; // total number of rows
 
-		pagechange?: (page: number, rows: number) => void;
+		onpagechange?: (page: number, rows: number) => void;
 	}
 
-	let { mode = 'mode1', page = 1, rows = 10, total = 0, pagechange }: PaginatorProps = $props();
+	let { mode = 'mode1', page = 1, rows = 10, total = 0, onpagechange }: PaginatorProps = $props();
 
 	let pages = $derived(Math.ceil(total / rows));
 
 	const setPage = (num: number) => {
+		if (num < 1 || num > pages) return;
+
 		page = num;
-		pagechange && pagechange(page, rows);
+		onpagechange && onpagechange(page, rows);
 	};
 </script>
 
