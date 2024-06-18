@@ -133,6 +133,8 @@
 			value = e;
 		}
 
+		console.log('=== CHANGE: ', name, value);
+
 		const field = fields.find((f) => f.name === name);
 		const onChange = field?.onchange;
 		const valid = onChange ? await onChange(name, value, values) : true;
@@ -168,7 +170,7 @@
 									{...field}
 									value={_v(field).toString()}
 									{...field?.extra ?? {}}
-									onchange={(e: any) => onChangeField(field.name, e)}
+									onchange={onChangeField}
 								/>
 							{:else if ['text', 'string'].indexOf(field?.type ?? '') > -1}
 								<Input
