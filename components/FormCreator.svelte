@@ -179,23 +179,36 @@
 									name={field.name}
 									value={_v(field)}
 									type="text"
-									onchange={(e:any) => onChangeField(field.name, e)}
+									onchange={(e: any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'title'}
 								<div class="title">{field?.label ?? ''}</div>
+							{:else if field?.type === 'textarea'}
+								<div class="title">{field?.label ?? ''}</div>
+								<textarea
+									style="width: 100%;"
+									rows={10}
+									cols={40}
+									{...field}
+									{...field?.extra ?? {}}
+									name={field.name}
+									value={_v(field)}
+									onchange={(e: any) => onChangeField(field.name, e)}
+								></textarea>
 							{:else if field?.type === 'tags'}
 								<TagInput
 									name={field.name}
 									value={_v(field)}
 									{...field?.extra ?? {}}
-									onchange={(e:any) => onChangeField(field.name, e)}
+									onchange={(e: any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'markdown'}
+								<div class="title">{field?.label ?? ''}</div>
 								<MarkdownInput
 									name={field.name}
 									value={_v(field)}
 									{...field?.extra ?? {}}
-									onchange={(e:any) => onChangeField(field.name, e)}
+									onchange={(e: any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'element-list'}
 								<div class="title">{field?.label ?? ''}</div>
@@ -203,14 +216,14 @@
 									name={field.name}
 									value={_v(field)}
 									{...field?.extra ?? {}}
-									onchange={(e:any) => onChangeField(field.name, e.detail)}
+									onchange={(e: any) => onChangeField(field.name, e.detail)}
 								/>
 							{:else if field?.type === 'draggable-tree'}
 								<DraggableTree
 									name={field.name}
 									value={_v(field)}
 									{...field?.extra ?? {}}
-									onchange={(e:any) => onChangeField(field.name, e)}
+									onchange={(e: any) => onChangeField(field.name, e)}
 								/>
 							{:else if field?.type === 'checkbox'}
 								<div class="simple-row">
@@ -221,7 +234,7 @@
 											checked={isTrue(_v(field))}
 											value="on"
 											{...field?.extra ?? {}}
-											onchange={(e:any) => onChangeField(field.name, e)}
+											onchange={(e: any) => onChangeField(field.name, e)}
 										/>
 										{field?.label ?? ''}
 									</label>
@@ -239,7 +252,7 @@
 											value={_v(field)}
 											placeholder={field.placeholder}
 											{...field?.extra ?? {}}
-											on:change={(e:any) => onChangeField(field.name, e.detail.value)}
+											on:change={(e: any) => onChangeField(field.name, e.detail.value)}
 											on:clear={() => onChangeField(field.name, '')}
 											items={field.options ?? []}
 										/>
@@ -254,7 +267,7 @@
 									{...field}
 									value={_v(field).toString()}
 									{...field?.extra ?? {}}
-									onchange={(e:any) => onChangeField(field.name, e)}
+									onchange={(e: any) => onChangeField(field.name, e)}
 								/>
 							{/if}
 						{/if}
