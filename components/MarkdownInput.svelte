@@ -62,6 +62,7 @@
 		height: 100%;
 		display: none;
 		border: 1px solid var(--liwe3-button-border);
+		background-color: var(--liwe3-paper);
 	}
 
 	.preview {
@@ -73,6 +74,7 @@
 		width: 100%;
 		height: 100%;
 		padding: 0.5rem;
+		background-color: var(--liwe3-paper);
 	}
 
 	.show {
