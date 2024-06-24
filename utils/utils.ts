@@ -340,3 +340,24 @@ export const isTrue = ( value: any ): boolean => {
 export const toInt = ( value: any ): number => {
 	return parseInt( value.toString(), 10 );
 };
+
+export const challenge_create = ( params: string[], secret: string, debug = false ) => {
+	const s: string[] = params.map( ( p ) => ( p || '' )?.toString().toLowerCase() );
+	s.sort();
+	s.push( secret );
+
+	let ckey = s.join( '-' );
+
+	// remove multiple '-' characters
+	ckey = ckey.replace( /-{2,}/g, '-' );
+
+	// remove all starting '-' characters
+	while ( ckey[ 0 ] == '-' ) ckey = ckey.substring( 1 );
+
+	/*
+	if ( cfg.debug.enabled || debug )
+		console.log( "=== Server Challenge: ", ckey );
+	*/
+
+	return md5( ckey );
+};
