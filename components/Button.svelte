@@ -65,8 +65,11 @@
 			<Icon src={icon} size={iconSizes[size]} {solid} />
 		</div>
 	{/if}
-	{@render children()}
-	<div class="button-no-content"></div>
+	{#if children}
+		{@render children()}
+	{:else}
+		<div class="button-no-content"></div>
+	{/if}
 	{#if iconRight}
 		<div class="liwe3-button-icon-right">
 			<Icon src={iconRight} size={iconSizes[size]} {solid} />
