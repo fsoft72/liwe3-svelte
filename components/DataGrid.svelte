@@ -1,5 +1,6 @@
 <script context="module" lang="ts">
 	export interface GridFieldExtra {
+		options?: { label: string; value: string }[];
 		dateFormat?: string;
 	}
 
@@ -306,47 +307,88 @@
 
 		is_editing = true;
 
-		// create an input element
-		const input = document.createElement('input');
-		input.type = 'text'; //field.type;
-		input.classList.add('liwe3-form', 'liwe3-form-custom-input', mode, 'input', 'xs');
-		input.value = row[field_name];
+		if (field.type !== 'select') {
+			// create an input element
+			const input = document.createElement('input');
+			input.type = 'text'; //field.type;
+			input.classList.add('liwe3-form', 'liwe3-form-custom-input', mode, 'input', 'xs');
+			input.value = row[field_name];
 
-		// replace the td content with the input
-		const td = e.target as HTMLTableCellElement;
-		td.innerHTML = '';
-		td.appendChild(input);
+			// replace the td content with the input
+			const td = e.target as HTMLTableCellElement;
+			td.innerHTML = '';
+			td.appendChild(input);
 
-		// if the user presses the ESC key, we cancel the edit
-		input.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape') {
-				is_editing = false;
+			// if the user presses the ESC key, we cancel the edit
+			input.addEventListener('keydown', (e) => {
+				if (e.key === 'Escape') {
+					is_editing = false;
+					td.innerHTML = row[field_name];
+				}
+			});
+
+			// add a blur event to the input
+			input.addEventListener('blur', () => {
+				if (!is_editing) return;
+				var do_update = true;
+
+				// if the two values are the same, we don't need to update
+				if (row[field_name] === input.value) do_update = false;
+
+				// update the row
+				row[field_name] = input.value;
+
+				// remove the input
 				td.innerHTML = row[field_name];
-			}
-		});
 
-		// add a blur event to the input
-		input.addEventListener('blur', () => {
-			if (!is_editing) return;
-			var do_update = true;
+				if (!do_update) return;
 
-			// if the two values are the same, we don't need to update
-			if (row[field_name] === input.value) do_update = false;
+				// update the field
+				onupdatefield && onupdatefield(row, field_name, row[field_name]);
+			});
 
-			// update the row
-			row[field_name] = input.value;
+			// focus the input
+			input.focus();
+		} else {
+			// create an input element
+			const input = document.createElement('select');
+			input.classList.add('liwe3-form', 'liwe3-form-custom-input', mode, 'input', 'xs');
 
-			// remove the input
-			td.innerHTML = row[field_name];
+			field.extra?.options?.forEach((opt) => {
+				const option = document.createElement('option');
+				option.value = opt.value;
+				option.label = opt.label;
+				input.appendChild(option);
+			});
 
-			if (!do_update) return;
+			// replace the td content with the input
+			const td = e.target as HTMLTableCellElement;
+			td.innerHTML = '';
+			td.appendChild(input);
 
-			// update the field
-			onupdatefield && onupdatefield(row, field_name, row[field_name]);
-		});
+			// add a blur event to the input
+			input.addEventListener('blur', () => {
+				if (!is_editing) return;
+				var do_update = true;
 
-		// focus the input
-		input.focus();
+				// if the two values are the same, we don't need to update
+				if (row[field_name] === input.value) do_update = false;
+
+				// update the row
+				row[field_name] = input.value;
+
+				// remove the input
+				td.innerHTML = row[field_name];
+
+				if (!do_update) return;
+
+				// update the field
+				onupdatefield && onupdatefield(row, field_name, row[field_name]);
+			});
+
+			// focus the input
+			input.focus();
+		}
 	};
 
 	const filter_change = (e: Event) => {
