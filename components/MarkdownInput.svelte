@@ -14,7 +14,7 @@
 	}
 
 	let {
-		value = '',
+		value = $bindable(''),
 		name = '',
 		mode = 'mode1',
 		rows = 10,
