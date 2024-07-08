@@ -299,6 +299,49 @@
 		resizeHeaderDebounced();
 	};
 
+	const _create_input = (
+		td: HTMLTableCellElement,
+		row: GridDataRow,
+		field_name: string,
+		elem = 'input'
+	) => {
+		// create an input element
+		const input = document.createElement(elem) as HTMLInputElement;
+		if (elem == 'input') input.type = 'text'; //field.type;
+		input.classList.add('liwe3-form', 'liwe3-form-custom-input', mode, 'input', 'xs');
+		// input.value = row[field_name];
+
+		// if the user presses the ESC key, we cancel the edit
+		input.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') {
+				is_editing = false;
+				td.innerHTML = row[field_name];
+			}
+		});
+
+		// add a blur event to the input
+		input.addEventListener('blur', () => {
+			if (!is_editing) return;
+			var do_update = true;
+
+			// if the two values are the same, we don't need to update
+			if (row[field_name] === input.value) do_update = false;
+
+			// update the row
+			row[field_name] = input.value;
+
+			// remove the input
+			td.innerHTML = row[field_name];
+
+			if (!do_update) return;
+
+			// update the field
+			onupdatefield && onupdatefield(row, field_name, row[field_name]);
+		});
+
+		return input;
+	};
+
 	const cell_doubleclick = (e: MouseEvent, row: GridDataRow, field_name: string) => {
 		const field = fieldsUI.find((f) => f.name === field_name);
 		if (!field) return;
@@ -306,52 +349,21 @@
 		if (!field.editable) return;
 
 		is_editing = true;
+		const td = e.target as HTMLTableCellElement;
+		let input: HTMLInputElement;
 
 		if (field.type !== 'select') {
-			// create an input element
-			const input = document.createElement('input');
-			input.type = 'text'; //field.type;
-			input.classList.add('liwe3-form', 'liwe3-form-custom-input', mode, 'input', 'xs');
-			input.value = row[field_name];
-
 			// replace the td content with the input
-			const td = e.target as HTMLTableCellElement;
 			td.innerHTML = '';
+			input = _create_input(td, row, field_name);
+
 			td.appendChild(input);
-
-			// if the user presses the ESC key, we cancel the edit
-			input.addEventListener('keydown', (e) => {
-				if (e.key === 'Escape') {
-					is_editing = false;
-					td.innerHTML = row[field_name];
-				}
-			});
-
-			// add a blur event to the input
-			input.addEventListener('blur', () => {
-				if (!is_editing) return;
-				var do_update = true;
-
-				// if the two values are the same, we don't need to update
-				if (row[field_name] === input.value) do_update = false;
-
-				// update the row
-				row[field_name] = input.value;
-
-				// remove the input
-				td.innerHTML = row[field_name];
-
-				if (!do_update) return;
-
-				// update the field
-				onupdatefield && onupdatefield(row, field_name, row[field_name]);
-			});
 
 			// focus the input
 			input.focus();
 		} else {
 			// create an input element
-			const input = document.createElement('select');
+			input = _create_input(td, row, field_name, 'select');
 			input.classList.add('liwe3-form', 'liwe3-form-custom-input', mode, 'input', 'xs');
 
 			field.extra?.options?.forEach((opt) => {
@@ -362,33 +374,12 @@
 			});
 
 			// replace the td content with the input
-			const td = e.target as HTMLTableCellElement;
-			td.innerHTML = '';
 			td.appendChild(input);
-
-			// add a blur event to the input
-			input.addEventListener('blur', () => {
-				if (!is_editing) return;
-				var do_update = true;
-
-				// if the two values are the same, we don't need to update
-				if (row[field_name] === input.value) do_update = false;
-
-				// update the row
-				row[field_name] = input.value;
-
-				// remove the input
-				td.innerHTML = row[field_name];
-
-				if (!do_update) return;
-
-				// update the field
-				onupdatefield && onupdatefield(row, field_name, row[field_name]);
-			});
 
 			// focus the input
 			input.focus();
 		}
+		input.value = row[field_name];
 	};
 
 	const filter_change = (e: Event) => {
