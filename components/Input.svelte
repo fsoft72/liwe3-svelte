@@ -1,19 +1,50 @@
 <script lang="ts">
 	import type { Color, Size } from '$liwe3/types/types';
+	import { mkid } from '$liwe3/utils/utils';
 
-	export let label = '';
-	export let id = ($$restProps.name ?? Math.random().toString()) + new Date().getTime().toString();
-	export let size: Size = 'md';
-	export let validChars: string = '';
-	export let width: string = '100%'; // 'auto';
-	export let mode: Color = 'mode3';
-	export let divClass: string = '';
-	export let value: string | boolean | number = '';
+	interface Props {
+		id?: string;
+		name?: string;
+		value?: string;
 
-	const inputClass = `liwe3-form liwe3-form-custom-input ${$$restProps.class ? $$restProps.class : ''} ${mode} input ${size}`;
-	const checkboxClass = `${mode} liwe3-form liwe3-form-custom-checkbox-radio ${$$restProps.class ? $$restProps.class : ''} checkbox ${size}`;
+		divClass?: string;
+		label?: string;
+		mode?: Color;
+		size?: Size;
+		type?: string;
+		validChars?: string;
+		width?: string;
 
-	let type = 'checkbox';
+		// events
+		onblur?: (event: FocusEvent) => void;
+		onchange?: (event: Event) => void;
+		onkeydown?: (event: KeyboardEvent) => void;
+		onkeyup?: (event: KeyboardEvent) => void;
+
+		// rest
+		[k: string]: any;
+	}
+
+	let {
+		name = mkid('fld'),
+		label = '',
+		id = mkid('id'),
+		size = 'md',
+		validChars = '',
+		width = '100%',
+		mode = 'mode3',
+		divClass = '',
+		value = $bindable(''),
+		type = 'text',
+		onblur,
+		onchange,
+		onkeydown,
+		onkeyup,
+		...rest
+	}: Props = $props();
+
+	const inputClass = `liwe3-form liwe3-form-custom-input ${rest.class ? rest.class : ''} ${mode} input ${size}`;
+
 	let rx = validChars ? new RegExp(`[^${validChars}]*`, 'g') : null;
 
 	let isDispatching = false;
@@ -26,7 +57,7 @@
 			bubbles: true,
 			cancelable: true,
 			composed: true,
-			data
+			data,
 		});
 		isDispatching = true;
 		event.target.dispatchEvent(inputEvent);
@@ -51,17 +82,10 @@
 		} else {
 			const el = event.target as HTMLInputElement;
 
-			if (el.type === 'checkbox') {
-				el.value = el.checked ? 'true' : 'false';
-			}
-
 			_dispatchEvent(event, el.value);
 			value = el.value;
 		}
 	};
-
-	$: type = $$restProps.type || 'text';
-	$: if (type == 'checkbox' && width == '100%') width = 'auto';
 </script>
 
 <div
@@ -74,16 +98,15 @@
 	{/if}
 	<input
 		{id}
-		{...$$restProps}
-		class={type === 'checkbox' ? checkboxClass : inputClass}
+		{...rest}
+		class={inputClass}
 		{type}
 		{value}
-		on:blur
-		on:change
-		on:keydown
-		on:keyup
-		on:keypress
-		on:input={handleInput}
+		{onblur}
+		{onchange}
+		{onkeydown}
+		{onkeyup}
+		oninput={handleInput}
 	/>
 </div>
 

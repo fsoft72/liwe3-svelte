@@ -60,6 +60,7 @@
 	import { _ } from '$liwe3/stores/LocalizationStore';
 	import { has_one_perm, isTrue } from '$liwe3/utils/utils';
 	import { storeUser } from '$modules/user/store.svelte';
+	import Checkbox from './Checkbox.svelte';
 
 	interface Props {
 		fields: FormField[];
@@ -84,7 +85,7 @@
 
 		// events
 		onsubmit,
-		onchange
+		onchange,
 	}: Props = $props();
 
 	const _check_required_fields = () => {
@@ -113,7 +114,7 @@
 				message:
 					$_('Please fill all required fields:<br /><ul><li>') +
 					missing.join('</li><li>') +
-					'</li></ul>'
+					'</li></ul>',
 			});
 
 			return;
@@ -228,8 +229,7 @@
 							{:else if field?.type === 'checkbox'}
 								<div class="simple-row">
 									<label for={field.name}>
-										<Input
-											type="checkbox"
+										<Checkbox
 											name={field.name}
 											checked={isTrue(_v(field))}
 											value="on"

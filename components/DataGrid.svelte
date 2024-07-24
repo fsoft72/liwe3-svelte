@@ -58,6 +58,7 @@
 	import { debounce, format_date, toBool } from '$liwe3/utils/utils';
 	import { filterModes } from '$liwe3/utils/match_filter';
 	import { onMount } from 'svelte';
+	import Checkbox from './Checkbox.svelte';
 
 	type UpdateFieldCallback = (row: GridDataRow, field_name: string, value: any) => void;
 
@@ -414,8 +415,8 @@
 			...filters,
 			[name]: {
 				mode,
-				value
-			}
+				value,
+			},
 		};
 
 		// remove from new_filters the filters that have an empty value
@@ -552,11 +553,10 @@
 												onchange={filter_change}
 											/>
 										{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
-											<Input
+											<Checkbox
 												{mode}
 												name={`f_${field.name}`}
 												size="xs"
-												type="checkbox"
 												onchange={filter_change}
 											/>
 										{/if}
@@ -594,9 +594,8 @@
 											{@html field.render(row[field.name], row)}
 										{/if}
 									{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
-										<Input
+										<Checkbox
 											{mode}
-											type="checkbox"
 											checked={toBool(row[field.name])}
 											onchange={(e: any) => {
 												row[field.name] = e.target?.checked;
@@ -661,8 +660,7 @@
 		<div class="fields-chk-container">
 			{#each fieldsUI as field (field.name)}
 				<div class="fields-chk">
-					<Input
-						type="checkbox"
+					<Checkbox
 						checked={field.hidden}
 						label={field.name}
 						onchange={(e: any) => (field.hidden = e.target.checked)}
