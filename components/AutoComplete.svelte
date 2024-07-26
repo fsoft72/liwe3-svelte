@@ -6,16 +6,24 @@
 	interface Props {
 		mode?: Color;
 		items: string[];
-		selectedItems: string[];
+		selectedItems?: string[];
 
 		// events
 		onset?: (value: string) => void;
+		onchange?: (e: Event) => void;
 
 		// restProps
 		[k: string]: any;
 	}
 
-	let { mode = 'mode1', items = [], selectedItems = [], onset, ...restProps }: Props = $props();
+	let {
+		mode = 'mode1',
+		items = [],
+		selectedItems = [],
+		onset,
+		onchange,
+		...restProps
+	}: Props = $props();
 
 	/* FILTERING items DATA BASED ON INPUT */
 	let filteredItems: string[] = $state([]);
@@ -65,7 +73,7 @@
 		return str.replace(/<(.)*?>/g, '');
 	};
 
-	const onKeyPress = (e: KeyboardEvent) => {
+	const onkeypress = (e: KeyboardEvent) => {
 		if (e.code != 'Enter') return;
 		e.stopImmediatePropagation();
 		e.preventDefault();
@@ -92,7 +100,7 @@
 			type="text"
 			bind:value
 			{onchange}
-			onkeypress={onKeyPress}
+			{onkeypress}
 			oninput={filter}
 		/>
 	</div>

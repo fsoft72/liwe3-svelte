@@ -24,7 +24,7 @@
 		actions = [],
 		maxLevel = 2,
 		fontSize = '24',
-		onselect
+		onselect,
 	}: SimpleTreeProps = $props();
 
 	// takes an id and returns it with ":" appended in both ends
@@ -70,8 +70,6 @@
 <ul>
 	{#each items as item}
 		<li>
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
