@@ -35,8 +35,6 @@
 		...rest
 	}: Props = $props();
 
-	console.log('=== CHECKBOX: ', { name, label, checked });
-
 	const inputClass = `liwe3-form liwe3-form-custom-input ${rest.class ? rest.class : ''} ${mode} input checkbox ${size}`;
 </script>
 
@@ -134,7 +132,7 @@
 		height: 1rem;
 		min-width: 1rem;
 		min-height: 1rem;
-    background: var(--liwe3-form-bg);
+		background: var(--liwe3-form-bg);
 	}
 	/* end generic size rules for inputs and labels--------------------------*/
 </style>
