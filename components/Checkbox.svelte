@@ -38,7 +38,7 @@
 	const inputClass = `liwe3-form liwe3-form-custom-input ${rest.class ? rest.class : ''} ${mode} input checkbox ${size}`;
 </script>
 
-<div class={`${divClass} input-container`} style={`width:auto;`}>
+<div class={`${divClass} input-container checkbox`} style={`width:auto;`}>
 	{#if label}
 		<label for={id} class="label">{label}</label>
 	{/if}
