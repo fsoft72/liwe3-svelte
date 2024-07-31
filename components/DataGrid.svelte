@@ -427,8 +427,6 @@
 
 		filters = new_filters;
 
-		console.log('=== FILTER CHANGE: ', filters);
-
 		onfilterchange && onfilterchange(filters);
 		resizeHeaderDebounced();
 	};
@@ -446,7 +444,7 @@
 	});
 </script>
 
-{#snippet optionButtons(options)}
+{#snippet optionButtons(options: any)}
 	{#if options?.length > 0}
 		{#each options as option}
 			<Button

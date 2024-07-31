@@ -44,6 +44,7 @@
 	{/if}
 	<input
 		{id}
+		{name}
 		{...rest}
 		class={inputClass}
 		type="checkbox"

@@ -98,6 +98,7 @@
 	{/if}
 	<input
 		{id}
+		{name}
 		{...rest}
 		class={inputClass}
 		{type}
@@ -188,7 +189,7 @@
 		height: 1rem;
 		min-width: 1rem;
 		min-height: 1rem;
-    background: var(--liwe3-form-bg);
+		background: var(--liwe3-form-bg);
 	}
 	/* end generic size rules for inputs and labels--------------------------*/
 </style>
