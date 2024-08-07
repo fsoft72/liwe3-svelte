@@ -88,6 +88,8 @@
 		onchange,
 	}: Props = $props();
 
+	let formId : HTMLFormElement;
+
 	const _check_required_fields = () => {
 		const required: string[] = [];
 
@@ -153,10 +155,15 @@
 
 		return v;
 	};
-</script>
+
+	const clearForm = () => {
+		formId.reset();
+	};
+
+ </script>
 
 <div class="form">
-	<form onsubmit={handleSubmit}>
+	<form onsubmit={handleSubmit} bind:this={formId}>
 		<div class="liwe3-row">
 			{#each fields as field}
 				<div class={`liwe3-col${field?.col ?? 12} ${field?.align ? 'align-' + field?.align : ''}`}>
@@ -276,7 +283,13 @@
 		{#if showButtons}
 			<div class="buttons">
 				{#if showReset}
-					<Button mode="danger" type="reset">{resetLabel}</Button>
+					<Button
+						mode="danger"
+						type="reset"
+						onclick={clearForm}
+					>
+					{resetLabel}
+				</Button>
 				{/if}
 				<Button mode="success" type="submit" onclick={handleSubmit}>{submitLabel}</Button>
 			</div>
@@ -345,7 +358,7 @@
 	.custom-select {
 		position: relative;
 		width: 100%;
-		top: -4px;
+		/*top: -4px;*/
 	}
 
 	.label {
