@@ -57,7 +57,7 @@
 			bubbles: true,
 			cancelable: true,
 			composed: true,
-			data,
+			data
 		});
 		isDispatching = true;
 		event.target.dispatchEvent(inputEvent);
@@ -99,7 +99,6 @@
 	<input
 		{id}
 		{name}
-		{...rest}
 		class={inputClass}
 		{type}
 		{value}
@@ -108,6 +107,8 @@
 		{onkeydown}
 		{onkeyup}
 		oninput={handleInput}
+		title={rest.title || rest.placeholder || label || ''}
+		{...rest}
 	/>
 </div>
 
