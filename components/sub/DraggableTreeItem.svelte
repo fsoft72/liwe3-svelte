@@ -169,7 +169,7 @@
 							title="Edit Item"
 						/>
 					{/if}
-					{#if canAdd && (item.level ?? 99) < maxDepth}
+					{#if canAdd && (item.level ?? 0) < maxDepth}
 						<Button
 							size="xs"
 							mode="success"

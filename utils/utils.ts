@@ -96,18 +96,6 @@ export const has_one_perm = ( user: UserAuth | null, perms: string[] ) => {
 
 
 
-export const tree_set_meta = ( items: TreeItem[], id_parent: string, level: number ) => {
-	for ( let i = 0; i < items.length; i++ ) {
-		const item = items[ i ];
-		item.id_parent = id_parent;
-		item.pos = i;
-		item.level = level;
-		if ( item.children ) {
-			tree_set_meta( item.children, item.id, level + 1 );
-		}
-	}
-};
-
 /**
  *  Generates a random integer number from `min` to `max`
  *
@@ -360,4 +348,17 @@ export const challenge_create = ( params: string[], secret: string, debug = fals
 	*/
 
 	return md5( ckey );
+};
+
+
+/**
+ * This function returns a deep copy of the object passed as argument.
+ *
+ * @param obj - The object to clone.
+ *
+ * @returns A deep copy of the object.
+ *
+ */
+export const clone = ( obj: any ) => {
+	return structuredClone( obj );
 };

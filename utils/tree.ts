@@ -79,31 +79,33 @@ const _tree_del_item = ( items: TreeItem[], id: string ): TreeItem[] => {
 };
 
 export const tree_del_item = ( tree: Tree, id: string ): TreeItem[] => {
-	return _tree_del_item( tree.children, id );
+	tree.children = _tree_del_item( tree.children, id );
+
+	return tree.children;
 };
 
 const _tree_add_item = ( items: TreeItem[], item: TreeItem, id_parent: string ) => {
-	let parentItem;
+	let parentItem: TreeItem | undefined;
 
 	if ( id_parent ) {
 		parentItem = _tree_find_item( items, id_parent );
-	} else {
-		parentItem = items[ 0 ];
+		if ( !parentItem ) {
+			console.error( `Parent item with ID ${ id_parent } not found` );
+			return items;
+		}
+		parentItem.isOpen = true;
+		if ( !parentItem.children ) parentItem.children = [];
 	}
-
-	if ( !parentItem ) return items;
-
-	parentItem.isOpen = true;
 
 	if ( !item.id ) item.id = new Date().getTime().toString();
 	if ( !item.children ) item.children = [];
 
 	item.id_parent = id_parent;
 
-	if ( parentItem.children ) {
-		parentItem.children.push( item );
+	if ( parentItem ) {
+		parentItem.children?.push( item );
 	} else {
-		parentItem.children = [ item ];
+		items.push( item );
 	}
 
 	_tree_items_set_meta( items, '', 0 );

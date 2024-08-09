@@ -1,9 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { _tree_add_item, _tree_del_item, tree_find_item, type TreeItem } from '$liwe3/utils/tree';
+	import {
+		tree_add_item,
+		tree_del_item,
+		tree_find_item,
+		type TreeItem,
+		type Tree,
+		tree_set_meta
+	} from '$liwe3/utils/tree';
 	import DraggableTreeItem from './sub/DraggableTreeItem.svelte';
 	import Button from './Button.svelte';
-	import { tree_set_meta } from '$liwe3/utils/utils';
 	import type { Color } from '$liwe3/types/types';
 
 	type reorderEvent = {
@@ -13,14 +19,14 @@
 	};
 
 	interface Props {
+		tree: Tree;
+
 		mode?: Color;
 		name?: string;
 		maxDepth?: number;
-		items?: TreeItem[];
 		canAdd?: boolean;
 		canEdit?: boolean;
 		canDelete?: boolean;
-		value?: string;
 
 		showNew?: boolean;
 		newLabel?: string;
@@ -30,21 +36,20 @@
 		oncreatenewitem?: (parentItem?: TreeItem) => Promise<TreeItem | undefined>;
 		ondraginto?: (sourceId: string, targetId: string, pos: number) => void;
 		onreorder?: (event: reorderEvent) => void;
-		onchange?: (items: TreeItem[]) => void;
+		onchange?: (tree: Tree) => void;
 		onadditem?: (item: TreeItem) => void;
 		onedititem?: (item: TreeItem) => void;
 		ondelitem?: (item: TreeItem) => void;
 	}
 
 	let {
+		tree,
 		mode = 'mode1',
 		name = '',
 		maxDepth = 2,
-		items = $bindable([]),
 		canAdd = true,
 		canEdit = true,
 		canDelete = true,
-		value = '',
 		showNew = true,
 		newLabel = 'New',
 
@@ -55,8 +60,8 @@
 				resolve({
 					id: new Date().getTime().toString(),
 					id_parent: parentItem?.id ?? '',
-					name: `New Item ${items.length ?? 0}`,
-					children: [],
+					name: `New Item ${wtree.children.length ?? 0}`,
+					children: []
 				});
 			});
 		},
@@ -65,16 +70,18 @@
 		onchange,
 		onadditem,
 		onedititem,
-		ondelitem,
+		ondelitem
 	}: Props = $props();
+
+	let wtree: Tree = $state({ ...tree });
 
 	const onReorder = (event: reorderEvent) => {
 		const { sourceId, targetId, pos } = event;
-		let newItems = [...items];
+		let tmpTree: Tree = { children: wtree.children };
 
-		const sourceItem = tree_find_item(newItems, sourceId);
-		const targetItem = tree_find_item(newItems, targetId);
-		let parentItem = tree_find_item(newItems, sourceItem?.id_parent ?? '');
+		const sourceItem = tree_find_item(tmpTree, sourceId);
+		const targetItem = tree_find_item(tmpTree, targetId);
+		let parentItem = tree_find_item(tmpTree, sourceItem?.id_parent ?? '');
 
 		if (!sourceItem || !targetItem) return;
 
@@ -82,10 +89,10 @@
 		if (parentItem) {
 			parentItem.children = parentItem.children?.filter((item) => item.id !== sourceId);
 		} else {
-			newItems = newItems.filter((item) => item.id !== sourceId);
+			tmpTree.children = tmpTree.children.filter((item) => item.id !== sourceId);
 		}
 
-		tree_set_meta(newItems, '', 0);
+		tree_set_meta(tmpTree);
 
 		// if pos == -1, append the sourceItem to the targetItem (if it has children)
 		if (pos == -1) {
@@ -100,12 +107,12 @@
 
 			ondraginto && ondraginto(sourceId, targetId, pos);
 		} else {
-			parentItem = tree_find_item(newItems, targetItem.id_parent ?? '');
+			parentItem = tree_find_item(tmpTree, targetItem.id_parent ?? '');
 
 			// if parentItem is null, it means that the targetItem is the root
 			// so we need to insert the sourceItem to the root
 			if (!parentItem) {
-				newItems.splice(pos, 0, sourceItem);
+				tmpTree.children.splice(pos, 0, sourceItem);
 			} else {
 				// insert the sourceItem to the targetItem's children at the specified position
 				parentItem?.children?.splice(pos, 0, sourceItem);
@@ -113,50 +120,48 @@
 		}
 
 		// update the items
-		// items = structuredClone(newItems);
-		items = [...newItems];
+		wtree.children = [...tmpTree.children];
 
-		tree_set_meta(items, '', 0);
+		tree_set_meta(wtree);
 
 		onreorder && onreorder({ sourceId, targetId, pos });
 	};
 
-	const onChange = (newItems: TreeItem[]) => {
-		// items = structuredClone(newItems);
+	const onChange = () => {
+		console.log('=== Tree onChange');
+		tree_set_meta(wtree);
 
-		tree_set_meta(items, '', 0);
-
-		onchange && onchange(items);
+		onchange && onchange(wtree);
 	};
 
 	const onAddItem = async (id_parent: string) => {
-		const newItem: TreeItem | undefined = await oncreatenewitem(tree_find_item(items, id_parent));
+		const newItem: TreeItem | undefined = await oncreatenewitem(tree_find_item(wtree, id_parent));
+
+		console.log('=== addItem', { id_parent, newItem });
 
 		if (!newItem) return;
 
 		onadditem && onadditem(newItem);
 
-		// items = structuredClone(tree_add_item(items, newItem, id_parent));
-		_tree_add_item(items, newItem, id_parent);
+		tree_add_item(wtree, newItem, id_parent);
 
-		tree_set_meta(items, '', 0);
-		onchange && onchange(items);
+		onchange && onchange(wtree);
 	};
 
 	const onEditItem = (id: string) => {
-		const item = tree_find_item(items, id);
+		const item = tree_find_item(wtree, id);
+
+		console.log('=== editItem', { id, item });
 
 		if (!item) return;
 
 		onedititem && onedititem(item);
-
-		tree_set_meta(items, '', 0);
-
-		onchange && onchange(items);
 	};
 
 	const onDelItem = async (id: string) => {
-		const item = tree_find_item(items, id);
+		const item = tree_find_item(wtree, id);
+
+		console.log('=== delItem', { id, item });
 
 		if (!item) return;
 
@@ -165,9 +170,8 @@
 
 		if (res) return;
 
-		items = _tree_del_item(items, id);
-
-		onchange && onchange(items);
+		tree_del_item(wtree, id);
+		onchange && onchange(wtree);
 	};
 
 	const newItem = async (e: Event) => {
@@ -178,29 +182,11 @@
 
 		if (!newItem) return;
 
-		items.push(newItem);
-
-		console.log('=== NEW ITEM: ', { newItem, items });
+		tree_add_item(wtree, newItem, '');
 
 		onadditem && onadditem(newItem);
-
-		tree_set_meta(items, '', 0);
-		// items = structuredClone(items);
-
-		onchange && onchange(items);
+		onchange && onchange(wtree);
 	};
-
-	onMount(() => {
-		if (!value) return;
-		items = JSON.parse(value);
-		tree_set_meta(items, '', 0);
-	});
-
-	/*
-	$effect(() => {
-		tree_set_meta(items, '', 0);
-	});
-	*/
 </script>
 
 <div class={`container ${mode}`}>
@@ -212,10 +198,9 @@
 		</div>
 	{/if}
 
-	<input type="hidden" {name} value={JSON.stringify(items)} />
 	<DraggableTreeItem
 		{mode}
-		{items}
+		items={wtree.children}
 		{canAdd}
 		{canEdit}
 		{canDelete}
