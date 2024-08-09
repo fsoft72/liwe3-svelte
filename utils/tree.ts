@@ -88,6 +88,26 @@ export const tree_add_item = ( items: TreeItem[], item: TreeItem, id_parent: str
 };
 
 /**
+ * Updates an item in the tree structure, by replacing the item with the same ID.
+ *
+ * @param items - The list of items to update.
+ * @param item - The item to update.
+ *
+ * @returns The updated list of items.
+ */
+export const tree_update_item = ( items: TreeItem[], item: TreeItem ) => {
+	const found = tree_find_item( items, item.id );
+
+	console.log( '=== FOUND: ', found );
+
+	if ( !found ) return items;
+
+	Object.assign( found, item );
+
+	return items;
+};
+
+/**
  * Converts a flat list of items into a tree structure.
  * @param items - The list of items to convert.
  * @param id - The name of the property that contains the item ID [default: 'id'].
