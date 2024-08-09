@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { tree_add_item, tree_del_item, tree_find_item, type TreeItem } from '$liwe3/utils/tree';
+	import { _tree_add_item, _tree_del_item, tree_find_item, type TreeItem } from '$liwe3/utils/tree';
 	import DraggableTreeItem from './sub/DraggableTreeItem.svelte';
 	import Button from './Button.svelte';
 	import { tree_set_meta } from '$liwe3/utils/utils';
@@ -56,7 +56,7 @@
 					id: new Date().getTime().toString(),
 					id_parent: parentItem?.id ?? '',
 					name: `New Item ${items.length ?? 0}`,
-					children: []
+					children: [],
 				});
 			});
 		},
@@ -65,7 +65,7 @@
 		onchange,
 		onadditem,
 		onedititem,
-		ondelitem
+		ondelitem,
 	}: Props = $props();
 
 	const onReorder = (event: reorderEvent) => {
@@ -137,7 +137,7 @@
 		onadditem && onadditem(newItem);
 
 		// items = structuredClone(tree_add_item(items, newItem, id_parent));
-		tree_add_item(items, newItem, id_parent);
+		_tree_add_item(items, newItem, id_parent);
 
 		tree_set_meta(items, '', 0);
 		onchange && onchange(items);
@@ -165,7 +165,7 @@
 
 		if (res) return;
 
-		items = tree_del_item(items, id);
+		items = _tree_del_item(items, id);
 
 		onchange && onchange(items);
 	};

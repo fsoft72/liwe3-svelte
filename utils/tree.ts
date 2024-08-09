@@ -1,5 +1,9 @@
 import type { IconSource } from 'svelte-hero-icons';
 
+export type Tree = {
+	children: TreeItem[];
+};
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type TreeItem = {
 	id: string;
@@ -19,28 +23,34 @@ export type TreeItem = {
 };
 
 // recursively set the tree meta info (pos and level)
-export const tree_set_meta = ( items: TreeItem[], id_parent: string, level: number ) => {
+const _tree_items_set_meta = ( items: TreeItem[], id_parent: string, level: number ) => {
+
 	for ( let i = 0; i < items.length; i++ ) {
 		const item = items[ i ];
 		item.id_parent = id_parent;
 		item.pos = i;
 		item.level = level;
 		if ( item.children ) {
-			tree_set_meta( item.children, item.id, level + 1 );
+			_tree_items_set_meta( item.children, item.id, level + 1 );
 		}
 	}
 
 	return items;
 };
 
-export const tree_find_item = ( items: TreeItem[], id: string ): TreeItem | undefined => {
+export const tree_set_meta = ( tree: Tree ) => {
+	return _tree_items_set_meta( tree.children, '', 0 );
+};
+
+// recursively find an item in the tree structure by ID
+const _tree_find_item = ( items: TreeItem[], id: string ): TreeItem | undefined => {
 	for ( let i = 0; i < items.length; i++ ) {
 		const item = items[ i ];
 		if ( item.id === id ) {
 			return item;
 		}
 		if ( item.children ) {
-			const found = tree_find_item( item.children, id );
+			const found = _tree_find_item( item.children, id );
 			if ( found ) {
 				return found;
 			}
@@ -49,23 +59,37 @@ export const tree_find_item = ( items: TreeItem[], id: string ): TreeItem | unde
 	return undefined;
 };
 
-export const tree_del_item = ( items: TreeItem[], id: string ): TreeItem[] => {
-	const item = tree_find_item( items, id );
+export const tree_find_item = ( tree: Tree, id: string ): TreeItem | undefined => {
+	return _tree_find_item( tree.children, id );
+};
+
+const _tree_del_item = ( items: TreeItem[], id: string ): TreeItem[] => {
+	const item = _tree_find_item( items, id );
 
 	if ( !item ) return items;
 
-	const parentItem = tree_find_item( items, item.id_parent ?? '' );
+	const parentItem = _tree_find_item( items, item.id_parent ?? '' );
 
 	if ( parentItem ) parentItem.children = parentItem.children?.filter( ( item ) => item.id !== id );
 	else items = items.filter( ( item ) => item.id !== id );
 
-	tree_set_meta( items, '', item.level ?? 0 );
+	_tree_items_set_meta( items, '', item.level ?? 0 );
 
 	return items;
 };
 
-export const tree_add_item = ( items: TreeItem[], item: TreeItem, id_parent: string ) => {
-	const parentItem = tree_find_item( items, id_parent );
+export const tree_del_item = ( tree: Tree, id: string ): TreeItem[] => {
+	return _tree_del_item( tree.children, id );
+};
+
+const _tree_add_item = ( items: TreeItem[], item: TreeItem, id_parent: string ) => {
+	let parentItem;
+
+	if ( id_parent ) {
+		parentItem = _tree_find_item( items, id_parent );
+	} else {
+		parentItem = items[ 0 ];
+	}
 
 	if ( !parentItem ) return items;
 
@@ -82,10 +106,15 @@ export const tree_add_item = ( items: TreeItem[], item: TreeItem, id_parent: str
 		parentItem.children = [ item ];
 	}
 
-	tree_set_meta( items, '', 0 );
+	_tree_items_set_meta( items, '', 0 );
 
 	return items;
 };
+
+export const tree_add_item = ( tree: Tree, item: TreeItem, id_parent: string ): TreeItem[] => {
+	return _tree_add_item( tree.children, item, id_parent );
+};
+
 
 /**
  * Updates an item in the tree structure, by replacing the item with the same ID.
@@ -96,7 +125,7 @@ export const tree_add_item = ( items: TreeItem[], item: TreeItem, id_parent: str
  * @returns The updated list of items.
  */
 export const tree_update_item = ( items: TreeItem[], item: TreeItem ) => {
-	const found = tree_find_item( items, item.id );
+	const found = _tree_find_item( items, item.id );
 
 	console.log( '=== FOUND: ', found );
 
@@ -107,15 +136,7 @@ export const tree_update_item = ( items: TreeItem[], item: TreeItem ) => {
 	return items;
 };
 
-/**
- * Converts a flat list of items into a tree structure.
- * @param items - The list of items to convert.
- * @param id - The name of the property that contains the item ID [default: 'id'].
- * @param title - The name of the property that contains the item title [default: 'title'].
- * @param id_parent - The name of the property that contains the ID of the item's parent [default: 'id_parent'].
- * @returns The resulting tree structure.
- */
-export const tree_convert_list = ( items: any[], id = 'id', title = 'title', id_parent = 'id_parent' ) => {
+const _tree_convert_list = ( items: any[], id = 'id', title = 'title', id_parent = 'id_parent' ) => {
 	const res: TreeItem[] = [];
 
 	items.forEach( ( item ) => {
@@ -129,14 +150,32 @@ export const tree_convert_list = ( items: any[], id = 'id', title = 'title', id_
 		if ( !newItem.id_parent ) {
 			res.push( newItem );
 		} else {
-			const parent = tree_find_item( res, newItem.id_parent );
+			const parent = _tree_find_item( res, newItem.id_parent );
 			if ( parent ) {
 				parent.children?.push( newItem );
 			}
 		}
 	} );
 
-	tree_set_meta( res, '', 0 );
+	_tree_items_set_meta( res, '', 0 );
 
 	return res;
+};
+
+/**
+ * Converts a flat list of items into a tree structure.
+ *
+ * @param items - The list of items to convert.
+ * @param id - The name of the property that contains the item ID [default: 'id'].
+ * @param title - The name of the property that contains the item title [default: 'title'].
+ * @param id_parent - The name of the property that contains the ID of the item's parent [default: 'id_parent'].
+ *
+ * @returns The resulting tree structure.
+ */
+export const tree_convert_list = ( items: any[], id = 'id', title = 'title', id_parent = 'id_parent' ): Tree => {
+	const children = _tree_convert_list( items, id, title, id_parent );
+
+	return {
+		children,
+	};
 };
