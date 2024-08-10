@@ -169,6 +169,7 @@
 							title="Edit Item"
 						/>
 					{/if}
+					{console.log('=== canAdd: ', { canAdd, itemLevel: item.level, maxDepth })}
 					{#if canAdd && (item.level ?? 0) < maxDepth}
 						<Button
 							size="xs"

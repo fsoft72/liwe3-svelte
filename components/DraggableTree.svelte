@@ -31,6 +31,8 @@
 		showNew?: boolean;
 		newLabel?: string;
 
+		debug?: boolean;
+
 		// events
 		onbeforedraginto?: (source: TreeItem, target: TreeItem) => boolean;
 		oncreatenewitem?: (parentItem?: TreeItem) => Promise<TreeItem | undefined>;
@@ -43,7 +45,7 @@
 	}
 
 	let {
-		tree,
+		tree: origTree,
 		mode = 'mode1',
 		name = '',
 		maxDepth = 2,
@@ -52,6 +54,7 @@
 		canDelete = true,
 		showNew = true,
 		newLabel = 'New',
+		debug = false,
 
 		// events
 		onbeforedraginto = () => true,
@@ -60,7 +63,7 @@
 				resolve({
 					id: new Date().getTime().toString(),
 					id_parent: parentItem?.id ?? '',
-					name: `New Item ${wtree.children.length ?? 0}`,
+					name: `New Item ${tree.children.length ?? 0}`,
 					children: []
 				});
 			});
@@ -73,11 +76,11 @@
 		ondelitem
 	}: Props = $props();
 
-	let wtree: Tree = $state({ ...tree });
+	let tree: Tree = $state({ ...origTree });
 
 	const onReorder = (event: reorderEvent) => {
 		const { sourceId, targetId, pos } = event;
-		let tmpTree: Tree = { children: wtree.children };
+		let tmpTree: Tree = { children: tree.children };
 
 		const sourceItem = tree_find_item(tmpTree, sourceId);
 		const targetItem = tree_find_item(tmpTree, targetId);
@@ -120,22 +123,22 @@
 		}
 
 		// update the items
-		wtree.children = [...tmpTree.children];
+		tree.children = [...tmpTree.children];
 
-		tree_set_meta(wtree);
+		tree_set_meta(tree);
 
 		onreorder && onreorder({ sourceId, targetId, pos });
 	};
 
 	const onChange = () => {
 		console.log('=== Tree onChange');
-		tree_set_meta(wtree);
+		tree_set_meta(tree);
 
-		onchange && onchange(wtree);
+		onchange && onchange(tree);
 	};
 
 	const onAddItem = async (id_parent: string) => {
-		const newItem: TreeItem | undefined = await oncreatenewitem(tree_find_item(wtree, id_parent));
+		const newItem: TreeItem | undefined = await oncreatenewitem(tree_find_item(tree, id_parent));
 
 		console.log('=== addItem', { id_parent, newItem });
 
@@ -143,13 +146,13 @@
 
 		onadditem && onadditem(newItem);
 
-		tree_add_item(wtree, newItem, id_parent);
+		tree_add_item(tree, newItem, id_parent);
 
-		onchange && onchange(wtree);
+		onchange && onchange(tree);
 	};
 
 	const onEditItem = (id: string) => {
-		const item = tree_find_item(wtree, id);
+		const item = tree_find_item(tree, id);
 
 		console.log('=== editItem', { id, item });
 
@@ -159,7 +162,7 @@
 	};
 
 	const onDelItem = async (id: string) => {
-		const item = tree_find_item(wtree, id);
+		const item = tree_find_item(tree, id);
 
 		console.log('=== delItem', { id, item });
 
@@ -170,8 +173,8 @@
 
 		if (res) return;
 
-		tree_del_item(wtree, id);
-		onchange && onchange(wtree);
+		tree_del_item(tree, id);
+		onchange && onchange(tree);
 	};
 
 	const newItem = async (e: Event) => {
@@ -182,10 +185,10 @@
 
 		if (!newItem) return;
 
-		tree_add_item(wtree, newItem, '');
+		tree_add_item(tree, newItem, '');
 
 		onadditem && onadditem(newItem);
-		onchange && onchange(wtree);
+		onchange && onchange(tree);
 	};
 </script>
 
@@ -200,7 +203,7 @@
 
 	<DraggableTreeItem
 		{mode}
-		items={wtree.children}
+		items={tree.children}
 		{canAdd}
 		{canEdit}
 		{canDelete}
@@ -212,6 +215,11 @@
 		onchange={onChange}
 	/>
 </div>
+{#if debug}
+	<div class="debug">
+		<pre>{JSON.stringify(tree, null, 2)}</pre>
+	</div>
+{/if}
 
 <style>
 	.container {
@@ -232,5 +240,26 @@
 		display: flex;
 		justify-content: flex-end;
 		margin-bottom: 0.5rem;
+	}
+
+	.debug {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 50%;
+		max-width: 400px;
+
+		border: 1px solid var(--liwe3-border-color);
+		border-radius: var(--liwe3-border-radius);
+		padding: 0.5rem;
+		margin: 0.5rem;
+
+		max-height: 90vh;
+		overflow: auto;
+		scrollbar-width: thin;
+
+		pre {
+			font-size: 70%;
+		}
 	}
 </style>

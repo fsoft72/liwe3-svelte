@@ -73,13 +73,13 @@ const _tree_del_item = ( items: TreeItem[], id: string ): TreeItem[] => {
 	if ( parentItem ) parentItem.children = parentItem.children?.filter( ( item ) => item.id !== id );
 	else items = items.filter( ( item ) => item.id !== id );
 
-	_tree_items_set_meta( items, '', item.level ?? 0 );
-
 	return items;
 };
 
 export const tree_del_item = ( tree: Tree, id: string ): TreeItem[] => {
 	tree.children = _tree_del_item( tree.children, id );
+
+	tree_set_meta( tree );
 
 	return tree.children;
 };
@@ -108,13 +108,15 @@ const _tree_add_item = ( items: TreeItem[], item: TreeItem, id_parent: string ) 
 		items.push( item );
 	}
 
-	_tree_items_set_meta( items, '', 0 );
-
 	return items;
 };
 
 export const tree_add_item = ( tree: Tree, item: TreeItem, id_parent: string ): TreeItem[] => {
-	return _tree_add_item( tree.children, item, id_parent );
+	const res = _tree_add_item( tree.children, item, id_parent );
+
+	tree_set_meta( tree );
+
+	return res;
 };
 
 
@@ -128,8 +130,6 @@ export const tree_add_item = ( tree: Tree, item: TreeItem, id_parent: string ): 
  */
 export const tree_update_item = ( items: TreeItem[], item: TreeItem ) => {
 	const found = _tree_find_item( items, item.id );
-
-	console.log( '=== FOUND: ', found );
 
 	if ( !found ) return items;
 
