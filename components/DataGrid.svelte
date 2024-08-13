@@ -446,7 +446,7 @@
 
 {#snippet optionButtons(options: any)}
 	{#if options?.length > 0}
-		{#each options as option}
+		{#each options as option (option.id)}
 			<Button
 				key={option.id}
 				size="xs"
