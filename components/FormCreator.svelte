@@ -2,6 +2,7 @@
 	import type { IconSource } from 'svelte-hero-icons';
 
 	export type FormField = {
+		id?: string;
 		name: string;
 		type?: string;
 		label?: string;
@@ -32,35 +33,35 @@
 	type FormCreatorPlugin = {
 		name: string;
 		component: any;
+		extra?: Record<string, any>;
 	};
 
 	const formCreatorPlugins: Record<string, FormCreatorPlugin> = {};
 
-	export const formCreatorPluginRegister = (name: string, component: any) => {
+	export const formCreatorPluginRegister = (
+		name: string,
+		component: any,
+		extra?: Record<string, any>
+	) => {
 		name = name.toLowerCase();
-		formCreatorPlugins[name] = { name, component };
+		formCreatorPlugins[name] = { name, component, extra };
 	};
 
 	export const formCreatorPluginGet = (name: string) => {
 		name = name.toLowerCase();
-		return formCreatorPlugins[name];
+		const plug = formCreatorPlugins[name];
+
+		return plug;
 	};
 </script>
 
 <script lang="ts">
-	import Input from './Input.svelte';
-	import Button from './Button.svelte';
-	import TagInput from './TagInput.svelte';
-	import MarkdownInput from './MarkdownInput.svelte';
-	import DraggableTree from './DraggableTree.svelte';
 	import type { Size } from '$liwe3/types/types';
-	import ElementList from './ElementList.svelte';
 	import { addToast } from '$liwe3/stores/ToastStore.svelte';
-	import Select from 'svelte-select';
 	import { _ } from '$liwe3/stores/LocalizationStore';
 	import { has_one_perm, isTrue } from '$liwe3/utils/utils';
 	import { storeUser } from '$modules/user/store.svelte';
-	import Checkbox from './Checkbox.svelte';
+	import Button from '$liwe3/components/Button.svelte';
 
 	interface Props {
 		fields: FormField[];
@@ -77,7 +78,7 @@
 
 	let {
 		fields = [],
-		values = {},
+		values = $bindable({}),
 		submitLabel = 'Submit',
 		resetLabel = 'Reset',
 		showButtons = true,
@@ -85,10 +86,8 @@
 
 		// events
 		onsubmit,
-		onchange,
+		onchange
 	}: Props = $props();
-
-	let formId : HTMLFormElement;
 
 	const _check_required_fields = () => {
 		const required: string[] = [];
@@ -116,7 +115,7 @@
 				message:
 					$_('Please fill all required fields:<br /><ul><li>') +
 					missing.join('</li><li>') +
-					'</li></ul>',
+					'</li></ul>'
 			});
 
 			return;
@@ -135,6 +134,8 @@
 		} else {
 			value = e;
 		}
+
+		console.log('=== CHANGE: ', name, value);
 
 		const field = fields.find((f) => f.name === name);
 		const onChange = field?.onchange;
@@ -155,126 +156,36 @@
 
 		return v;
 	};
+</script>
 
-	const clearForm = () => {
-		formId.reset();
-	};
+{#snippet renderPlugin(plugin: FormCreatorPlugin, field: FormField)}
+	{#if plugin}
+		<plugin.component
+			this={plugin.component}
+			{_v}
+			{...plugin.extra ?? {}}
+			name={field.name}
+			value={_v(field)}
+			{field}
+			{...field?.extra ?? {}}
+			onchange={onChangeField}
+		/>
+	{/if}
+{/snippet}
 
- </script>
+<!--
+
+-->
 
 <div class="form">
-	<form onsubmit={handleSubmit} bind:this={formId}>
+	<form onsubmit={handleSubmit}>
 		<div class="liwe3-row">
 			{#each fields as field}
 				<div class={`liwe3-col${field?.col ?? 12} ${field?.align ? 'align-' + field?.align : ''}`}>
 					<div class="space">
 						{#if has_one_perm(storeUser, field?.perms ?? []) && !field?.hide}
-							{#if formCreatorPluginGet(field?.type ?? '---')}
-								<div class="title">{field?.label ?? ''}</div>
-								<svelte:component
-									this={formCreatorPluginGet(field?.type ?? '---').component}
-									{...field}
-									value={_v(field).toString()}
-									{...field?.extra ?? {}}
-									onchange={onChangeField}
-								/>
-							{:else if ['text', 'string'].indexOf(field?.type ?? '') > -1}
-								<Input
-									{...field}
-									{...field?.extra ?? {}}
-									name={field.name}
-									value={_v(field)}
-									type="text"
-									onchange={(e: any) => onChangeField(field.name, e)}
-								/>
-							{:else if field?.type === 'title'}
-								<div class="title">{field?.label ?? ''}</div>
-							{:else if field?.type === 'textarea'}
-								<div class="title">{field?.label ?? ''}</div>
-								<textarea
-									style="width: 100%;"
-									rows={10}
-									cols={40}
-									{...field}
-									{...field?.extra ?? {}}
-									name={field.name}
-									value={_v(field)}
-									onchange={(e: any) => onChangeField(field.name, e)}
-								></textarea>
-							{:else if field?.type === 'tags'}
-								<TagInput
-									name={field.name}
-									value={_v(field)}
-									{...field?.extra ?? {}}
-									onchange={(e: any) => onChangeField(field.name, e)}
-								/>
-							{:else if field?.type === 'markdown'}
-								<div class="title">{field?.label ?? ''}</div>
-								<MarkdownInput
-									name={field.name}
-									value={_v(field)}
-									{...field?.extra ?? {}}
-									onchange={(e: any) => onChangeField(field.name, e)}
-								/>
-							{:else if field?.type === 'element-list'}
-								<div class="title">{field?.label ?? ''}</div>
-								<ElementList
-									name={field.name}
-									value={_v(field)}
-									{...field?.extra ?? {}}
-									onchange={(e: any) => onChangeField(field.name, e.detail)}
-								/>
-							{:else if field?.type === 'draggable-tree'}
-								<DraggableTree
-									name={field.name}
-									value={_v(field)}
-									{...field?.extra ?? {}}
-									onchange={(e: any) => onChangeField(field.name, e)}
-								/>
-							{:else if field?.type === 'checkbox'}
-								<div class="simple-row">
-									<label for={field.name}>
-										<Checkbox
-											name={field.name}
-											checked={isTrue(_v(field))}
-											value="on"
-											{...field?.extra ?? {}}
-											onchange={(e: any) => onChangeField(field.name, e)}
-										/>
-										{field?.label ?? ''}
-									</label>
-								</div>
-							{:else if field?.type === 'hidden'}
-								<input type="hidden" name={field.name} value={_v(field)} />
-							{:else if field?.type === 'select'}
-								<div class="custom-select">
-									{#if field?.label ?? ''}
-										<div class="label">{field?.label ?? ''}</div>
-									{/if}
-									<div class="svelte-select mode3" style="width: 100%">
-										<Select
-											name={field.name}
-											value={_v(field)}
-											placeholder={field.placeholder}
-											{...field?.extra ?? {}}
-											on:change={(e: any) => onChangeField(field.name, e.detail.value)}
-											on:clear={() => onChangeField(field.name, '')}
-											items={field.options ?? []}
-										/>
-									</div>
-								</div>
-							{:else if field?.type === 'button'}
-								<Button {...field} {...field?.extra ?? {}} onclick={field?.onclick}>
-									{field.label}
-								</Button>
-							{:else}
-								<Input
-									{...field}
-									value={_v(field).toString()}
-									{...field?.extra ?? {}}
-									onchange={(e: any) => onChangeField(field.name, e)}
-								/>
-							{/if}
+							{@const p = formCreatorPluginGet(field?.type ?? '---')}
+							{@render renderPlugin(p, field)}
 						{/if}
 					</div>
 				</div>
@@ -283,13 +194,7 @@
 		{#if showButtons}
 			<div class="buttons">
 				{#if showReset}
-					<Button
-						mode="danger"
-						type="reset"
-						onclick={clearForm}
-					>
-					{resetLabel}
-				</Button>
+					<Button mode="danger" type="reset">{resetLabel}</Button>
 				{/if}
 				<Button mode="success" type="submit" onclick={handleSubmit}>{submitLabel}</Button>
 			</div>
@@ -298,7 +203,7 @@
 </div>
 
 <style>
-	label {
+	.label {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
@@ -358,7 +263,7 @@
 	.custom-select {
 		position: relative;
 		width: 100%;
-		/*top: -4px;*/
+		top: -4px;
 	}
 
 	.label {
