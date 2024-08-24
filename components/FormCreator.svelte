@@ -89,6 +89,8 @@
 		onchange,
 	}: Props = $props();
 
+	let formID: HTMLFormElement;
+
 	const _check_required_fields = () => {
 		const required: string[] = [];
 
@@ -156,6 +158,10 @@
 
 		return v;
 	};
+
+	const resetForm = () => {
+		formID.reset();
+	};
 </script>
 
 {#snippet renderPlugin(plugin: FormCreatorPlugin, field: FormField)}
@@ -178,7 +184,7 @@
 -->
 
 <div class="form">
-	<form onsubmit={handleSubmit}>
+	<form onsubmit={handleSubmit} bind:this={formID}>
 		<div class="liwe3-row">
 			{#each fields as field}
 				<div class={`liwe3-col${field?.col ?? 12} ${field?.align ? 'align-' + field?.align : ''}`}>
@@ -194,7 +200,7 @@
 		{#if showButtons}
 			<div class="buttons">
 				{#if showReset}
-					<Button mode="danger" type="reset">{resetLabel}</Button>
+					<Button mode="danger" type="reset" onclick={resetForm}>{resetLabel}</Button>
 				{/if}
 				<Button mode="success" type="submit" onclick={handleSubmit}>{submitLabel}</Button>
 			</div>
