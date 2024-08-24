@@ -1,4 +1,4 @@
-<script module lang="ts">
+<script context="module" lang="ts">
 	import type { IconSource } from 'svelte-hero-icons';
 
 	export type FormField = {
@@ -86,7 +86,7 @@
 
 		// events
 		onsubmit,
-		onchange
+		onchange,
 	}: Props = $props();
 
 	const _check_required_fields = () => {
@@ -115,7 +115,7 @@
 				message:
 					$_('Please fill all required fields:<br /><ul><li>') +
 					missing.join('</li><li>') +
-					'</li></ul>'
+					'</li></ul>',
 			});
 
 			return;
