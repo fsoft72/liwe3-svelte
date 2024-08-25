@@ -1,4 +1,4 @@
-<script module lang="ts">
+<script context="module" lang="ts">
 	import type { IconSource } from 'svelte-hero-icons';
 
 	export type FormField = {
