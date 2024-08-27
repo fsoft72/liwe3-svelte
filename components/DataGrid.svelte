@@ -4,6 +4,9 @@
 	import type { filterModes } from '$liwe3/utils/match_filter';
 
 	import type { IconSource } from 'svelte-hero-icons';
+	import Checkbox from './Checkbox.svelte';
+	import { format_date, toBool } from '$liwe3/utils/utils';
+	import Avatar from './Avatar.svelte';
 
 	export interface DataGridFieldExtra {
 		options?: { label: string; value: string }[];
@@ -37,12 +40,14 @@
 	}
 
 	export interface DataGridAction {
+		id?: string;
 		label?: string;
 		icon?: IconSource;
 		mode?: Color;
 		variant?: Variant;
 
-		onclick: (row: DataGridRow) => void;
+		onclick?: (row: DataGridRow) => void;
+		action?: (row: DataGridRow) => void;
 	}
 
 	export interface DataGridButton {
@@ -51,7 +56,9 @@
 		icon?: IconSource;
 		mode?: Color;
 		variant?: Variant;
-		action: () => void;
+		onclick: () => void;
+
+		action?: () => void;
 	}
 </script>
 
@@ -61,13 +68,24 @@
 		data: DataGridRow[];
 		actions?: DataGridAction[];
 
+		mode?: Color;
 		viewMode?: string;
 
 		// events
 		oncelledit?: (row: DataGridRow, field: string, oldValue: any, newValue: any) => void;
+
+		onupdatefield?: (row: DataGridRow, field_name: string, value: any) => void;
 	}
 
-	let { fields, data, actions, viewMode = 'comfy', oncelledit }: Props = $props();
+	let {
+		fields,
+		data,
+		actions,
+		mode = 'mode3',
+		viewMode = 'comfy',
+		oncelledit,
+		onupdatefield
+	}: Props = $props();
 
 	let sortField: string | null = $state(null);
 	let sortDirection: 'asc' | 'desc' = $state('asc');
@@ -126,7 +144,14 @@
 		if (newValue !== oldValue.toString()) {
 			const updatedRow = { ...row, [field]: newValue };
 			data[editingCell!.rowIndex] = updatedRow;
-			data = [...data]; // Trigger Svelte reactivity
+			// data = [...data]; // Trigger Svelte reactivity
+
+			if (onupdatefield) {
+				console.warn('=== WARN: onupdatefield is deprecated. Use oncelledit instead.');
+				onupdatefield(updatedRow, field, newValue);
+				return;
+			}
+
 			oncelledit?.(updatedRow, field, oldValue, newValue);
 		}
 
@@ -147,14 +172,16 @@
 		<thead>
 			<tr>
 				{#each fields as field}
-					<th onclick={() => sortData(field.name)}>
-						{field.name}
-						{#if field.sortable && sortField === field.name}
-							{sortDirection === 'asc' ? '▲' : '▼'}
-						{/if}
-						<!-- svelte-ignore a11y_no_static_element_interactions -->
-						<div class="resizer" onmousedown={(e) => startResize(e, field.name)}></div>
-					</th>
+					{#if !field.hidden}
+						<th onclick={() => sortData(field.name)}>
+							{field.name}
+							{#if field.sortable && sortField === field.name}
+								{sortDirection === 'asc' ? '▲' : '▼'}
+							{/if}
+							<!-- svelte-ignore a11y_no_static_element_interactions -->
+							<div class="resizer" onmousedown={(e) => startResize(e, field.name)}></div>
+						</th>
+					{/if}
 				{/each}
 				{#if actions}
 					<th class="actions-header">Actions</th>
@@ -165,23 +192,85 @@
 			{#each data as row, rowIndex}
 				<tr>
 					{#each fields as field}
-						<td ondblclick={() => startEditing(rowIndex, field.name)}>
-							{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
-								<input
-									type="text"
-									value={row[field.name]}
-									onblur={(e) => finishEditing(row, field.name, e)}
-									onkeydown={(e) => handleKeyDown(e, row, field.name)}
-								/>
-							{:else}
-								{row[field.name]}
-							{/if}
-						</td>
+						{#if !field.hidden}
+							<td ondblclick={() => startEditing(rowIndex, field.name)}>
+								{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
+									<input
+										type="text"
+										value={row[field.name]}
+										onblur={(e) => finishEditing(row, field.name, e)}
+										onkeydown={(e) => handleKeyDown(e, row, field.name)}
+									/>
+								{:else if field.render}
+									{#if field.onclick}
+										<Button
+											mode="mode4"
+											size="sm"
+											variant="outline"
+											onclick={() => field.onclick && field.onclick(row)}
+										>
+											{@html field.render(row[field.name], row)}
+										</Button>
+									{:else}
+										{@html field.render(row[field.name], row)}
+									{/if}
+								{:else if ['bool', 'boolean', 'checkbox'].includes(field.type)}
+									<Checkbox
+										{mode}
+										checked={toBool(row[field.name])}
+										onchange={(e: any) => {
+											row[field.name] = e.target.checked;
+											if (onupdatefield) {
+												console.warn(
+													'=== WARN: onupdatefield is deprecated. Use oncelledit instead.'
+												);
+												onupdatefield(row, field.name, e.target.checked);
+												return;
+											}
+											oncelledit?.(row, field.name, !e.target.checked, e.target.checked);
+										}}
+									/>
+								{:else if field.onclick}
+									<Button
+										mode="mode4"
+										size="sm"
+										variant="outline"
+										onclick={() => field.onclick && field.onclick(row)}
+									>
+										{row[field.name]}
+									</Button>
+								{:else if field.type == 'date'}
+									{#if field.extra?.dateFormat}
+										{format_date(row[field.name], field.extra.dateFormat)}
+									{:else}
+										{row[field.name]}
+									{/if}
+								{:else if field.pre}
+									<pre>{row[field.name]}</pre>
+								{:else if field.type == 'avatar'}
+									<Avatar size="64px" value={row} />
+								{:else}
+									{row[field.name]}
+								{/if}
+							</td>
+						{/if}
 					{/each}
 					{#if actions}
 						<td class="actions-cell">
 							{#each actions as action}
-								<Button size="xs" onclick={() => action.onclick(row)}>{action.label}</Button>
+								<Button
+									size="xs"
+									onclick={() => {
+										if (action.action) {
+											console.warn(
+												"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
+											);
+											action.action(row);
+											return;
+										}
+										action.onclick && action.onclick(row);
+									}}>{action.label}</Button
+								>
 							{/each}
 						</td>
 					{/if}
@@ -238,12 +327,12 @@
 	th,
 	td {
 		text-align: left;
-		background-color: var(--liwe3-darker-paper);
 		border: 1px solid var(--liwe3-secondary-color);
 	}
 
 	th {
 		padding: 8px;
+		background-color: var(--liwe3-darker-paper);
 	}
 
 	.condensed td {
@@ -271,20 +360,16 @@
 		max-height: 2rem;
 	}
 
+	tr:hover {
+		background-color: var(--liwe3-lighter-paper) !important;
+	}
+
 	td {
 		border-right: 1px solid var(--liwe3-button-border);
 	}
 
 	tbody tr:nth-child(even) {
-		background-color: var(--liwe3-darker-primary-color);
-	}
-
-	.dataview tr:hover {
-		background-color: red !important;
-	}
-
-	td:hover {
-		background-color: yellow;
+		background-color: var(--liwe3-darker-paper);
 	}
 
 	.resizer {
