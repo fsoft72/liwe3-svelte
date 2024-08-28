@@ -51,7 +51,7 @@
 	}
 
 	export interface DataGridButton {
-		id: string;
+		id?: string;
 		label?: string;
 		icon?: IconSource;
 		mode?: Color;
@@ -67,7 +67,9 @@
 		fields: DataGridField[];
 		data: DataGridRow[];
 		actions?: DataGridAction[];
+		buttons?: DataGridButton[];
 
+		title?: string; // DataGrid title
 		mode?: Color;
 		viewMode?: string;
 
@@ -79,8 +81,10 @@
 
 	let {
 		fields,
-		data,
+		data: _data,
 		actions,
+		buttons,
+		title,
 		mode = 'mode3',
 		viewMode = 'comfy',
 		oncelledit,
@@ -91,6 +95,7 @@
 	let sortDirection: 'asc' | 'desc' = $state('asc');
 	let tableElement: HTMLTableElement | null = $state(null);
 	let editingCell: { rowIndex: number; field: string } | null = $state(null);
+	let data = $state(_data);
 
 	function sortData(field: string): void {
 		const fieldDef = fields.find((f) => f.name === field);
@@ -165,9 +170,49 @@
 			editingCell = null;
 		}
 	}
+
+	const viewModes = ['condensed', 'comfy', 'large'];
+	const changeViewMode = (mode: string) => {
+		viewMode = mode;
+	};
 </script>
 
 <div class="dataview">
+	{#if title || buttons}
+		<div class="title-bar">
+			<div class="title">
+				{title}
+			</div>
+
+			<div class="view-modes">
+				{#each viewModes as vm}
+					<Button
+						mode={vm == viewMode ? 'mode4' : 'mode1'}
+						onclick={() => changeViewMode(vm)}
+						size="xs"
+					>
+						{vm}
+					</Button>
+				{/each}
+			</div>
+
+			{#if buttons}
+				<div class="buttons">
+					{#each buttons as button}
+						<Button
+							size="xs"
+							mode={button.mode || mode}
+							variant={button.variant}
+							icon={button.icon}
+							onclick={button.onclick}
+						>
+							{button.label}
+						</Button>
+					{/each}
+				</div>
+			{/if}
+		</div>
+	{/if}
 	<table bind:this={tableElement} class={viewMode}>
 		<thead>
 			<tr>
@@ -260,6 +305,9 @@
 							{#each actions as action}
 								<Button
 									size="xs"
+									mode={action.mode || mode}
+									variant={action.variant}
+									icon={action.icon}
 									onclick={() => {
 										if (action.action) {
 											console.warn(
@@ -269,7 +317,7 @@
 											return;
 										}
 										action.onclick && action.onclick(row);
-									}}>{action.label}</Button
+									}}>{action.label ?? ''}</Button
 								>
 							{/each}
 						</td>
@@ -304,6 +352,20 @@
 
 		font-size: var(--table-font-size);
 		font-family: var(--table-font-family);
+	}
+
+	.title-bar {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		padding: 4px;
+
+		background-color: var(--liwe3-darker-paper);
+	}
+
+	.title {
+		font-weight: bold;
 	}
 
 	table {
