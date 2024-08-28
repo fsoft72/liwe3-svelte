@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
 	import type { IconSource } from 'svelte-hero-icons';
 
 	export type FormField = {
@@ -86,7 +86,7 @@
 
 		// events
 		onsubmit,
-		onchange,
+		onchange
 	}: Props = $props();
 
 	let formID: HTMLFormElement;
@@ -117,7 +117,7 @@
 				message:
 					$_('Please fill all required fields:<br /><ul><li>') +
 					missing.join('</li><li>') +
-					'</li></ul>',
+					'</li></ul>'
 			});
 
 			return;
@@ -178,10 +178,6 @@
 		/>
 	{/if}
 {/snippet}
-
-<!--
-
--->
 
 <div class="form">
 	<form onsubmit={handleSubmit} bind:this={formID}>
