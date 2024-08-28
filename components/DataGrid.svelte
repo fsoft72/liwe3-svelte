@@ -95,7 +95,7 @@
 	let sortDirection: 'asc' | 'desc' = $state('asc');
 	let tableElement: HTMLTableElement | null = $state(null);
 	let editingCell: { rowIndex: number; field: string } | null = $state(null);
-	let data = $state(_data);
+	let data: DataGridRow[] = $state(_data);
 
 	function sortData(field: string): void {
 		const fieldDef = fields.find((f) => f.name === field);
@@ -302,24 +302,26 @@
 					{/each}
 					{#if actions}
 						<td class="actions-cell">
-							{#each actions as action}
-								<Button
-									size="xs"
-									mode={action.mode || mode}
-									variant={action.variant}
-									icon={action.icon}
-									onclick={() => {
-										if (action.action) {
-											console.warn(
-												"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
-											);
-											action.action(row);
-											return;
-										}
-										action.onclick && action.onclick(row);
-									}}>{action.label ?? ''}</Button
-								>
-							{/each}
+							<div class="actions">
+								{#each actions as action}
+									<Button
+										size="xs"
+										mode={action.mode || mode}
+										variant={action.variant}
+										icon={action.icon}
+										onclick={() => {
+											if (action.action) {
+												console.warn(
+													"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
+												);
+												action.action(row);
+												return;
+											}
+											action.onclick && action.onclick(row);
+										}}>{action.label ?? ''}</Button
+									>
+								{/each}
+							</div>
 						</td>
 					{/if}
 				</tr>
@@ -366,6 +368,13 @@
 
 	.title {
 		font-weight: bold;
+	}
+
+	.buttons,
+	.actions {
+		display: flex;
+		flex-direction: row;
+		gap: 0.5rem;
 	}
 
 	table {
