@@ -1,7 +1,5 @@
 <script lang="ts">
-	import type { FormField } from '$lib/FormCreator2.svelte';
-	import Input from '$liwe3/components/Input.svelte';
-	import { isTrue } from '$liwe3/utils/utils';
+	import type { FormField } from '../FormCreator.svelte';
 
 	interface Props {
 		field: FormField;

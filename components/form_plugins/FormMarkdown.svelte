@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { FormField } from '$lib/FormCreator2.svelte';
 	import MarkdownInput from '$liwe3/components/MarkdownInput.svelte';
+	import type { FormField } from '../FormCreator.svelte';
 
 	interface Props {
 		field: FormField;

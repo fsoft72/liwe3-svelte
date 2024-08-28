@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { FormField } from '$lib/FormCreator2.svelte';
 	import DraggableTree from '$liwe3/components/DraggableTree.svelte';
+	import type { FormField } from '../FormCreator.svelte';
 
 	interface Props {
 		field: FormField;
@@ -20,7 +20,7 @@
 
 <DraggableTree
 	name={field.name}
-	value={_v(field)}
+	tree={_v(field)}
 	{...field?.extra ?? {}}
 	onchange={(e: any) => onchange(field.name, e)}
 />

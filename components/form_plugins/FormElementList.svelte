@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { FormField } from '$lib/FormCreator2.svelte';
 	import ElementList from '$liwe3/components/ElementList.svelte';
+	import type { FormField } from '../FormCreator.svelte';
 
 	interface Props {
 		field: FormField;
