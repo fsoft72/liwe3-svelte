@@ -78,14 +78,19 @@
 		mode?: Color;
 		viewMode?: string;
 
+		// paginator
 		maxRowsPerPage?: number;
 		page?: number;
+		totalRows?: number;
 
 		// events
 		oncelledit?: (row: DataGridRow, field: string, oldValue: any, newValue: any) => void;
 
 		onupdatefield?: (row: DataGridRow, field_name: string, value: any) => void;
 		onfilterchange?: (filters: Record<string, any>) => void;
+
+		// paginator event
+		onpagechange?: (page: number, rows: number) => void;
 	}
 
 	let {
@@ -97,11 +102,19 @@
 		title,
 		mode = $bindable('mode3'),
 		viewMode = $bindable('comfy'),
+
+		// paginator
 		page = $bindable(1),
-		maxRowsPerPage = $bindable(15),
+		totalRows,
+		maxRowsPerPage = $bindable(10),
+
+		// events
 		oncelledit,
 		onupdatefield,
-		onfilterchange
+		onfilterchange,
+
+		// paginator event
+		onpagechange
 	}: Props = $props();
 
 	let sortField: string | null = $state(null);
@@ -158,7 +171,11 @@
 		return internalFilteredData.slice((page - 1) * maxRowsPerPage, page * maxRowsPerPage);
 	});
 
-	let totRows = $derived(internalFilteredData.length);
+	let totRows = $derived.by(() => {
+		if (totalRows) return totalRows;
+
+		return internalFilteredData.length;
+	});
 
 	function sortData(field: string): void {
 		const fieldDef = fields.find((f) => f.name === field);
@@ -287,6 +304,15 @@
 		_do_filter(filters);
 	};
 
+	const internalPageChange = (page_: number, rows: number) => {
+		if (onpagechange) {
+			onpagechange(page_, rows);
+			return;
+		}
+
+		page = page_;
+	};
+
 	onMount(() => {
 		// console.log('=== DataGrid mounted');
 		// get the container height
@@ -363,7 +389,6 @@
 									onchange={filter_change}
 									checked={toBool(filters[field.name]?.value)}
 								/>
-								/>
 							{/if}
 						{/if}
 					</td>
@@ -417,7 +442,7 @@
 					{#each fields as field}
 						{#if !field.hidden}
 							<th onclick={() => sortData(field.name)}>
-								{field.name}
+								{field.label || field.name}
 								{#if field.sortable && sortField === field.name}
 									{sortDirection === 'asc' ? '▲' : '▼'}
 								{/if}
@@ -532,7 +557,7 @@
 		bind:this={paginator}
 		total={totRows}
 		rows={maxRowsPerPage}
-		onpagechange={(page_, rows) => (page = page_)}
+		onpagechange={internalPageChange}
 	/>
 </div>
 
