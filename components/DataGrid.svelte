@@ -548,7 +548,8 @@
 		width: 100%;
 		height: 100%;
 
-		border: 1px solid yellow;
+		border: 1px solid var(--liwe3-button-border);
+		border-radius: var(--liwe3-border-radius);
 	}
 
 	.dataview {
@@ -561,13 +562,13 @@
 		scrollbar-width: thin;
 		scrollbar-color: var(--liwe3-darker-paper) var(--liwe3-paper);
 
-		border: 1px solid var(--liwe3-button-border);
-		border-radius: var(--liwe3-border-radius);
 		background-color: var(--liwe3-paper);
 		color: var(--liwe3-color);
 
 		font-size: var(--table-font-size);
 		font-family: var(--table-font-family);
+
+		border-radius: var(--liwe3-border-radius);
 	}
 
 	.title-bar {
