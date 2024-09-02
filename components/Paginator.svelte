@@ -21,6 +21,10 @@
 		page = num;
 		onpagechange && onpagechange(page, rows);
 	};
+
+	export const resetPage = () => {
+		setPage(1);
+	};
 </script>
 
 <div class="paginator">

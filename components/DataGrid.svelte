@@ -9,6 +9,7 @@
 	import Avatar from './Avatar.svelte';
 	import Input from './Input.svelte';
 	import Paginator from './Paginator.svelte';
+	import { onMount } from 'svelte';
 
 	export interface DataGridFieldExtra {
 		options?: { label: string; value: string }[];
@@ -109,11 +110,23 @@
 	let editingCell: { rowIndex: number; field: string } | null = $state(null);
 	let data: DataGridRow[] = $state($state.snapshot(_data));
 	let has_filters = fields.some((f) => f.filterable);
+	let dataView: HTMLDivElement | null = $state(null);
+	let paginator: any = $state(null);
+
+	$effect(() => {
+		data = $state.snapshot(_data);
+	});
+
+	$effect(() => {
+		if (page) dataView?.scrollTo(0, 0);
+	});
 
 	let internalFilteredData: DataGridRow[] = $derived.by(() => {
 		// if user defined onfilterchange, we don't filter the data
 		if (onfilterchange) return data;
 		if (!filters || Object.keys(filters).length == 0) return data;
+
+		console.log('=== internal filtered');
 
 		const res: DataGridRow[] = [];
 
@@ -134,6 +147,9 @@
 
 			if (add) res.push(row);
 		});
+
+		// reset page
+		// paginator.resetPage();
 
 		return res;
 	});
@@ -223,13 +239,9 @@
 		viewMode = mode;
 	};
 
-	const _internal_onfilterchange = (filters: Record<string, any>) => {
-		console.log('=== INTERNAL FILTER CHANGE: ', filters);
-	};
-
 	const _do_filter = (filters: Record<string, any>) => {
+		paginator.resetPage();
 		if (onfilterchange) onfilterchange(filters);
-		else _internal_onfilterchange(filters);
 	};
 
 	const filter_change = (e: Event) => {
@@ -238,8 +250,6 @@
 		const field = fields.find((f) => f.name === name);
 		let value: any = input.value;
 		let mode = field?.searchMode || filterModes.contains;
-
-		console.log('=== FILTER CHANGE: ', { name, field, value, mode, type: input.type });
 
 		if (name.endsWith('_1')) {
 			mode = filterModes['>='];
@@ -276,6 +286,18 @@
 
 		_do_filter(filters);
 	};
+
+	onMount(() => {
+		// console.log('=== DataGrid mounted');
+		// get the container height
+		if (dataView) {
+			const container = dataView.parentElement;
+			if (container) {
+				const height = container.clientHeight;
+				dataView.style.height = `${height - 40}px`;
+			}
+		}
+	});
 </script>
 
 {#snippet filtersRow()}
@@ -353,7 +375,7 @@
 {/snippet}
 
 <div class="container">
-	<div class="dataview">
+	<div bind:this={dataView} class="dataview">
 		{#if title || buttons}
 			<div class="title-bar">
 				<div class="title">
@@ -506,7 +528,12 @@
 			</tbody>
 		</table>
 	</div>
-	<Paginator total={totRows} rows={maxRowsPerPage} onpagechange={(page_, rows) => (page = page_)} />
+	<Paginator
+		bind:this={paginator}
+		total={totRows}
+		rows={maxRowsPerPage}
+		onpagechange={(page_, rows) => (page = page_)}
+	/>
 </div>
 
 <style>
@@ -516,11 +543,19 @@
 		--table-font-family: var(--liwe3-main-font-family);
 	}
 
+	.container {
+		position: relative;
+		width: 100%;
+		height: 100%;
+
+		border: 1px solid yellow;
+	}
+
 	.dataview {
 		position: relative;
 
 		width: 100%;
-		height: 400px; /* Set a fixed height or use a responsive value */
+		height: 100%; /* Set a fixed height or use a responsive value */
 
 		overflow: auto;
 		scrollbar-width: thin;
