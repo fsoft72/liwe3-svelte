@@ -8,6 +8,7 @@
 	import { format_date, toBool } from '$liwe3/utils/utils';
 	import Avatar from './Avatar.svelte';
 	import Input from './Input.svelte';
+	import Paginator from './Paginator.svelte';
 
 	export interface DataGridFieldExtra {
 		options?: { label: string; value: string }[];
@@ -76,6 +77,9 @@
 		mode?: Color;
 		viewMode?: string;
 
+		maxRowsPerPage?: number;
+		page?: number;
+
 		// events
 		oncelledit?: (row: DataGridRow, field: string, oldValue: any, newValue: any) => void;
 
@@ -90,8 +94,10 @@
 		actions,
 		buttons,
 		title,
-		mode = 'mode3',
-		viewMode = 'comfy',
+		mode = $bindable('mode3'),
+		viewMode = $bindable('comfy'),
+		page = $bindable(1),
+		maxRowsPerPage = $bindable(15),
 		oncelledit,
 		onupdatefield,
 		onfilterchange
@@ -131,6 +137,12 @@
 
 		return res;
 	});
+
+	let paginatedData: DataGridRow[] = $derived.by(() => {
+		return internalFilteredData.slice((page - 1) * maxRowsPerPage, page * maxRowsPerPage);
+	});
+
+	let totRows = $derived(internalFilteredData.length);
 
 	function sortData(field: string): void {
 		const fieldDef = fields.find((f) => f.name === field);
@@ -340,158 +352,161 @@
 	{/if}
 {/snippet}
 
-<div class="dataview">
-	{#if title || buttons}
-		<div class="title-bar">
-			<div class="title">
-				{title}
-			</div>
+<div class="container">
+	<div class="dataview">
+		{#if title || buttons}
+			<div class="title-bar">
+				<div class="title">
+					{title}
+				</div>
 
-			<div class="view-modes">
-				{#each viewModes as vm}
-					<Button
-						mode={vm == viewMode ? 'mode4' : 'mode1'}
-						onclick={() => changeViewMode(vm)}
-						size="xs"
-					>
-						{vm}
-					</Button>
-				{/each}
-			</div>
-
-			{#if buttons}
-				<div class="buttons">
-					{#each buttons as button}
+				<div class="view-modes">
+					{#each viewModes as vm}
 						<Button
+							mode={vm == viewMode ? 'mode4' : 'mode1'}
+							onclick={() => changeViewMode(vm)}
 							size="xs"
-							mode={button.mode || mode}
-							variant={button.variant}
-							icon={button.icon}
-							onclick={button.onclick}
 						>
-							{button.label}
+							{vm}
 						</Button>
 					{/each}
 				</div>
-			{/if}
-		</div>
-	{/if}
-	<table bind:this={tableElement} class={viewMode}>
-		<thead>
-			<tr>
-				{#each fields as field}
-					{#if !field.hidden}
-						<th onclick={() => sortData(field.name)}>
-							{field.name}
-							{#if field.sortable && sortField === field.name}
-								{sortDirection === 'asc' ? '▲' : '▼'}
-							{/if}
-							<!-- svelte-ignore a11y_no_static_element_interactions -->
-							<div class="resizer" onmousedown={(e) => startResize(e, field.name)}></div>
-						</th>
-					{/if}
-				{/each}
-				{#if actions}
-					<th class="actions-header">Actions</th>
+
+				{#if buttons}
+					<div class="buttons">
+						{#each buttons as button}
+							<Button
+								size="xs"
+								mode={button.mode || mode}
+								variant={button.variant}
+								icon={button.icon}
+								onclick={button.onclick}
+							>
+								{button.label}
+							</Button>
+						{/each}
+					</div>
 				{/if}
-			</tr>
-			{@render filtersRow()}
-		</thead>
-		<tbody>
-			{#each internalFilteredData as row, rowIndex}
+			</div>
+		{/if}
+		<table bind:this={tableElement} class={viewMode}>
+			<thead>
 				<tr>
 					{#each fields as field}
 						{#if !field.hidden}
-							<td ondblclick={() => startEditing(rowIndex, field.name)}>
-								{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
-									<input
-										type="text"
-										value={row[field.name]}
-										onblur={(e) => finishEditing(row, field.name, e)}
-										onkeydown={(e) => handleKeyDown(e, row, field.name)}
-									/>
-								{:else if field.render}
-									{#if field.onclick}
+							<th onclick={() => sortData(field.name)}>
+								{field.name}
+								{#if field.sortable && sortField === field.name}
+									{sortDirection === 'asc' ? '▲' : '▼'}
+								{/if}
+								<!-- svelte-ignore a11y_no_static_element_interactions -->
+								<div class="resizer" onmousedown={(e) => startResize(e, field.name)}></div>
+							</th>
+						{/if}
+					{/each}
+					{#if actions}
+						<th class="actions-header">Actions</th>
+					{/if}
+				</tr>
+				{@render filtersRow()}
+			</thead>
+			<tbody>
+				{#each paginatedData as row, rowIndex}
+					<tr>
+						{#each fields as field}
+							{#if !field.hidden}
+								<td ondblclick={() => startEditing(rowIndex, field.name)}>
+									{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
+										<input
+											type="text"
+											value={row[field.name]}
+											onblur={(e) => finishEditing(row, field.name, e)}
+											onkeydown={(e) => handleKeyDown(e, row, field.name)}
+										/>
+									{:else if field.render}
+										{#if field.onclick}
+											<Button
+												mode="mode4"
+												size="sm"
+												variant="outline"
+												onclick={() => field.onclick && field.onclick(row)}
+											>
+												{@html field.render(row[field.name], row)}
+											</Button>
+										{:else}
+											{@html field.render(row[field.name], row)}
+										{/if}
+									{:else if ['bool', 'boolean', 'checkbox'].includes(field.type)}
+										<Checkbox
+											{mode}
+											checked={toBool(row[field.name])}
+											onchange={(e: any) => {
+												row[field.name] = e.target.checked;
+												if (onupdatefield) {
+													console.warn(
+														'=== WARN: onupdatefield is deprecated. Use oncelledit instead.'
+													);
+													onupdatefield(row, field.name, e.target.checked);
+													return;
+												}
+												oncelledit?.(row, field.name, !e.target.checked, e.target.checked);
+											}}
+										/>
+									{:else if field.onclick}
 										<Button
 											mode="mode4"
 											size="sm"
 											variant="outline"
 											onclick={() => field.onclick && field.onclick(row)}
 										>
-											{@html field.render(row[field.name], row)}
+											{row[field.name]}
 										</Button>
-									{:else}
-										{@html field.render(row[field.name], row)}
-									{/if}
-								{:else if ['bool', 'boolean', 'checkbox'].includes(field.type)}
-									<Checkbox
-										{mode}
-										checked={toBool(row[field.name])}
-										onchange={(e: any) => {
-											row[field.name] = e.target.checked;
-											if (onupdatefield) {
-												console.warn(
-													'=== WARN: onupdatefield is deprecated. Use oncelledit instead.'
-												);
-												onupdatefield(row, field.name, e.target.checked);
-												return;
-											}
-											oncelledit?.(row, field.name, !e.target.checked, e.target.checked);
-										}}
-									/>
-								{:else if field.onclick}
-									<Button
-										mode="mode4"
-										size="sm"
-										variant="outline"
-										onclick={() => field.onclick && field.onclick(row)}
-									>
-										{row[field.name]}
-									</Button>
-								{:else if field.type == 'date'}
-									{#if field.extra?.dateFormat}
-										{format_date(row[field.name], field.extra.dateFormat)}
+									{:else if field.type == 'date'}
+										{#if field.extra?.dateFormat}
+											{format_date(row[field.name], field.extra.dateFormat)}
+										{:else}
+											{row[field.name]}
+										{/if}
+									{:else if field.pre}
+										<pre>{row[field.name]}</pre>
+									{:else if field.type == 'avatar'}
+										<Avatar size="64px" value={row} />
 									{:else}
 										{row[field.name]}
 									{/if}
-								{:else if field.pre}
-									<pre>{row[field.name]}</pre>
-								{:else if field.type == 'avatar'}
-									<Avatar size="64px" value={row} />
-								{:else}
-									{row[field.name]}
-								{/if}
+								</td>
+							{/if}
+						{/each}
+						{#if actions}
+							<td class="actions-cell">
+								<div class="actions">
+									{#each actions as action}
+										<Button
+											size="xs"
+											mode={action.mode || mode}
+											variant={action.variant}
+											icon={action.icon}
+											onclick={() => {
+												if (action.action) {
+													console.warn(
+														"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
+													);
+													action.action(row);
+													return;
+												}
+												action.onclick && action.onclick(row);
+											}}>{action.label ?? ''}</Button
+										>
+									{/each}
+								</div>
 							</td>
 						{/if}
-					{/each}
-					{#if actions}
-						<td class="actions-cell">
-							<div class="actions">
-								{#each actions as action}
-									<Button
-										size="xs"
-										mode={action.mode || mode}
-										variant={action.variant}
-										icon={action.icon}
-										onclick={() => {
-											if (action.action) {
-												console.warn(
-													"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
-												);
-												action.action(row);
-												return;
-											}
-											action.onclick && action.onclick(row);
-										}}>{action.label ?? ''}</Button
-									>
-								{/each}
-							</div>
-						</td>
-					{/if}
-				</tr>
-			{/each}
-		</tbody>
-	</table>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+	<Paginator total={totRows} rows={maxRowsPerPage} onpagechange={(page_, rows) => (page = page_)} />
 </div>
 
 <style>
