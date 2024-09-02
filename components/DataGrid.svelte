@@ -101,8 +101,36 @@
 	let sortDirection: 'asc' | 'desc' = $state('asc');
 	let tableElement: HTMLTableElement | null = $state(null);
 	let editingCell: { rowIndex: number; field: string } | null = $state(null);
-	let data: DataGridRow[] = $state(_data);
+	let data: DataGridRow[] = $state($state.snapshot(_data));
 	let has_filters = fields.some((f) => f.filterable);
+
+	let internalFilteredData: DataGridRow[] = $derived.by(() => {
+		// if user defined onfilterchange, we don't filter the data
+		if (onfilterchange) return data;
+		if (!filters || Object.keys(filters).length == 0) return data;
+
+		const res: DataGridRow[] = [];
+
+		data.forEach((row) => {
+			let add = true;
+
+			for (const field in filters) {
+				const filter = filters[field];
+
+				if (filter.mode == filterModes.contains) {
+					if (filter) {
+						if (!row[field] || row[field].toLowerCase().indexOf(filter.value.toLowerCase()) == -1) {
+							add = false;
+						}
+					}
+				}
+			}
+
+			if (add) res.push(row);
+		});
+
+		return res;
+	});
 
 	function sortData(field: string): void {
 		const fieldDef = fields.find((f) => f.name === field);
@@ -183,6 +211,15 @@
 		viewMode = mode;
 	};
 
+	const _internal_onfilterchange = (filters: Record<string, any>) => {
+		console.log('=== INTERNAL FILTER CHANGE: ', filters);
+	};
+
+	const _do_filter = (filters: Record<string, any>) => {
+		if (onfilterchange) onfilterchange(filters);
+		else _internal_onfilterchange(filters);
+	};
+
 	const filter_change = (e: Event) => {
 		const input = e.target as HTMLInputElement;
 		const name = input.name.replace('f_', '');
@@ -204,8 +241,7 @@
 			delete nf[name];
 
 			filters = nf;
-			onfilterchange && onfilterchange(filters);
-			return;
+			return _do_filter(filters);
 		} else if (input.type == 'checkbox' && toBool(value) == true) {
 			value = true;
 		}
@@ -226,7 +262,7 @@
 
 		filters = new_filters;
 
-		onfilterchange && onfilterchange(filters);
+		_do_filter(filters);
 	};
 </script>
 
@@ -362,7 +398,7 @@
 			{@render filtersRow()}
 		</thead>
 		<tbody>
-			{#each data as row, rowIndex}
+			{#each internalFilteredData as row, rowIndex}
 				<tr>
 					{#each fields as field}
 						{#if !field.hidden}
