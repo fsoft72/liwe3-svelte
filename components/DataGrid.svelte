@@ -1,12 +1,13 @@
 <script module lang="ts">
 	import Button from '$liwe3/components/Button.svelte';
 	import type { Color, Variant } from '$liwe3/types/types';
-	import type { filterModes } from '$liwe3/utils/match_filter';
+	import { filterModes } from '$liwe3/utils/match_filter';
 
 	import type { IconSource } from 'svelte-hero-icons';
 	import Checkbox from './Checkbox.svelte';
 	import { format_date, toBool } from '$liwe3/utils/utils';
 	import Avatar from './Avatar.svelte';
+	import Input from './Input.svelte';
 
 	export interface DataGridFieldExtra {
 		options?: { label: string; value: string }[];
@@ -69,6 +70,8 @@
 		actions?: DataGridAction[];
 		buttons?: DataGridButton[];
 
+		filters?: Record<string, any>;
+
 		title?: string; // DataGrid title
 		mode?: Color;
 		viewMode?: string;
@@ -77,18 +80,21 @@
 		oncelledit?: (row: DataGridRow, field: string, oldValue: any, newValue: any) => void;
 
 		onupdatefield?: (row: DataGridRow, field_name: string, value: any) => void;
+		onfilterchange?: (filters: Record<string, any>) => void;
 	}
 
 	let {
 		fields,
 		data: _data,
+		filters = $bindable({}),
 		actions,
 		buttons,
 		title,
 		mode = 'mode3',
 		viewMode = 'comfy',
 		oncelledit,
-		onupdatefield
+		onupdatefield,
+		onfilterchange
 	}: Props = $props();
 
 	let sortField: string | null = $state(null);
@@ -96,6 +102,7 @@
 	let tableElement: HTMLTableElement | null = $state(null);
 	let editingCell: { rowIndex: number; field: string } | null = $state(null);
 	let data: DataGridRow[] = $state(_data);
+	let has_filters = fields.some((f) => f.filterable);
 
 	function sortData(field: string): void {
 		const fieldDef = fields.find((f) => f.name === field);
@@ -175,7 +182,127 @@
 	const changeViewMode = (mode: string) => {
 		viewMode = mode;
 	};
+
+	const filter_change = (e: Event) => {
+		const input = e.target as HTMLInputElement;
+		const name = input.name.replace('f_', '');
+		const field = fields.find((f) => f.name === name);
+		let value: any = input.value;
+		let mode = field?.searchMode || filterModes.contains;
+
+		console.log('=== FILTER CHANGE: ', { name, field, value, mode, type: input.type });
+
+		if (name.endsWith('_1')) {
+			mode = filterModes['>='];
+		} else if (name.endsWith('_2')) {
+			mode = filterModes['<='];
+		}
+
+		// we add to the query only checkboxes that are set to true
+		if (input.type == 'checkbox' && toBool(value) == false) {
+			const nf = { ...filters };
+			delete nf[name];
+
+			filters = nf;
+			onfilterchange && onfilterchange(filters);
+			return;
+		} else if (input.type == 'checkbox' && toBool(value) == true) {
+			value = true;
+		}
+
+		const new_filters = {
+			...filters,
+			[name]: {
+				mode,
+				value
+			}
+		};
+
+		// remove from new_filters the filters that have an empty value
+		for (const key in new_filters) {
+			const filter = new_filters[key];
+			if (!filter.value) delete new_filters[key];
+		}
+
+		filters = new_filters;
+
+		onfilterchange && onfilterchange(filters);
+	};
 </script>
+
+{#snippet filtersRow()}
+	<!-- filters -->
+	{#if has_filters}
+		<tr>
+			{#each fields as field}
+				{#if !field.hidden}
+					<td class="filter" style={`width: ${field.width || 'min-content'};`}>
+						{#if field.filterable}
+							{#if field.type == 'string'}
+								<Input
+									{mode}
+									width={field.width}
+									size="xs"
+									name={`f_${field.name}`}
+									onchange={filter_change}
+									value={filters[field.name]?.value}
+								/>
+							{:else if field.type == 'number'}
+								{@const fn1 = `f_${field.name}_1`}
+								{@const fn2 = `f_${field.name}_2`}
+								<Input
+									{mode}
+									size="xs"
+									type="number"
+									name={fn1}
+									onchange={filter_change}
+									value={filters[fn1]?.value}
+								/>
+								<Input
+									{mode}
+									size="xs"
+									type="number"
+									name={fn2}
+									value={filters[fn2]?.value}
+									onchange={filter_change}
+								/>
+							{:else if field.type == 'date'}
+								{@const fn1 = `f_${field.name}_1`}
+								{@const fn2 = `f_${field.name}_2`}
+								<Input
+									{mode}
+									size="xs"
+									type="date"
+									name={fn1}
+									value={filters[fn1]?.value}
+									onchange={filter_change}
+								/>
+								<Input
+									{mode}
+									size="xs"
+									type="date"
+									name={fn2}
+									value={filters[fn2]?.value}
+									onchange={filter_change}
+								/>
+							{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
+								<Checkbox
+									{mode}
+									name={`f_${field.name}`}
+									size="xs"
+									onchange={filter_change}
+									checked={toBool(filters[field.name]?.value)}
+								/>
+								/>
+							{/if}
+						{/if}
+					</td>
+				{/if}
+			{/each}
+			<td></td>
+		</tr>
+	{/if}
+{/snippet}
 
 <div class="dataview">
 	{#if title || buttons}
@@ -232,6 +359,7 @@
 					<th class="actions-header">Actions</th>
 				{/if}
 			</tr>
+			{@render filtersRow()}
 		</thead>
 		<tbody>
 			{#each data as row, rowIndex}
