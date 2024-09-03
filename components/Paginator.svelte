@@ -28,11 +28,16 @@
 </script>
 
 <div class="paginator">
-	<Button {mode} size="sm" disabled={page == 1} onclick={() => setPage(1)}>First</Button>
-	<Button {mode} size="sm" disabled={page == 1} onclick={() => setPage(page - 1)}>Prev</Button>
+	<Button mode="info" size="sm" disabled={page == 1} onclick={() => setPage(1)}>First</Button>
+	<Button mode="success" size="sm" disabled={page == 1} onclick={() => setPage(page - 1)}
+		>Prev</Button
+	>
 	{page} of {pages}
-	<Button {mode} size="sm" disabled={page == pages} onclick={() => setPage(page + 1)}>Next</Button>
-	<Button {mode} size="sm" disabled={page == pages} onclick={() => setPage(pages)}>Last</Button>
+	<Button mode="success" size="sm" disabled={page == pages} onclick={() => setPage(page + 1)}
+		>Next</Button
+	>
+	<Button mode="info" size="sm" disabled={page == pages} onclick={() => setPage(pages)}>Last</Button
+	>
 </div>
 
 <style>
