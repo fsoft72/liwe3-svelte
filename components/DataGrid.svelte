@@ -79,7 +79,8 @@
 		viewMode?: string;
 
 		// paginator
-		maxRowsPerPage?: number;
+		disablePaginator?: boolean;
+		rowsPerPage?: number;
 		page?: number;
 		totalRows?: number;
 
@@ -104,9 +105,10 @@
 		viewMode = $bindable('comfy'),
 
 		// paginator
+		disablePaginator,
 		page = $bindable(1),
 		totalRows,
-		maxRowsPerPage = $bindable(10),
+		rowsPerPage = $bindable(10),
 
 		// events
 		oncelledit,
@@ -139,8 +141,6 @@
 		if (onfilterchange) return data;
 		if (!filters || Object.keys(filters).length == 0) return data;
 
-		console.log('=== internal filtered');
-
 		const res: DataGridRow[] = [];
 
 		data.forEach((row) => {
@@ -168,7 +168,9 @@
 	});
 
 	let paginatedData: DataGridRow[] = $derived.by(() => {
-		return internalFilteredData.slice((page - 1) * maxRowsPerPage, page * maxRowsPerPage);
+		if ( disablePaginator ) return internalFilteredData;
+
+		return internalFilteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 	});
 
 	let totRows = $derived.by(() => {
@@ -399,8 +401,7 @@
 	{/if}
 {/snippet}
 
-<div class="container">
-	<div bind:this={dataView} class="dataview">
+{#snippet titleBar()}
 		{#if title || buttons}
 			<div class="title-bar">
 				<div class="title">
@@ -436,25 +437,34 @@
 				{/if}
 			</div>
 		{/if}
+{/snippet}
+
+{#snippet tableHeaders()}
+	<tr>
+		{#each fields as field}
+			{#if !field.hidden}
+				<th onclick={() => sortData(field.name)}>
+					{field.label || field.name}
+					{#if field.sortable && sortField === field.name}
+						{sortDirection === 'asc' ? '▲' : '▼'}
+					{/if}
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<div class="resizer" onmousedown={(e) => startResize(e, field.name)}></div>
+				</th>
+			{/if}
+		{/each}
+		{#if actions}
+			<th class="actions-header">Actions</th>
+		{/if}
+	</tr>
+{/snippet}
+
+<div class="container">
+	<div bind:this={dataView} class="dataview">
+		{@render titleBar()}
 		<table bind:this={tableElement} class={viewMode}>
 			<thead>
-				<tr>
-					{#each fields as field}
-						{#if !field.hidden}
-							<th onclick={() => sortData(field.name)}>
-								{field.label || field.name}
-								{#if field.sortable && sortField === field.name}
-									{sortDirection === 'asc' ? '▲' : '▼'}
-								{/if}
-								<!-- svelte-ignore a11y_no_static_element_interactions -->
-								<div class="resizer" onmousedown={(e) => startResize(e, field.name)}></div>
-							</th>
-						{/if}
-					{/each}
-					{#if actions}
-						<th class="actions-header">Actions</th>
-					{/if}
-				</tr>
+				{@render tableHeaders()}
 				{@render filtersRow()}
 			</thead>
 			<tbody>
@@ -462,7 +472,7 @@
 					<tr>
 						{#each fields as field}
 							{#if !field.hidden}
-								<td ondblclick={() => startEditing(rowIndex, field.name)}>
+								<td ondblclick={() => startEditing(rowIndex, field.name)} style:text-align={field.align}>
 									{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
 										<input
 											type="text"
@@ -553,12 +563,14 @@
 			</tbody>
 		</table>
 	</div>
-	<Paginator
-		bind:this={paginator}
-		total={totRows}
-		rows={maxRowsPerPage}
-		onpagechange={internalPageChange}
-	/>
+	{#if ! disablePaginator}
+		<Paginator
+			bind:this={paginator}
+			total={totRows}
+			rows={rowsPerPage}
+			onpagechange={internalPageChange}
+		/>
+	{/if}
 </div>
 
 <style>
