@@ -116,7 +116,7 @@
 		onfilterchange,
 
 		// paginator event
-		onpagechange
+		onpagechange,
 	}: Props = $props();
 
 	let sortField: string | null = $state(null);
@@ -168,7 +168,7 @@
 	});
 
 	let paginatedData: DataGridRow[] = $derived.by(() => {
-		if ( disablePaginator ) return internalFilteredData;
+		if (disablePaginator) return internalFilteredData;
 
 		return internalFilteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 	});
@@ -259,7 +259,7 @@
 	};
 
 	const _do_filter = (filters: Record<string, any>) => {
-		paginator.resetPage();
+		paginator && paginator.resetPage();
 		if (onfilterchange) onfilterchange(filters);
 	};
 
@@ -291,8 +291,8 @@
 			...filters,
 			[name]: {
 				mode,
-				value
-			}
+				value,
+			},
 		};
 
 		// remove from new_filters the filters that have an empty value
@@ -402,41 +402,41 @@
 {/snippet}
 
 {#snippet titleBar()}
-		{#if title || buttons}
-			<div class="title-bar">
-				<div class="title">
-					{title}
-				</div>
+	{#if title || buttons}
+		<div class="title-bar">
+			<div class="title">
+				{title}
+			</div>
 
-				<div class="view-modes">
-					{#each viewModes as vm}
+			<div class="view-modes">
+				{#each viewModes as vm}
+					<Button
+						mode={vm == viewMode ? 'mode4' : 'mode1'}
+						onclick={() => changeViewMode(vm)}
+						size="xs"
+					>
+						{vm}
+					</Button>
+				{/each}
+			</div>
+
+			{#if buttons}
+				<div class="buttons">
+					{#each buttons as button}
 						<Button
-							mode={vm == viewMode ? 'mode4' : 'mode1'}
-							onclick={() => changeViewMode(vm)}
 							size="xs"
+							mode={button.mode || mode}
+							variant={button.variant}
+							icon={button.icon}
+							onclick={button.onclick}
 						>
-							{vm}
+							{button.label}
 						</Button>
 					{/each}
 				</div>
-
-				{#if buttons}
-					<div class="buttons">
-						{#each buttons as button}
-							<Button
-								size="xs"
-								mode={button.mode || mode}
-								variant={button.variant}
-								icon={button.icon}
-								onclick={button.onclick}
-							>
-								{button.label}
-							</Button>
-						{/each}
-					</div>
-				{/if}
-			</div>
-		{/if}
+			{/if}
+		</div>
+	{/if}
 {/snippet}
 
 {#snippet tableHeaders()}
@@ -472,7 +472,10 @@
 					<tr>
 						{#each fields as field}
 							{#if !field.hidden}
-								<td ondblclick={() => startEditing(rowIndex, field.name)} style:text-align={field.align}>
+								<td
+									ondblclick={() => startEditing(rowIndex, field.name)}
+									style:text-align={field.align}
+								>
 									{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
 										<input
 											type="text"
@@ -563,7 +566,7 @@
 			</tbody>
 		</table>
 	</div>
-	{#if ! disablePaginator}
+	{#if !disablePaginator}
 		<Paginator
 			bind:this={paginator}
 			total={totRows}
@@ -584,6 +587,8 @@
 		position: relative;
 		width: 100%;
 		height: 100%;
+
+		min-height: 250px;
 
 		border: 1px solid var(--liwe3-button-border);
 		border-radius: var(--liwe3-border-radius);
