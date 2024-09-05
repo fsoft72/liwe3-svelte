@@ -5,7 +5,7 @@
  *
  * Every parameter is passed through the snapshot function to get a snapshot of the object.
  */
-export const $debug = ( ...args: any[] ) => {
+export const runeDebug = ( ...args: any[] ) => {
 	const snapshotArgs = args.map( arg => {
 		try {
 			return $state.snapshot( arg );
@@ -15,11 +15,4 @@ export const $debug = ( ...args: any[] ) => {
 		}
 	} );
 	console.log( ...snapshotArgs );
-};
-
-/**
- * This function creates a reactive state from an object.
- */
-export const $restate = ( obj: any ) => {
-	return $state( $state.snapshot( obj ) );
 };
