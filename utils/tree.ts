@@ -1,4 +1,5 @@
 import type { IconSource } from 'svelte-hero-icons';
+import { runeDebug } from './runes.svelte';
 
 export type Tree = {
 	children: TreeItem[];
@@ -46,14 +47,12 @@ export const tree_set_meta = ( tree: Tree ) => {
 const _tree_find_item = ( items: TreeItem[], id: string ): TreeItem | undefined => {
 	for ( let i = 0; i < items.length; i++ ) {
 		const item = items[ i ];
-		if ( item.id === id ) {
-			return item;
-		}
+
+		if ( item.id === id ) return item;
+
 		if ( item.children ) {
 			const found = _tree_find_item( item.children, id );
-			if ( found ) {
-				return found;
-			}
+			if ( found ) return found;
 		}
 	}
 	return undefined;
@@ -153,9 +152,7 @@ const _tree_convert_list = ( items: any[], id = 'id', title = 'title', id_parent
 			res.push( newItem );
 		} else {
 			const parent = _tree_find_item( res, newItem.id_parent );
-			if ( parent ) {
-				parent.children?.push( newItem );
-			}
+			if ( parent ) parent.children?.push( newItem );
 		}
 	} );
 
