@@ -3,13 +3,13 @@
 	import type { Color } from '$liwe3/types/types';
 
 	interface SelectTreeProps {
-		name: string;
+		name?: string;
 		tree: TreeItem[];
-		level: number;
-		fontSize: string;
-		addEmpty: boolean;
-		value: string;
-		mode: Color;
+		level?: number;
+		fontSize?: string;
+		addEmpty?: boolean;
+		value?: string;
+		mode?: Color;
 
 		onchange: (id: string) => void;
 	}
