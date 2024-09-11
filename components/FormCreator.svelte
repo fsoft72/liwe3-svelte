@@ -137,7 +137,7 @@
 			value = e;
 		}
 
-		console.log('=== CHANGE: ', name, value);
+		console.log('=== FormCreator/onChangeField: ', name, value);
 
 		const field = fields.find((f) => f.name === name);
 		const onChange = field?.onchange;
