@@ -5,7 +5,6 @@
 	interface SelectTreeProps {
 		tree: Tree;
 		name?: string;
-		level?: number;
 		fontSize?: string;
 		addEmpty?: boolean;
 		value?: string;
@@ -17,11 +16,10 @@
 	let {
 		tree,
 		name = '',
-		level = 0,
 		fontSize = '1.2em',
 		addEmpty = true,
 		value = '',
-		mode = 'mode1',
+		mode = 'mode3',
 		onchange
 	}: SelectTreeProps = $props();
 
@@ -52,7 +50,7 @@
 </script>
 
 <div class={mode}>
-	<select {name} style:font-size={fontSize} onchange={onChange}>
+	<select {name} class={`liwe3-form ${mode}`} style:font-size={fontSize} onchange={onChange}>
 		{#if addEmpty}
 			<option value="">(Select)</option>
 		{/if}
