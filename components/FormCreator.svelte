@@ -62,6 +62,7 @@
 	import { has_one_perm, isTrue } from '$liwe3/utils/utils';
 	import { storeUser } from '$modules/user/store.svelte';
 	import Button from '$liwe3/components/Button.svelte';
+	import { runeDebug } from '$liwe3/utils/runes.svelte';
 
 	interface Props {
 		fields: FormField[];
@@ -137,7 +138,7 @@
 			value = e;
 		}
 
-		console.log('=== FormCreator/onChangeField: ', name, value);
+		runeDebug('=== FormCreator/onChangeField: ', name, value);
 
 		const field = fields.find((f) => f.name === name);
 		const onChange = field?.onchange;
