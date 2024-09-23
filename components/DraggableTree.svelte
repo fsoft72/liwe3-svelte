@@ -203,7 +203,7 @@
 
 	<DraggableTreeItem
 		{mode}
-		items={tree.children}
+		bind:items={tree.children}
 		{canAdd}
 		{canEdit}
 		{canDelete}
