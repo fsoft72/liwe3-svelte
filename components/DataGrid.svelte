@@ -59,7 +59,9 @@
 		icon?: IconSource;
 		mode?: Color;
 		variant?: Variant;
-		onclick: () => void;
+		onclick: (checked?: boolean) => void;
+		type?: 'button' | 'checkbox'; // New property
+		checked?: boolean; // New property for checkbox state
 
 		action?: () => void;
 	}
@@ -116,7 +118,7 @@
 		onfilterchange,
 
 		// paginator event
-		onpagechange,
+		onpagechange
 	}: Props = $props();
 
 	let sortField: string | null = $state(null);
@@ -253,6 +255,13 @@
 		}
 	}
 
+	function handleButtonClick(button: DataGridButton) {
+		if (button.type === 'checkbox') {
+			button.checked = !button.checked;
+		}
+		button.onclick(button.checked);
+	}
+
 	const viewModes = ['condensed', 'comfy', 'large'];
 	const changeViewMode = (mode: string) => {
 		viewMode = mode;
@@ -291,8 +300,8 @@
 			...filters,
 			[name]: {
 				mode,
-				value,
-			},
+				value
+			}
 		};
 
 		// remove from new_filters the filters that have an empty value
@@ -423,15 +432,25 @@
 			{#if buttons}
 				<div class="buttons">
 					{#each buttons as button}
-						<Button
-							size="xs"
-							mode={button.mode || mode}
-							variant={button.variant}
-							icon={button.icon}
-							onclick={button.onclick}
-						>
-							{button.label}
-						</Button>
+						{#if button.type === 'checkbox'}
+							<Checkbox
+								size="xs"
+								mode={button.mode || mode}
+								checked={button.checked || false}
+								onchange={() => handleButtonClick(button)}
+								label={button.label}
+							/>
+						{:else}
+							<Button
+								size="xs"
+								mode={button.mode || mode}
+								variant={button.variant}
+								icon={button.icon}
+								onclick={() => handleButtonClick(button)}
+							>
+								{button.label}
+							</Button>
+						{/if}
 					{/each}
 				</div>
 			{/if}
