@@ -75,7 +75,7 @@
 	.checkbox {
 		/* width: 100%; */
 		flex-direction: row-reverse;
-		align-items: flex-end;
+		align-items: center;
 		justify-content: flex-end;
 		gap: 0.2rem;
 	}
