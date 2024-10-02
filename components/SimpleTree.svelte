@@ -24,7 +24,7 @@
 		actions = [],
 		maxLevel = 2,
 		fontSize = '24',
-		onselect,
+		onselect
 	}: SimpleTreeProps = $props();
 
 	// takes an id and returns it with ":" appended in both ends
@@ -63,7 +63,7 @@
 
 	onMount(() => {
 		// only the root element should set all the meta
-		if (level == 0) tree_set_meta(items, '', level);
+		if (level == 0) tree_set_meta({ children: items });
 	});
 </script>
 
