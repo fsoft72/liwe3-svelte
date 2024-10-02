@@ -2,8 +2,8 @@
 	import { onMount } from 'svelte';
 
 	interface ThemeSwitcherProps {
-		lightTheme: string;
-		darkTheme: string;
+		lightTheme?: string;
+		darkTheme?: string;
 	}
 
 	let { lightTheme = 'liwe3-light-theme', darkTheme = 'liwe3-dark-theme' }: ThemeSwitcherProps =
