@@ -72,7 +72,7 @@ const _post = async ( method: string, url: string, data: FetcherData, skipError:
 
 
 interface FetcherData {
-	[ key: string ]: string | number | boolean | Record<string, unknown> | Array<unknown> | undefined | Date | null;
+	[ key: string ]: string | number | boolean | Record<string, unknown> | Array<unknown> | File | undefined | Date | null;
 }
 
 const get = async ( url: string, data: FetcherData | null, skipError: boolean ) => {
