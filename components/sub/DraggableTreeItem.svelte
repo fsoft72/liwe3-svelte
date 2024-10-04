@@ -1,25 +1,43 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-
 	import { Icon, ChevronDown, ChevronRight, Trash, Plus, PencilSquare } from 'svelte-hero-icons';
 	import type { TreeItem } from '$liwe3/utils/tree';
 	import Button from '../Button.svelte';
 	import type { Color } from '$liwe3/types/types';
 
-	export let items: TreeItem[] = [];
+	interface DraggableTreeItemProps {
+		items: TreeItem[];
+		mode: Color;
+		canAdd: boolean;
+		canDelete: boolean;
+		canEdit: boolean;
+		maxDepth: number;
 
-	export let mode: Color = 'mode1';
+		// events
+		onreorder?: (event: { sourceId: string; targetId: string; pos: number }) => void;
+		onchange?: (items: TreeItem[]) => void;
+		onadditem?: (id_item: string, newItem?: TreeItem) => void;
+		onedititem?: (id_item: string) => void;
+		ondelitem?: (id_item: string) => void;
+	}
 
-	export let canAdd: boolean = true;
-	export let canDelete: boolean = true;
-	export let canEdit: boolean = true;
+	let {
+		items = $bindable([]),
+		mode = 'mode1',
+		canAdd = true,
+		canDelete = true,
+		canEdit = true,
+		maxDepth = 2,
 
-	export let maxDepth: number = 2;
+		// events
+		onreorder,
+		onadditem,
+		onedititem,
+		ondelitem,
+		onchange
+	}: DraggableTreeItemProps = $props();
 
-	let dragItem: TreeItem | null;
-	let overItem: TreeItem | null;
-
-	const dispatch = createEventDispatcher();
+	let dragItem: TreeItem | null = $state(null);
+	let overItem: TreeItem | null = $state(null);
 
 	function onDragStart(event: DragEvent, item: TreeItem) {
 		dragItem = item;
@@ -51,11 +69,7 @@
 
 		if (sourceId === targetId) return;
 
-		dispatch('reorder', {
-			sourceId,
-			targetId,
-			pos: -1
-		});
+		onreorder && onreorder({ sourceId, targetId, pos: -1 });
 	}
 
 	function onOverEmpty(event: DragEvent, nextItem: TreeItem) {
@@ -77,11 +91,7 @@
 
 		if (sourceId === targetId) return;
 
-		dispatch('reorder', {
-			sourceId,
-			targetId,
-			pos: item.pos
-		});
+		onreorder && onreorder({ sourceId, targetId, pos: item.pos || 0 });
 	}
 
 	const toggleOpen = (item: TreeItem) => {
@@ -90,44 +100,46 @@
 	};
 
 	const addItem = (item: TreeItem) => {
-		dispatch('additem', { id_parent: item.id });
+		onadditem && onadditem(item.id);
 	};
 
 	const deleteItem = (item: TreeItem) => {
-		dispatch('delitem', { id: item.id });
+		ondelitem && ondelitem(item.id);
 	};
 
 	const editItem = (item: TreeItem) => {
-		dispatch('edititem', { id: item.id });
+		onedititem && onedititem(item.id);
 	};
 </script>
 
 <div class={`tree ${mode}`}>
 	{#each items as item (item.id)}
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="item">
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
 				id={`emp-${item.id}`}
 				class="bar mini"
 				class:is-dragging-over={overItem?.id == `emp-${item.id}`}
 				class:dashed-border={overItem?.id == `emp-${item.id}`}
-				on:dragover={(event) => onOverEmpty(event, item)}
-				on:drop={(event) => onDropEmpty(event, item)}
-			/>
+				ondragleave={(event) => onDragLeave(event, item)}
+				ondragover={(event) => onOverEmpty(event, item)}
+				ondrop={(event) => onDropEmpty(event, item)}
+			></div>
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
 				draggable="true"
 				class="bar"
 				class:is-dragging-over={overItem == item}
-				on:dragstart={(event) => onDragStart(event, item)}
-				on:dragover={(event) => onDragOver(event, item)}
-				on:dragleave={(event) => onDragLeave(event, item)}
-				on:drop={(event) => onDrop(event, item)}
+				ondragstart={(event) => onDragStart(event, item)}
+				ondragover={(event) => onDragOver(event, item)}
+				ondragleave={(event) => onDragLeave(event, item)}
+				ondrop={(event) => onDrop(event, item)}
 			>
 				<div class="bar-options">
 					<div class="btn">
 						{#if item.children && item.children.length}
-							<!-- svelte-ignore a11y-click-events-have-key-events -->
-							<div on:click={() => toggleOpen(item)}>
+							<!-- svelte-ignore a11y_click_events_have_key_events -->
+							<div onclick={() => toggleOpen(item)}>
 								{#if item.isOpen}
 									<Icon src={ChevronDown} />
 								{:else}
@@ -144,7 +156,7 @@
 							size="xs"
 							mode="error"
 							icon={Trash}
-							on:click={() => deleteItem(item)}
+							onclick={() => deleteItem(item)}
 							title="Delete Item"
 						/>
 					{/if}
@@ -153,16 +165,17 @@
 							{mode}
 							size="xs"
 							icon={PencilSquare}
-							on:click={() => editItem(item)}
+							onclick={() => editItem(item)}
 							title="Edit Item"
 						/>
 					{/if}
-					{#if canAdd && (item.level ?? 99) < maxDepth}
+					{console.log('=== canAdd: ', { canAdd, itemLevel: item.level, maxDepth })}
+					{#if canAdd && (item.level ?? 0) < maxDepth}
 						<Button
 							size="xs"
 							mode="success"
 							icon={Plus}
-							on:click={() => addItem(item)}
+							onclick={() => addItem(item)}
 							title="Add new Item"
 						/>
 					{/if}
@@ -177,11 +190,11 @@
 						{canEdit}
 						{canDelete}
 						{maxDepth}
-						on:reorder
-						on:additem
-						on:edititem
-						on:delitem
-						on:change
+						{onreorder}
+						{onadditem}
+						{onedititem}
+						{ondelitem}
+						{onchange}
 					/>
 				{/if}
 			{/if}
@@ -211,7 +224,7 @@
 		align-items: center;
 		justify-content: space-between;
 
-		max-width: 300px;
+		/* max-width: 300px; */
 	}
 
 	.btn {
@@ -237,7 +250,7 @@
 	}
 
 	.is-dragging-over {
-		border: 2px dashed var(--darker);
+		border: 2px dashed yellow; /* var(--darker); */
 		padding: 1rem;
 	}
 

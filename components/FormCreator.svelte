@@ -1,7 +1,8 @@
-<script context="module" lang="ts">
+<script module lang="ts">
 	import type { IconSource } from 'svelte-hero-icons';
 
 	export type FormField = {
+		id?: string;
 		name: string;
 		type?: string;
 		label?: string;
@@ -17,54 +18,79 @@
 		options?: { label: string; value: string }[];
 		default?: any;
 
+		// if true, the field will not be displayed
+		hide?: boolean;
+
 		// list of perms the user must have to see this field
 		perms?: string[];
 
 		// events
-		onChange?: (name: string, value: any, values: Record<string, any>) => Promise<boolean>;
+		onchange?: (name: string, value: any, values: Record<string, any>) => Promise<boolean>;
+		onsubmit?: (values: Record<string, any>) => void;
+		onclick?: () => void;
 	};
 
 	type FormCreatorPlugin = {
 		name: string;
 		component: any;
+		extra?: Record<string, any>;
 	};
 
 	const formCreatorPlugins: Record<string, FormCreatorPlugin> = {};
 
-	export const registerFormCreatorPlugin = (name: string, component: any) => {
+	export const formCreatorPluginRegister = (
+		name: string,
+		component: any,
+		extra?: Record<string, any>
+	) => {
 		name = name.toLowerCase();
-		formCreatorPlugins[name] = { name, component };
+		formCreatorPlugins[name] = { name, component, extra };
 	};
 
-	export const getFormCreatorPlugin = (name: string) => {
+	export const formCreatorPluginGet = (name: string) => {
 		name = name.toLowerCase();
-		return formCreatorPlugins[name];
+		const plug = formCreatorPlugins[name];
+
+		return plug;
 	};
 </script>
 
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-	import Input from './Input.svelte';
-	import Button from './Button.svelte';
-	import TagInput from './TagInput.svelte';
-	import MarkdownInput from './MarkdownInput.svelte';
-	import DraggableTree from './DraggableTree.svelte';
 	import type { Size } from '$liwe3/types/types';
-	import ElementList from './ElementList.svelte';
-	import { addToast } from '$liwe3/stores/ToastStore';
-	import Select from 'svelte-select';
+	import { addToast } from '$liwe3/stores/ToastStore.svelte';
 	import { _ } from '$liwe3/stores/LocalizationStore';
-	import { has_one_perm, has_perm, isTrue } from '$liwe3/utils/utils';
-	import { user } from '$modules/user/store';
+	import { has_one_perm, isTrue } from '$liwe3/utils/utils';
+	import { storeUser } from '$modules/user/store.svelte';
+	import Button from '$liwe3/components/Button.svelte';
+	import { runeDebug } from '$liwe3/utils/runes.svelte';
 
-	export let fields: FormField[] = [];
-	export let values: Record<string, any> = {};
-	export let submitLabel: string = 'Submit';
-	export let resetLabel: string = 'Reset';
-	export let showButtons: boolean = true;
-	export let showReset: boolean = true;
+	interface Props {
+		fields: FormField[];
+		values?: Record<string, any>;
+		submitLabel?: string;
+		resetLabel?: string;
+		showButtons?: boolean;
+		showReset?: boolean;
 
-	const dispatch = createEventDispatcher();
+		// events
+		onsubmit?: (values: Record<string, any>) => void;
+		onchange?: (name: string, value: any) => void;
+	}
+
+	let {
+		fields = [],
+		values = $bindable({}),
+		submitLabel = 'Submit',
+		resetLabel = 'Reset',
+		showButtons = true,
+		showReset = true,
+
+		// events
+		onsubmit,
+		onchange
+	}: Props = $props();
+
+	let formID: HTMLFormElement;
 
 	const _check_required_fields = () => {
 		const required: string[] = [];
@@ -79,6 +105,10 @@
 	};
 
 	const handleSubmit = (e: Event) => {
+		e.preventDefault();
+		e.stopImmediatePropagation();
+		e.stopPropagation();
+
 		const missing = _check_required_fields();
 
 		// verify required fields
@@ -94,7 +124,7 @@
 			return;
 		}
 
-		dispatch('submit', values);
+		onsubmit && onsubmit(values);
 	};
 
 	const onChangeField = async (name: string, e: any) => {
@@ -108,127 +138,57 @@
 			value = e;
 		}
 
+		runeDebug('=== FormCreator/onChangeField: ', name, value);
+
 		const field = fields.find((f) => f.name === name);
-		const onChange = field?.onChange;
+		const onChange = field?.onchange;
 		const valid = onChange ? await onChange(name, value, values) : true;
 
 		if (!valid) return;
 
 		if (valid) values[name] = value;
 
-		dispatch('change', { name, value });
+		onchange && onchange(name, value);
 	};
 
 	const _v = (field: FormField) => {
-		let v = values[field.name];
+		let v = values[field?.name];
 
-		if (v === undefined) v = field.default;
+		if (v === undefined) v = field?.default;
 		if (v === undefined) v = '';
 
 		return v;
 	};
+
+	const resetForm = () => {
+		formID.reset();
+	};
 </script>
 
+{#snippet renderPlugin(plugin: FormCreatorPlugin, field: FormField)}
+	{#if plugin}
+		<plugin.component
+			this={plugin.component}
+			{_v}
+			{...plugin.extra ?? {}}
+			name={field.name}
+			value={_v(field)}
+			{field}
+			{...field?.extra ?? {}}
+			onchange={onChangeField}
+		/>
+	{/if}
+{/snippet}
+
 <div class="form">
-	<form on:submit|preventDefault|stopPropagation={handleSubmit}>
+	<form onsubmit={handleSubmit} bind:this={formID}>
 		<div class="liwe3-row">
 			{#each fields as field}
-				<div class={`liwe3-col${field.col ?? 12} ${field.align ? 'align-' + field.align : ''}`}>
+				<div class={`liwe3-col${field?.col ?? 12} ${field?.align ? 'align-' + field?.align : ''}`}>
 					<div class="space">
-						{#if has_one_perm($user, field.perms || [])}
-							{#if field?.type === 'strange'}
-								<!-- strange component here -->
-							{:else if getFormCreatorPlugin(field?.type ?? '---')}
-								<div class="title">{field.label}</div>
-								<svelte:component
-									this={getFormCreatorPlugin(field?.type ?? '---').component}
-									{...field}
-									value={_v(field).toString()}
-									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e)}
-								/>
-							{:else if field?.type === 'text'}
-								<!--<div class="title">{field.label}</div>-->
-								<Input
-									{...field}
-									{...field.extra}
-									name={field.name}
-									value={_v(field)}
-									on:change={(e) => onChangeField(field.name, e)}
-								/>
-							{:else if field?.type === 'title'}
-								<div class="title">{field.label}</div>
-							{:else if field?.type === 'tags'}
-								<TagInput
-									name={field.name}
-									value={_v(field)}
-									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e)}
-								/>
-							{:else if field?.type === 'markdown'}
-								<MarkdownInput
-									name={field.name}
-									value={_v(field)}
-									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e)}
-								/>
-							{:else if field?.type === 'element-list'}
-								<div class="title">{field.label}</div>
-								<ElementList
-									name={field.name}
-									value={_v(field)}
-									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e.detail)}
-								/>
-							{:else if field?.type === 'draggable-tree'}
-								<DraggableTree
-									name={field.name}
-									value={_v(field)}
-									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e)}
-								/>
-							{:else if field?.type === 'checkbox'}
-								<div class="simple-row">
-									<!-- svelte-ignore a11y-label-has-associated-control -->
-									<label for={field.name}>
-										<Input
-											type="checkbox"
-											name={field.name}
-											checked={isTrue(_v(field))}
-											value="on"
-											{...field.extra}
-											on:change={(e) => onChangeField(field.name, e)}
-										/>
-										{field.label}
-									</label>
-								</div>
-							{:else if field?.type === 'hidden'}
-								<input type="hidden" name={field.name} value={_v(field)} />
-							{:else if field?.type === 'select'}
-								<div class="custom-select">
-									{#if field.label}
-										<div class="label">{field.label}</div>
-									{/if}
-									<div class="svelte-select mode3" style="width: 100%">
-										<Select
-											name={field.name}
-											value={_v(field)}
-											placeholder={field.placeholder}
-											{...field.extra}
-											on:change={(e) => onChangeField(field.name, e.detail.value)}
-											on:clear={() => onChangeField(field.name, '')}
-											items={field.options ?? []}
-										/>
-									</div>
-								</div>
-							{:else}
-								<Input
-									{...field}
-									value={_v(field).toString()}
-									{...field.extra}
-									on:change={(e) => onChangeField(field.name, e)}
-								/>
-							{/if}
+						{#if has_one_perm(storeUser, field?.perms ?? []) && !field?.hide}
+							{@const p = formCreatorPluginGet(field?.type ?? '---')}
+							{@render renderPlugin(p, field)}
 						{/if}
 					</div>
 				</div>
@@ -237,16 +197,16 @@
 		{#if showButtons}
 			<div class="buttons">
 				{#if showReset}
-					<Button mode="danger" type="reset">{resetLabel}</Button>
+					<Button mode="danger" type="reset" onclick={resetForm}>{resetLabel}</Button>
 				{/if}
-				<Button mode="success" type="submit" on:click={handleSubmit}>{submitLabel}</Button>
+				<Button mode="success" type="submit" onclick={handleSubmit}>{submitLabel}</Button>
 			</div>
 		{/if}
 	</form>
 </div>
 
 <style>
-	label {
+	.label {
 		display: flex;
 		flex-direction: row;
 		align-items: center;

@@ -5,110 +5,53 @@
 	interface Props {
 		id?: string;
 		name?: string;
-		value?: string | number;
+		checked?: boolean;
+		value?: string | number | boolean;
 
 		divClass?: string;
 		label?: string;
 		mode?: Color;
 		size?: Size;
-		type?: string;
-		validChars?: string;
-		width?: string;
 
 		// events
 		onblur?: (event: FocusEvent) => void;
 		onchange?: (event: Event) => void;
-		onkeydown?: (event: KeyboardEvent) => void;
-		onkeyup?: (event: KeyboardEvent) => void;
 
 		// rest
 		[k: string]: any;
 	}
 
 	let {
+		id = mkid('id'),
 		name = mkid('fld'),
 		label = '',
-		id = mkid('id'),
 		size = 'md',
-		validChars = '',
-		width = '100%',
 		mode = 'mode3',
 		divClass = '',
-		value = $bindable(''),
-		type = 'text',
+		value = '',
+		checked = $bindable(),
 		onblur,
 		onchange,
-		onkeydown,
-		onkeyup,
 		...rest
 	}: Props = $props();
 
-	const inputClass = `liwe3-form liwe3-form-custom-input ${rest.class ? rest.class : ''} ${mode} input ${size}`;
-
-	let rx = validChars ? new RegExp(`[^${validChars}]*`, 'g') : null;
-
-	let isDispatching = false;
-
-	const _dispatchEvent = (event: Event, data: string) => {
-		if (!event || !event.target) return;
-
-		// dispatch standard 'input' event with the new filteredValue
-		const inputEvent = new InputEvent('input', {
-			bubbles: true,
-			cancelable: true,
-			composed: true,
-			data
-		});
-		isDispatching = true;
-		event.target.dispatchEvent(inputEvent);
-		isDispatching = false;
-	};
-
-	const handleInput = (event: Event) => {
-		if (isDispatching) return;
-		if (!event || !event.target) return;
-		event.stopImmediatePropagation();
-		event.stopPropagation();
-
-		if (rx) {
-			const inputValue = (event.target as HTMLInputElement).value;
-			const filteredValue: string = inputValue.replace(rx, '');
-
-			if (filteredValue !== inputValue) {
-				(event.target as HTMLInputElement).value = filteredValue;
-				_dispatchEvent(event, filteredValue);
-				value = filteredValue;
-			}
-		} else {
-			const el = event.target as HTMLInputElement;
-
-			_dispatchEvent(event, el.value);
-			value = el.value;
-		}
-	};
+	const inputClass = `liwe3-form liwe3-form-custom-input ${rest.class ? rest.class : ''} ${mode} input checkbox ${size}`;
 </script>
 
-<div
-	class={`${divClass} input-container`}
-	class:checkbox={type === 'checkbox'}
-	style={`width: ${width}`}
->
+<div class={`${divClass} input-container checkbox`} style={`width:auto;`}>
 	{#if label}
 		<label for={id} class="label">{label}</label>
 	{/if}
 	<input
 		{id}
 		{name}
+		{...rest}
 		class={inputClass}
-		{type}
+		type="checkbox"
 		{value}
+		bind:checked
 		{onblur}
 		{onchange}
-		{onkeydown}
-		{onkeyup}
-		oninput={handleInput}
-		title={rest.title || rest.placeholder || label || ''}
-		{...rest}
 	/>
 </div>
 
@@ -132,7 +75,7 @@
 	.checkbox {
 		/* width: 100%; */
 		flex-direction: row-reverse;
-		align-items: flex-end;
+		align-items: center;
 		justify-content: flex-end;
 		gap: 0.2rem;
 	}

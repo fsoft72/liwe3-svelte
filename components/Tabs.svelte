@@ -3,10 +3,19 @@
 	import type { Color } from '$liwe3/types/types';
 	import { onMount } from 'svelte';
 
-	export let active: string = '';
-	export let minHeight: string = '200px';
-	export let height: string = '';
-	export let mode: Color = 'mode1';
+	let {
+		active,
+		minHeight = '',
+		height = '',
+		mode = 'mode3',
+		children
+	}: {
+		active?: string;
+		minHeight?: string;
+		height?: string;
+		mode?: Color;
+		children: any;
+	} = $props();
 
 	interface TabInfo {
 		id: string;
@@ -14,12 +23,13 @@
 		component: HTMLElement;
 	}
 
-	let tabsDiv: HTMLDivElement;
-	let tabsButtons: HTMLDivElement;
+	let tabsDiv: HTMLDivElement | undefined = $state();
 
-	let tabs: TabInfo[] = [];
+	let tabs: TabInfo[] = $state([]);
 
 	onMount(() => {
+		if (!tabsDiv) return;
+
 		const originalTabs = tabsDiv.querySelectorAll('.tab');
 
 		originalTabs.forEach((tab: any) => {
@@ -43,31 +53,27 @@
 		}
 	});
 
-	$: {
-		if (browser && tabsButtons) {
-			tabsButtons.innerHTML = '';
-		}
-	}
+	$effect(() => {
+		if (!tabsDiv) return;
 
-	$: {
 		if (browser && tabs.length) {
 			tabsDiv.innerHTML = '';
 			tabsDiv.appendChild(tabs.find((tab) => tab.id === active)?.component ?? tabs[0].component);
 		}
-	}
+	});
 </script>
 
 <div class="liwe3-tabs">
 	<div class={`container ${mode}`}>
-		<div class="tabs-buttons" bind:this={tabsButtons}>
+		<div class="tabs-buttons">
 			{#each tabs as tab (tab.id)}
 				<div
 					role="button"
 					tabindex="0"
 					class="tab-label"
 					class:active={tab.id === active}
-					on:click={() => (active = tab.id)}
-					on:keydown={(e) => {
+					onclick={() => (active = tab.id)}
+					onkeydown={(e) => {
 						if (e.key === 'Enter') {
 							active = tab.id;
 						}
@@ -78,7 +84,7 @@
 			{/each}
 		</div>
 		<div class="tabs" bind:this={tabsDiv} style:height style:min-height={minHeight}>
-			<slot />
+			{@render children()}
 		</div>
 	</div>
 </div>

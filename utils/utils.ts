@@ -42,6 +42,11 @@ export const format_amount = ( amount?: number ) => {
 	return `${ Number( int ).toLocaleString().replace( /,/g, '.' ) },${ dec }`;
 };
 
+export const toFixed = ( amount?: number | string, decimals = 2 ) => {
+	if ( !amount ) return 0.00;
+	return parseFloat( parseFloat( amount.toString() ).toFixed( decimals ) );
+};
+
 export const format_size = ( size: number ) => {
 	const units = [ 'B', 'KB', 'MB', 'GB', 'TB', 'PB' ];
 	let i = 0;
@@ -90,18 +95,6 @@ export const has_one_perm = ( user: UserAuth | null, perms: string[] ) => {
 };
 
 
-
-export const tree_set_meta = ( items: TreeItem[], id_parent: string, level: number ) => {
-	for ( let i = 0; i < items.length; i++ ) {
-		const item = items[ i ];
-		item.id_parent = id_parent;
-		item.pos = i;
-		item.level = level;
-		if ( item.children ) {
-			tree_set_meta( item.children, item.id, level + 1 );
-		}
-	}
-};
 
 /**
  *  Generates a random integer number from `min` to `max`
@@ -310,6 +303,13 @@ export function keys<T> ( obj: any ): string[] {
 	return Object.keys( obj );
 }
 
+export function clearObject ( obj: any ) {
+	for ( const prop in obj ) {
+		delete obj[ prop ];
+	}
+}
+
+
 export const isTrue = ( value: any ): boolean => {
 	if ( typeof value === 'boolean' ) return value;
 
@@ -323,4 +323,42 @@ export const isTrue = ( value: any ): boolean => {
 	}
 
 	return false;
+};
+
+export const toInt = ( value: any ): number => {
+	return parseInt( value.toString(), 10 );
+};
+
+export const challenge_create = ( params: string[], secret: string, debug = false ) => {
+	const s: string[] = params.map( ( p ) => ( p || '' )?.toString().toLowerCase() );
+	s.sort();
+	s.push( secret );
+
+	let ckey = s.join( '-' );
+
+	// remove multiple '-' characters
+	ckey = ckey.replace( /-{2,}/g, '-' );
+
+	// remove all starting '-' characters
+	while ( ckey[ 0 ] == '-' ) ckey = ckey.substring( 1 );
+
+	/*
+	if ( cfg.debug.enabled || debug )
+		console.log( "=== Server Challenge: ", ckey );
+	*/
+
+	return md5( ckey );
+};
+
+
+/**
+ * This function returns a deep copy of the object passed as argument.
+ *
+ * @param obj - The object to clone.
+ *
+ * @returns A deep copy of the object.
+ *
+ */
+export const clone = ( obj: any ) => {
+	return structuredClone( obj );
 };

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PUBLIC_LIWE_SERVER } from '$env/static/public';
-import { currentUser } from '$modules/user/store';
+import { storeUser } from '$modules/user/store.svelte';
 import { app } from '$liwe3/stores/LiWEApp';
-import { addToast } from '$liwe3/stores/ToastStore';
+import { addToast } from '$liwe3/stores/ToastStore.svelte';
 
 export interface LiWEFetcherOptions {
 	skipError?: boolean;
@@ -17,7 +17,7 @@ const url_and_headers = ( url: string ) => {
 		'Content-Type': 'application/json;charset=utf-8',
 	};
 
-	headers.Authorization = `Bearer ${ currentUser?.token }`;
+	headers.Authorization = `Bearer ${ storeUser.token }`;
 
 	return { url, headers };
 };
@@ -72,7 +72,7 @@ const _post = async ( method: string, url: string, data: FetcherData, skipError:
 
 
 interface FetcherData {
-	[ key: string ]: string | number | boolean | Record<string, unknown> | Array<unknown> | undefined | Date | null;
+	[ key: string ]: string | number | boolean | Record<string, unknown> | Array<unknown> | File | undefined | Date | null;
 }
 
 const get = async ( url: string, data: FetcherData | null, skipError: boolean ) => {

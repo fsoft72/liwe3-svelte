@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 //  Formatted version of a popular md5 implementation
 //  Original copyright (c) Paul Johnston & Greg Holt.
 //  The function itself is now 42 lines long.

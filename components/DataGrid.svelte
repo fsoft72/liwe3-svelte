@@ -1,9 +1,22 @@
-<script context="module" lang="ts">
-	export interface GridFieldExtra {
+<script module lang="ts">
+	import Button from '$liwe3/components/Button.svelte';
+	import type { Color, Variant } from '$liwe3/types/types';
+	import { filterModes } from '$liwe3/utils/match_filter';
+
+	import type { IconSource } from 'svelte-hero-icons';
+	import Checkbox from './Checkbox.svelte';
+	import { format_date, toBool } from '$liwe3/utils/utils';
+	import Avatar from './Avatar.svelte';
+	import Input from './Input.svelte';
+	import Paginator from './Paginator.svelte';
+	import { onMount } from 'svelte';
+
+	export interface DataGridFieldExtra {
+		options?: { label: string; value: string }[];
 		dateFormat?: string;
 	}
 
-	export interface GridField {
+	export interface DataGridField {
 		name: string;
 		type: string;
 		label?: string;
@@ -17,131 +30,246 @@
 		width?: string;
 		nowrap?: boolean;
 		pre?: string;
-		extra?: GridFieldExtra;
+		extra?: DataGridFieldExtra;
+
 		render?: (value: any, row: any) => any;
-		click?: (row: any) => void;
+
+		onclick?: (row: any) => void;
 	}
 
-	export interface GridDataRow {
+	export interface DataGridRow {
 		id: string;
 		[key: string]: any;
 	}
 
-	export interface GridAction {
-		id: string;
+	export interface DataGridAction {
+		id?: string;
 		label?: string;
 		icon?: IconSource;
 		mode?: Color;
 		variant?: Variant;
-		action: (row: GridDataRow) => void;
+
+		onclick?: (row: DataGridRow) => void;
+		action?: (row: DataGridRow) => void;
+	}
+
+	export interface DataGridButton {
+		id?: string;
+		label?: string;
+		icon?: IconSource;
+		mode?: Color;
+		variant?: Variant;
+		onclick: (checked?: boolean) => void;
+		type?: 'button' | 'checkbox'; // New property
+		checked?: boolean; // New property for checkbox state
+
+		action?: () => void;
 	}
 </script>
 
 <script lang="ts">
-	import Button from './Button.svelte';
-	import Input from './Input.svelte';
-	import { createEventDispatcher } from 'svelte';
-	import Modal from './Modal.svelte';
-	import Avatar from './Avatar.svelte';
-	import type { IconSource } from 'svelte-hero-icons';
-	import type { Color, Variant } from '$liwe3/types/types';
-	import { format_date, toBool } from '$liwe3/utils/utils';
-	import { filterModes } from '$liwe3/utils/match_filter';
+	interface Props {
+		fields: DataGridField[];
+		data: DataGridRow[];
+		actions?: DataGridAction[];
+		buttons?: DataGridButton[];
 
-	const dispatch = createEventDispatcher();
+		filters?: Record<string, any>;
 
-	type UpdateFieldCallback = (row: GridDataRow, field_name: string, value: any) => void;
+		title?: string; // DataGrid title
+		mode?: Color;
+		viewMode?: string;
 
-	export let fields: GridField[] = [];
-	export let data: GridDataRow[] = [];
-	export let actions: GridAction[] = [];
-	export let updateField: UpdateFieldCallback | null = null;
-	export let mode: Color = 'mode1';
+		// paginator
+		disablePaginator?: boolean;
+		rowsPerPage?: number;
+		page?: number;
+		totalRows?: number;
 
-	let is_resizing = false;
-	let td: HTMLTableCellElement | null = null;
-	let is_editing = false;
-	// here we save the current grid filters
-	let filters: { [key: string]: any } = {};
+		// events
+		oncelledit?: (row: DataGridRow, field: string, oldValue: any, newValue: any) => void;
 
-	// the has_filters is true if at least one field is filterable
+		onupdatefield?: (row: DataGridRow, field_name: string, value: any) => void;
+		onfilterchange?: (filters: Record<string, any>) => void;
+
+		// paginator event
+		onpagechange?: (page: number, rows: number) => void;
+	}
+
+	let {
+		fields,
+		data: _data,
+		filters = $bindable({}),
+		actions,
+		buttons,
+		title,
+		mode = $bindable('mode3'),
+		viewMode = $bindable('comfy'),
+
+		// paginator
+		disablePaginator,
+		page = $bindable(1),
+		totalRows,
+		rowsPerPage = $bindable(10),
+
+		// events
+		oncelledit,
+		onupdatefield,
+		onfilterchange,
+
+		// paginator event
+		onpagechange
+	}: Props = $props();
+
+	let sortField: string | null = $state(null);
+	let sortDirection: 'asc' | 'desc' = $state('asc');
+	let tableElement: HTMLTableElement | null = $state(null);
+	let editingCell: { rowIndex: number; field: string } | null = $state(null);
+	let data: DataGridRow[] = $state($state.snapshot(_data));
 	let has_filters = fields.some((f) => f.filterable);
+	let dataView: HTMLDivElement | null = $state(null);
+	let paginator: any = $state(null);
 
-	let showFieldsModal = false;
+	$effect(() => {
+		data = $state.snapshot(_data);
+	});
 
-	const resize_start = (e: MouseEvent) => {
-		// get the td element before this one
-		td = (e.target as HTMLTableCellElement)?.previousElementSibling as HTMLTableCellElement;
+	$effect(() => {
+		if (page) dataView?.scrollTo(0, 0);
+	});
 
-		if (!td) return;
+	let internalFilteredData: DataGridRow[] = $derived.by(() => {
+		// if user defined onfilterchange, we don't filter the data
+		if (onfilterchange) return data;
+		if (!filters || Object.keys(filters).length == 0) return data;
 
-		is_resizing = true;
-	};
+		const res: DataGridRow[] = [];
 
-	const mouse_move = (e: MouseEvent) => {
-		if (!is_resizing) return;
-		if (!td) return;
+		data.forEach((row) => {
+			let add = true;
 
-		const width = e.clientX - td.getBoundingClientRect().left;
+			for (const field in filters) {
+				const filter = filters[field];
 
-		td.style.width = `${width}px`;
-		td.style.maxWidth = `${width}px`;
-	};
-
-	const mouse_up = () => {
-		is_resizing = false;
-		td = null;
-	};
-
-	const cell_doubleclick = (e: MouseEvent, row: GridDataRow, field_name: string) => {
-		const field = fields.find((f) => f.name === field_name);
-		if (!field) return;
-
-		if (!field.editable) return;
-
-		is_editing = true;
-
-		// create an input element
-		const input = document.createElement('input');
-		input.value = row[field_name];
-
-		// replace the td content with the input
-		const td = e.target as HTMLTableCellElement;
-		td.innerHTML = '';
-		td.appendChild(input);
-
-		// if the user presses the ESC key, we cancel the edit
-		input.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape') {
-				is_editing = false;
-				td.innerHTML = row[field_name];
+				if (filter.mode == filterModes.contains) {
+					if (filter) {
+						if (!row[field] || row[field].toLowerCase().indexOf(filter.value.toLowerCase()) == -1) {
+							add = false;
+						}
+					}
+				}
 			}
+
+			if (add) res.push(row);
 		});
 
-		// add a blur event to the input
-		input.addEventListener('blur', () => {
-			if (!is_editing) return;
-			var do_update = true;
+		// reset page
+		// paginator.resetPage();
 
-			// if the two values are the same, we don't need to update
-			if (row[field_name] === input.value) do_update = false;
+		return res;
+	});
 
-			// update the row
-			row[field_name] = input.value;
+	let paginatedData: DataGridRow[] = $derived.by(() => {
+		if (disablePaginator) return internalFilteredData;
 
-			// remove the input
-			td.innerHTML = row[field_name];
+		return internalFilteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+	});
 
-			if (!do_update) return;
+	let totRows = $derived.by(() => {
+		if (totalRows) return totalRows;
 
-			// update the field
-			updateField && updateField(row, field_name, row[field_name]);
+		return internalFilteredData.length;
+	});
+
+	function sortData(field: string): void {
+		const fieldDef = fields.find((f) => f.name === field);
+		if (!fieldDef || !fieldDef.sortable) return; // Only sort if field is sortable
+
+		if (sortField === field) {
+			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+		} else {
+			sortField = field;
+			sortDirection = 'asc';
+		}
+
+		data = data.sort((a, b) => {
+			if (a[field] < b[field]) return sortDirection === 'asc' ? -1 : 1;
+			if (a[field] > b[field]) return sortDirection === 'asc' ? 1 : -1;
+			return 0;
 		});
+	}
 
-		// focus the input
-		input.focus();
+	function startResize(e: MouseEvent, field: string): void {
+		e.preventDefault();
+		const startX = e.clientX;
+		const th = (e.target as HTMLElement).closest('th') as HTMLTableCellElement;
+		const startWidth = th.offsetWidth;
 
-		console.log('Edit', row, field_name);
+		function onMouseMove(e: MouseEvent): void {
+			const width = startWidth + e.clientX - startX;
+			th.style.width = `${width}px`;
+		}
+
+		function onMouseUp(): void {
+			document.removeEventListener('mousemove', onMouseMove);
+			document.removeEventListener('mouseup', onMouseUp);
+		}
+
+		document.addEventListener('mousemove', onMouseMove);
+		document.addEventListener('mouseup', onMouseUp);
+	}
+
+	function startEditing(rowIndex: number, field: string): void {
+		if (fields.find((f) => f.name === field)?.editable) {
+			editingCell = { rowIndex, field };
+		}
+	}
+
+	function finishEditing(row: DataGridRow, field: string, event: Event): void {
+		const input = event.target as HTMLInputElement;
+		const newValue = input.value;
+		const oldValue = row[field];
+
+		if (newValue !== oldValue.toString()) {
+			const updatedRow = { ...row, [field]: newValue };
+			data[editingCell!.rowIndex] = updatedRow;
+			// data = [...data]; // Trigger Svelte reactivity
+
+			if (onupdatefield) {
+				console.warn('=== WARN: onupdatefield is deprecated. Use oncelledit instead.');
+				onupdatefield(updatedRow, field, newValue);
+				return;
+			}
+
+			oncelledit?.(updatedRow, field, oldValue, newValue);
+		}
+
+		editingCell = null;
+	}
+
+	function handleKeyDown(event: KeyboardEvent, row: DataGridRow, field: string): void {
+		if (event.key === 'Enter') {
+			finishEditing(row, field, event);
+		} else if (event.key === 'Escape') {
+			editingCell = null;
+		}
+	}
+
+	function handleButtonClick(button: DataGridButton) {
+		if (button.type === 'checkbox') {
+			button.checked = !button.checked;
+		}
+		button.onclick(button.checked);
+	}
+
+	const viewModes = ['condensed', 'comfy', 'large'];
+	const changeViewMode = (mode: string) => {
+		viewMode = mode;
+	};
+
+	const _do_filter = (filters: Record<string, any>) => {
+		paginator && paginator.resetPage();
+		if (onfilterchange) onfilterchange(filters);
 	};
 
 	const filter_change = (e: Event) => {
@@ -150,8 +278,6 @@
 		const field = fields.find((f) => f.name === name);
 		let value: any = input.value;
 		let mode = field?.searchMode || filterModes.contains;
-
-		console.log('=== FILTER CHANGE: ', { name, field, value, mode, type: input.type });
 
 		if (name.endsWith('_1')) {
 			mode = filterModes['>='];
@@ -165,8 +291,7 @@
 			delete nf[name];
 
 			filters = nf;
-			dispatch('filterchange', filters);
-			return;
+			return _do_filter(filters);
 		} else if (input.type == 'checkbox' && toBool(value) == true) {
 			value = true;
 		}
@@ -187,197 +312,288 @@
 
 		filters = new_filters;
 
-		console.log('=== FILTER CHANGE: ', filters);
-
-		dispatch('filterchange', filters);
+		_do_filter(filters);
 	};
 
-	let table_element: HTMLTableElement | null = null;
+	const internalPageChange = (page_: number, rows: number) => {
+		if (onpagechange) {
+			onpagechange(page_, rows);
+			return;
+		}
+
+		page = page_;
+	};
+
+	onMount(() => {
+		// console.log('=== DataGrid mounted');
+		// get the container height
+		if (dataView) {
+			const container = dataView.parentElement;
+			if (container) {
+				const height = container.clientHeight;
+				dataView.style.height = `${height - 40}px`;
+			}
+		}
+	});
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<div class="table">
-	<table class={mode} on:mousemove={mouse_move} on:mouseup={mouse_up} bind:this={table_element}>
-		<tbody>
-			<!-- headers -->
-			<tr>
-				{#each fields as field}
-					{#if !field.hidden}
-						<th style={`width: ${field.width || 'auto'};`}>{field.label || field.name}</th>
-						<th class="resize" on:mousedown={resize_start} />
-					{/if}
-				{/each}
-				{#if actions.length > 0}
-					<th>Actions</th>
-				{:else}
-					<th />
+{#snippet filtersRow()}
+	<!-- filters -->
+	{#if has_filters}
+		<tr>
+			{#each fields as field}
+				{#if !field.hidden}
+					<td class="filter" style={`width: ${field.width || 'min-content'};`}>
+						{#if field.filterable}
+							{#if field.type == 'string'}
+								<Input
+									{mode}
+									width={field.width}
+									size="xs"
+									name={`f_${field.name}`}
+									onchange={filter_change}
+									value={filters[field.name]?.value}
+								/>
+							{:else if field.type == 'number'}
+								{@const fn1 = `f_${field.name}_1`}
+								{@const fn2 = `f_${field.name}_2`}
+								<Input
+									{mode}
+									size="xs"
+									type="number"
+									name={fn1}
+									onchange={filter_change}
+									value={filters[fn1]?.value}
+								/>
+								<Input
+									{mode}
+									size="xs"
+									type="number"
+									name={fn2}
+									value={filters[fn2]?.value}
+									onchange={filter_change}
+								/>
+							{:else if field.type == 'date'}
+								{@const fn1 = `f_${field.name}_1`}
+								{@const fn2 = `f_${field.name}_2`}
+								<Input
+									{mode}
+									size="xs"
+									type="date"
+									name={fn1}
+									value={filters[fn1]?.value}
+									onchange={filter_change}
+								/>
+								<Input
+									{mode}
+									size="xs"
+									type="date"
+									name={fn2}
+									value={filters[fn2]?.value}
+									onchange={filter_change}
+								/>
+							{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
+								<Checkbox
+									{mode}
+									name={`f_${field.name}`}
+									size="xs"
+									onchange={filter_change}
+									checked={toBool(filters[field.name]?.value)}
+								/>
+							{/if}
+						{/if}
+					</td>
 				{/if}
-				<th>
-					<Button {mode} size="xs" on:click={() => (showFieldsModal = true)}>Fields</Button>
-				</th>
-			</tr>
+			{/each}
+			<td></td>
+		</tr>
+	{/if}
+{/snippet}
 
-			<!-- filters -->
-			{#if has_filters}
-				<tr>
-					{#each fields as field}
-						{#if !field.hidden}
-							<td class="filter" style={`width: ${field.width || 'auto'};`}>
-								{#if field.filterable}
-									{#if field.type == 'string'}
-										<Input
-											{mode}
-											width={field.width}
-											size="xs"
-											name={`f_${field.name}`}
-											on:change={filter_change}
-										/>
-									{:else if field.type == 'number'}
-										<Input
-											{mode}
-											size="xs"
-											type="number"
-											name={`f_${field.name}_1`}
-											on:change={filter_change}
-										/>
-										<Input
-											{mode}
-											size="xs"
-											type="number"
-											name={`f_${field.name}_2`}
-											on:change={filter_change}
-										/>
-									{:else if field.type == 'date'}
-										<Input
-											{mode}
-											size="xs"
-											type="date"
-											name={`f_${field.name}_1`}
-											on:change={filter_change}
-										/>
-										<Input
-											{mode}
-											size="xs"
-											type="date"
-											name={`f_${field.name}_2`}
-											on:change={filter_change}
-										/>
-									{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
-										<Input
-											{mode}
-											name={`f_${field.name}`}
-											size="xs"
-											type="checkbox"
-											on:change={filter_change}
-										/>
-									{/if}
-								{/if}
-							</td>
-							<td style="border: 0" />
+{#snippet titleBar()}
+	{#if title || buttons}
+		<div class="title-bar">
+			<div class="title">
+				{title}
+			</div>
+
+			<div class="view-modes">
+				{#each viewModes as vm}
+					<Button
+						mode={vm == viewMode ? 'mode4' : 'mode1'}
+						onclick={() => changeViewMode(vm)}
+						size="xs"
+					>
+						{vm}
+					</Button>
+				{/each}
+			</div>
+
+			{#if buttons}
+				<div class="buttons">
+					{#each buttons as button}
+						{#if button.type === 'checkbox'}
+							<Checkbox
+								size="xs"
+								mode={button.mode || mode}
+								checked={button.checked || false}
+								onchange={() => handleButtonClick(button)}
+								label={button.label}
+							/>
+						{:else}
+							<Button
+								size="xs"
+								mode={button.mode || mode}
+								variant={button.variant}
+								icon={button.icon}
+								onclick={() => handleButtonClick(button)}
+							>
+								{button.label}
+							</Button>
 						{/if}
 					{/each}
-					<td />
-					<td />
-				</tr>
+				</div>
 			{/if}
+		</div>
+	{/if}
+{/snippet}
 
-			<!-- rows -->
-			{#each data as row}
-				<tr>
-					{#each fields as field}
-						{#if !field.hidden}
-							<td
-								on:dblclick={(e) => cell_doubleclick(e, row, field.name)}
-								style={`text-align: ${field.align || 'left'}; width: ${
-									field.width || 'auto'
-								}; white-space: ${field.nowrap ? 'nowrap' : 'normal'};`}
-							>
-								{#if field.render}
-									{#if field.click}
+{#snippet tableHeaders()}
+	<tr>
+		{#each fields as field}
+			{#if !field.hidden}
+				<th onclick={() => sortData(field.name)}>
+					{field.label || field.name}
+					{#if field.sortable && sortField === field.name}
+						{sortDirection === 'asc' ? '▲' : '▼'}
+					{/if}
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<div class="resizer" onmousedown={(e) => startResize(e, field.name)}></div>
+				</th>
+			{/if}
+		{/each}
+		{#if actions}
+			<th class="actions-header">Actions</th>
+		{/if}
+	</tr>
+{/snippet}
+
+<div class="container">
+	<div bind:this={dataView} class="dataview">
+		{@render titleBar()}
+		<table bind:this={tableElement} class={viewMode}>
+			<thead>
+				{@render tableHeaders()}
+				{@render filtersRow()}
+			</thead>
+			<tbody>
+				{#each paginatedData as row, rowIndex}
+					<tr>
+						{#each fields as field}
+							{#if !field.hidden}
+								<td
+									ondblclick={() => startEditing(rowIndex, field.name)}
+									style:text-align={field.align}
+								>
+									{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
+										<input
+											type="text"
+											value={row[field.name]}
+											onblur={(e) => finishEditing(row, field.name, e)}
+											onkeydown={(e) => handleKeyDown(e, row, field.name)}
+										/>
+									{:else if field.render}
+										{#if field.onclick}
+											<Button
+												mode="mode4"
+												size="sm"
+												variant="outline"
+												onclick={() => field.onclick && field.onclick(row)}
+											>
+												{@html field.render(row[field.name], row)}
+											</Button>
+										{:else}
+											{@html field.render(row[field.name], row)}
+										{/if}
+									{:else if ['bool', 'boolean', 'checkbox'].includes(field.type)}
+										<Checkbox
+											{mode}
+											checked={toBool(row[field.name])}
+											onchange={(e: any) => {
+												row[field.name] = e.target.checked;
+												if (onupdatefield) {
+													console.warn(
+														'=== WARN: onupdatefield is deprecated. Use oncelledit instead.'
+													);
+													onupdatefield(row, field.name, e.target.checked);
+													return;
+												}
+												oncelledit?.(row, field.name, !e.target.checked, e.target.checked);
+											}}
+										/>
+									{:else if field.onclick}
 										<Button
 											mode="mode4"
 											size="sm"
 											variant="outline"
-											on:click={() => field.click && field.click(row)}
+											onclick={() => field.onclick && field.onclick(row)}
 										>
-											{@html field.render(row[field.name], row)}
+											{row[field.name]}
 										</Button>
-									{:else}
-										{@html field.render(row[field.name], row)}
-									{/if}
-								{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
-									<Input
-										{mode}
-										type="checkbox"
-										checked={toBool(row[field.name])}
-										on:change={(e) => {
-											row[field.name] = e.target?.checked;
-											updateField && updateField(row, field.name, row[field.name]);
-										}}
-									/>
-								{:else if field.type == 'avatar'}
-									<Avatar size="64px" value={row} />
-								{:else if field.click}
-									<Button
-										mode="mode4"
-										size="sm"
-										variant="outline"
-										on:click={() => field.click && field.click(row)}
-									>
-										{row[field.name]}
-									</Button>
-								{:else if field.type == 'date'}
-									{#if field.extra?.dateFormat}
-										{format_date(row[field.name], field.extra.dateFormat)}
+									{:else if field.type == 'date'}
+										{#if field.extra?.dateFormat}
+											{format_date(row[field.name], field.extra.dateFormat)}
+										{:else}
+											{row[field.name]}
+										{/if}
+									{:else if field.pre}
+										<pre>{row[field.name]}</pre>
+									{:else if field.type == 'avatar'}
+										<Avatar size="64px" value={row} />
 									{:else}
 										{row[field.name]}
 									{/if}
-								{:else if field.pre}
-									<pre>{row[field.name]}</pre>
-								{:else}
-									{row[field?.name || '']}
-								{/if}
+								</td>
+							{/if}
+						{/each}
+						{#if actions}
+							<td class="actions-cell">
+								<div class="actions">
+									{#each actions as action}
+										<Button
+											size="xs"
+											mode={action.mode || mode}
+											variant={action.variant}
+											icon={action.icon}
+											onclick={() => {
+												if (action.action) {
+													console.warn(
+														"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
+													);
+													action.action(row);
+													return;
+												}
+												action.onclick && action.onclick(row);
+											}}>{action.label ?? ''}</Button
+										>
+									{/each}
+								</div>
 							</td>
-							<td class="resize" on:mousedown={resize_start} />
 						{/if}
-					{/each}
-					{#if actions.length > 0}
-						<td class="actions">
-							{#each actions as action}
-								<Button
-									size="xs"
-									mode={action.mode || mode}
-									variant={action.variant}
-									icon={action.icon}
-									on:click={() => action.action(row)}
-								>
-									{action.label ? action.label : ''}
-								</Button>
-							{/each}
-						</td>
-					{/if}
-					<td />
-				</tr>
-			{/each}
-		</tbody>
-	</table>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+	{#if !disablePaginator}
+		<Paginator
+			bind:this={paginator}
+			total={totRows}
+			rows={rowsPerPage}
+			onpagechange={internalPageChange}
+		/>
+	{/if}
 </div>
-
-{#if showFieldsModal}
-	<Modal
-		title="Fields"
-		on:cancel={() => (showFieldsModal = false)}
-		closeOnEsc={true}
-		closeOnOutsideClick={true}
-	>
-		{#each fields as field (field.name)}
-			<div class="fields-chk">
-				<input type="checkbox" bind:checked={field.hidden} />
-				{field.name}
-			</div>
-		{/each}
-	</Modal>
-{/if}
 
 <style>
 	:root {
@@ -386,96 +602,142 @@
 		--table-font-family: var(--liwe3-main-font-family);
 	}
 
-	.fields-chk {
-		display: flex;
-		align-items: center;
-		align-content: center;
-		gap: 0.5rem;
-	}
-
-	.table {
-		min-width: 100%;
-		overflow: auto;
-		/* padding-bottom: 1rem; */
-
-		/* make the scrollbars smaller */
-		scrollbar-width: thin;
-
-		/* make the scrollbars transparent */
-		scrollbar-color: var(--liwe3-darker-primary-color) var(--liwe3-primary-color);
-	}
-
-	table {
+	.container {
+		position: relative;
 		width: 100%;
+		height: 100%;
+
+		min-height: 250px;
 
 		border: 1px solid var(--liwe3-button-border);
-		border-collapse: collapse;
 		border-radius: var(--liwe3-border-radius);
+	}
+
+	.dataview {
+		position: relative;
+
+		width: 100%;
+		height: 100%; /* Set a fixed height or use a responsive value */
+
+		overflow: auto;
+		scrollbar-width: thin;
+		scrollbar-color: var(--liwe3-darker-paper) var(--liwe3-paper);
 
 		background-color: var(--liwe3-paper);
 		color: var(--liwe3-color);
 
 		font-size: var(--table-font-size);
 		font-family: var(--table-font-family);
+
+		border-radius: var(--liwe3-border-radius);
 	}
 
-	table tr {
+	.title-bar {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		padding: 4px;
+
+		background-color: var(--liwe3-darker-paper);
+	}
+
+	.title {
+		font-weight: bold;
+	}
+
+	.buttons,
+	.actions {
+		display: flex;
+		flex-direction: row;
+		gap: 0.5rem;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: separate;
+		border-spacing: 0;
+
+		border-radius: var(--liwe3-border-radius);
+		border-collapse: collapse;
+	}
+
+	thead {
+		position: sticky;
+		top: -1px;
+		z-index: 1;
+		background-color: var(--liwe3-darker-paper);
+
+		border-bottom: 1px solid var(--liwe3-button-border);
+	}
+
+	th,
+	td {
+		text-align: left;
+		border: 1px solid var(--liwe3-secondary-color);
+	}
+
+	th {
+		padding: 8px;
+		background-color: var(--liwe3-darker-paper);
+	}
+
+	.condensed td {
+		padding: 3px;
+	}
+
+	.comfy td {
+		padding: 8px;
+	}
+
+	.large td {
+		padding: 24px;
+	}
+
+	th {
+		cursor: pointer;
+		position: relative;
+		background-color: var(--liwe3-secondary-color);
+
+		user-select: none;
+	}
+
+	tr {
 		border-bottom: 1px solid var(--liwe3-tertiary-color);
 		max-height: 2rem;
 	}
 
-	table td {
-		border-right: 1px solid var(--liwe3-tertiary-color);
+	tr:hover {
+		background-color: var(--liwe3-lighter-paper) !important;
 	}
 
-	table td .filter {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 0.25rem;
-
-		padding: 0;
-		border-right: none;
+	td {
+		border-right: 1px solid var(--liwe3-button-border);
 	}
 
-	table tr:last-child td {
-		border-bottom: none;
+	tbody tr:nth-child(even) {
+		background-color: var(--liwe3-darker-paper);
 	}
 
-	table tr td:last-child {
-		border-right: none;
+	.resizer {
+		position: absolute;
+		right: 0;
+		top: 0;
+		height: 100%;
+		width: 5px;
+		background: rgba(0, 0, 0, 0.3);
+		cursor: col-resize;
 	}
 
-	table th {
-		text-align: left;
-		background-color: var(--liwe3-lighter-tertiary-color);
-		/* disable selection */
-		user-select: none;
+	.actions-header,
+	.actions-cell {
+		width: 1%;
+		white-space: nowrap;
 	}
 
-	table td,
-	table th {
-		padding: 0.5rem;
-	}
-
-	table tr:hover td {
-		background-color: var(--liwe3-tertiary-color);
-	}
-
-	table td.actions {
-		display: flex;
-		justify-content: flex-start;
-		gap: 1rem;
-	}
-
-	/* table th borders can be dragged, make the pointer with the right cursor arrows */
-	table th.resize,
-	table td.resize {
-		cursor: ew-resize;
-		width: 2px;
-		max-width: 2px;
-		padding: 0;
-		margin: 0;
-		border-right: none;
+	input {
+		width: 100%;
+		box-sizing: border-box;
+		padding: 4px;
 	}
 </style>

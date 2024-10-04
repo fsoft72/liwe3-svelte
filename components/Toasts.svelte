@@ -1,16 +1,16 @@
 <script lang="ts">
 	import Toast from './sub/Toast.svelte';
 
-	import { dismissToast, toasts } from '$liwe3/stores/ToastStore';
+	import { dismissToast, toasts } from '$liwe3/stores/ToastStore.svelte';
 </script>
 
-{#if $toasts}
+{#if toasts}
 	<section>
-		{#each $toasts as toast (toast.id)}
+		{#each toasts as toast (toast.id)}
 			<Toast
 				type={toast.type}
 				dismissible={toast.dismissible}
-				on:dismiss={() => dismissToast(toast.id ?? 0)}
+				ondismiss={() => dismissToast(toast.id ?? 0)}
 				title={toast.title}
 				message={toast.message}
 			/>

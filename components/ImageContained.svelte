@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	export let url: string = '';
+	interface ImageContainedProps {
+		url?: string;
+		size?: 'cover' | 'contain';
+		position?: 'center' | 'top' | 'bottom' | 'left' | 'right';
+	}
 
-	export let size: 'cover' | 'contain' = 'cover';
-	export let position: 'center' | 'top' | 'bottom' | 'left' | 'right' = 'top';
+	let { url = '', size = 'cover', position = 'top' }: ImageContainedProps = $props();
 
 	let el: HTMLDivElement;
-	let width: string = '100px';
-	let height: string = '100px';
+	let width: string = $state('100px');
+	let height: string = $state('100px');
 
 	onMount(() => {
 		// set the div size according to the parent size in pixels
@@ -29,7 +32,7 @@
 <div
 	bind:this={el}
 	style={`width: ${width}; height: ${height}; background-image: url(${url}); background-size: ${size}; background-position: ${position};`}
-/>
+></div>
 
 <style>
 	div {

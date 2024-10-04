@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import {
 		CheckCircle as SuccessIcon,
@@ -9,12 +8,23 @@
 		Icon
 	} from 'svelte-hero-icons';
 
-	const dispatch = createEventDispatcher();
+	interface ToastProps {
+		type?: 'success' | 'error' | 'info';
+		dismissible?: boolean;
+		title?: string;
+		message?: string;
 
-	export let type = 'error';
-	export let dismissible = true;
-	export let title = '';
-	export let message = '';
+		// events
+		ondismiss?: () => void;
+	}
+
+	let {
+		type = 'error',
+		dismissible = true,
+		title = '',
+		message = '',
+		ondismiss
+	}: ToastProps = $props();
 </script>
 
 <article class={type} role="alert" transition:fade>
@@ -30,7 +40,12 @@
 		{title}
 
 		{#if dismissible}
-			<button class="close" on:click={() => dispatch('dismiss')}>
+			<button
+				class="close"
+				onclick={() => {
+					ondismiss && ondismiss();
+				}}
+			>
 				<Icon src={CloseIcon} width="0.8em" />
 			</button>
 		{/if}

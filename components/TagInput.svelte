@@ -1,19 +1,31 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import AutoComplete from '$liwe3/components/AutoComplete.svelte';
 	import type { Color } from '$liwe3/types/types';
 
-	export let mode: Color = 'mode1';
+	interface TagInputProps {
+		mode?: Color;
+		tags?: string[];
+		selected?: string[];
+		allowNewTags?: boolean;
+		name?: string;
+		value?: string | string[];
 
-	export let tags: string[] = [];
-	export let selected: string[] = [];
-	export let allowNewTags: boolean = false;
-	export let name: string = '';
-	export let value: string = '';
+		onchange?: (value: string[]) => void;
 
-	let finalValue = '';
+		[key: string]: any;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		mode = 'mode1',
+		tags = [],
+		selected = [],
+		allowNewTags = false,
+		name = '',
+		value = '',
+		onchange,
+		...restProps
+	}: TagInputProps = $props();
 
 	const set_tag = (e: CustomEvent) => {
 		console.log('=== SET: ', e.detail, allowNewTags);
@@ -28,16 +40,16 @@
 			tags = [...tags, t];
 			selected = [...selected, t];
 		}
+
+		onchange && onchange(selected);
 	};
 
 	const removeTag = (t: string) => {
 		selected = selected.filter((tag) => tag != t);
+		onchange && onchange(selected);
 	};
 
-	$: finalValue = selected.join(',');
-	$: {
-		dispatch('change', selected);
-	}
+	let finalValue = $derived(selected.join(','));
 
 	onMount(() => {
 		// if value is a list, simply assign it to selected
@@ -52,15 +64,13 @@
 </script>
 
 <div class={`tag-input ${mode}`}>
-	<input type="hidden" {name} bind:value={finalValue} />
-	<AutoComplete items={tags} selectedItems={selected} {...$$restProps} on:set={set_tag} />
+	<input type="hidden" {name} value={finalValue} />
+	<AutoComplete items={tags} selectedItems={selected} {...restProps} on:set={set_tag} />
 	<div class="tags-list">
 		{#each selected as tag (tag)}
 			<div class="tag">
 				<div class="name">{tag}</div>
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				<button class="btn" on:click={() => removeTag(tag)}>x</button>
+				<button class="btn" onclick={() => removeTag(tag)}>x</button>
 			</div>
 		{/each}
 	</div>

@@ -1,11 +1,18 @@
 <script lang="ts">
-	export let itemLabel: string;
-	export let highlighted: boolean;
+	interface AutoCompleteItemProps {
+		itemLabel: string;
+		highlighted: boolean;
+
+		// events
+		onclick?: (e: MouseEvent) => void;
+	}
+
+	let { itemLabel, highlighted, onclick }: AutoCompleteItemProps = $props();
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<li class="autocomplete-items" class:autocomplete-active={highlighted} on:click>
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<li class="autocomplete-items" class:autocomplete-active={highlighted} {onclick}>
 	{@html itemLabel}
 </li>
 
