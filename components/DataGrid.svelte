@@ -529,6 +529,7 @@
 													return;
 												}
 												oncelledit?.(row, field.name, !e.target.checked, e.target.checked);
+												if (field.onclick) field.onclick(row);
 											}}
 										/>
 									{:else if field.onclick}
