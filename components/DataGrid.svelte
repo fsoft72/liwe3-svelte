@@ -327,13 +327,15 @@
 	onMount(() => {
 		// console.log('=== DataGrid mounted');
 		// get the container height
-		if (dataView) {
-			const container = dataView.parentElement;
-			if (container) {
-				const height = container.clientHeight;
-				dataView.style.height = `${height - 40}px`;
-			}
-		}
+		/*
+        if (dataView) {
+            const container = dataView.parentElement;
+            if (container) {
+                const height = container.clientHeight;
+                dataView.style.height = `${height - 40}px`;
+            }
+        }
+            */
 	});
 </script>
 
@@ -478,7 +480,7 @@
 	</tr>
 {/snippet}
 
-<div class="container">
+<div class="dg-container">
 	<div bind:this={dataView} class="dataview">
 		{@render titleBar()}
 		<table bind:this={tableElement} class={viewMode}>
@@ -603,10 +605,14 @@
 		--table-font-family: var(--liwe3-main-font-family);
 	}
 
-	.container {
+	.dg-container {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+
 		position: relative;
 		width: 100%;
-		height: 100%;
+		/* height: 100%; */
 
 		min-height: 250px;
 
@@ -615,6 +621,10 @@
 	}
 
 	.dataview {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+
 		position: relative;
 
 		width: 100%;
