@@ -537,125 +537,130 @@
 	</tr>
 {/snippet}
 
-{console.log('=== ED: ', editingCell)}
 <div class="dg-container">
-	<div bind:this={dataView} class="dataview">
+	<div class="dg-header">
 		{@render titleBar()}
-		<table bind:this={tableElement} class={viewMode}>
-			<thead>
-				{@render tableHeaders()}
-				{@render filtersRow()}
-			</thead>
-			<tbody>
-				{#each paginatedData as row, rowIndex}
-					<tr>
-						{#each fields as field}
-							{#if !field.hidden}
-								<td
-									ondblclick={() => startEditing(rowIndex, field.name)}
-									style:text-align={field.align}
-								>
-									{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
-										<input
-											type="text"
-											value={row[field.name]}
-											onblur={(e) => finishEditing(row, field.name, e)}
-											onkeydown={(e) =>
-												handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
-											data-row={rowIndex}
-											data-field={field.name}
-										/>
-									{:else if field.render}
-										{#if field.onclick}
+	</div>
+	<div class="dg-body">
+		<div bind:this={dataView} class="dataview">
+			<table bind:this={tableElement} class={viewMode}>
+				<thead>
+					{@render tableHeaders()}
+					{@render filtersRow()}
+				</thead>
+				<tbody>
+					{#each paginatedData as row, rowIndex}
+						<tr>
+							{#each fields as field}
+								{#if !field.hidden}
+									<td
+										ondblclick={() => startEditing(rowIndex, field.name)}
+										style:text-align={field.align}
+									>
+										{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
+											<input
+												type="text"
+												value={row[field.name]}
+												onblur={(e) => finishEditing(row, field.name, e)}
+												onkeydown={(e) =>
+													handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+												data-row={rowIndex}
+												data-field={field.name}
+											/>
+										{:else if field.render}
+											{#if field.onclick}
+												<Button
+													mode="mode4"
+													size="sm"
+													variant="outline"
+													onclick={() => field.onclick && field.onclick(row)}
+												>
+													{@html field.render(row[field.name], row)}
+												</Button>
+											{:else}
+												{@html field.render(row[field.name], row)}
+											{/if}
+										{:else if ['bool', 'boolean', 'checkbox'].includes(field.type)}
+											<Checkbox
+												{mode}
+												checked={toBool(row[field.name])}
+												onchange={(e: any) => {
+													row[field.name] = e.target.checked;
+													if (onupdatefield) {
+														console.warn(
+															'=== WARN: onupdatefield is deprecated. Use oncelledit instead.'
+														);
+														onupdatefield(row, field.name, e.target.checked);
+														return;
+													}
+													oncelledit?.(row, field.name, !e.target.checked, e.target.checked);
+													if (field.onclick) field.onclick(row);
+												}}
+											/>
+										{:else if field.onclick}
 											<Button
 												mode="mode4"
 												size="sm"
 												variant="outline"
 												onclick={() => field.onclick && field.onclick(row)}
 											>
-												{@html field.render(row[field.name], row)}
+												{row[field.name]}
 											</Button>
-										{:else}
-											{@html field.render(row[field.name], row)}
-										{/if}
-									{:else if ['bool', 'boolean', 'checkbox'].includes(field.type)}
-										<Checkbox
-											{mode}
-											checked={toBool(row[field.name])}
-											onchange={(e: any) => {
-												row[field.name] = e.target.checked;
-												if (onupdatefield) {
-													console.warn(
-														'=== WARN: onupdatefield is deprecated. Use oncelledit instead.'
-													);
-													onupdatefield(row, field.name, e.target.checked);
-													return;
-												}
-												oncelledit?.(row, field.name, !e.target.checked, e.target.checked);
-												if (field.onclick) field.onclick(row);
-											}}
-										/>
-									{:else if field.onclick}
-										<Button
-											mode="mode4"
-											size="sm"
-											variant="outline"
-											onclick={() => field.onclick && field.onclick(row)}
-										>
-											{row[field.name]}
-										</Button>
-									{:else if field.type == 'date'}
-										{#if field.extra?.dateFormat}
-											{format_date(row[field.name], field.extra.dateFormat)}
+										{:else if field.type == 'date'}
+											{#if field.extra?.dateFormat}
+												{format_date(row[field.name], field.extra.dateFormat)}
+											{:else}
+												{row[field.name]}
+											{/if}
+										{:else if field.pre}
+											<pre>{row[field.name]}</pre>
+										{:else if field.type == 'avatar'}
+											<Avatar size="64px" value={row} />
 										{:else}
 											{row[field.name]}
 										{/if}
-									{:else if field.pre}
-										<pre>{row[field.name]}</pre>
-									{:else if field.type == 'avatar'}
-										<Avatar size="64px" value={row} />
-									{:else}
-										{row[field.name]}
-									{/if}
+									</td>
+								{/if}
+							{/each}
+							{#if actions}
+								<td class="actions-cell">
+									<div class="actions">
+										{#each actions as action}
+											<Button
+												size="xs"
+												mode={action.mode || mode}
+												variant={action.variant}
+												icon={action.icon}
+												onclick={() => {
+													if (action.action) {
+														console.warn(
+															"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
+														);
+														action.action(row);
+														return;
+													}
+													action.onclick && action.onclick(row);
+												}}>{action.label ?? ''}</Button
+											>
+										{/each}
+									</div>
 								</td>
 							{/if}
-						{/each}
-						{#if actions}
-							<td class="actions-cell">
-								<div class="actions">
-									{#each actions as action}
-										<Button
-											size="xs"
-											mode={action.mode || mode}
-											variant={action.variant}
-											icon={action.icon}
-											onclick={() => {
-												if (action.action) {
-													console.warn(
-														"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
-													);
-													action.action(row);
-													return;
-												}
-												action.onclick && action.onclick(row);
-											}}>{action.label ?? ''}</Button
-										>
-									{/each}
-								</div>
-							</td>
-						{/if}
-					</tr>
-				{/each}
-			</tbody>
-		</table>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
 	</div>
 	{#if !disablePaginator}
-		<Paginator
-			bind:this={paginator}
-			total={totRows}
-			rows={rowsPerPage}
-			onpagechange={internalPageChange}
-		/>
+		<div class="dg-footer">
+			<Paginator
+				bind:this={paginator}
+				total={totRows}
+				rows={rowsPerPage}
+				onpagechange={internalPageChange}
+			/>
+		</div>
 	{/if}
 </div>
 
@@ -667,6 +672,28 @@
 	}
 
 	.dg-container {
+		display: flex;
+		flex-direction: column;
+		height: 100%; /* Or a specific height */
+		min-height: 250px;
+		border: 1px solid var(--liwe3-button-border);
+		border-radius: var(--liwe3-border-radius);
+		overflow: hidden; /* Hide overflow */
+	}
+
+	.dg-header {
+		flex: 0 0 auto; /* Don't grow or shrink */
+		background-color: var(--liwe3-darker-paper);
+		z-index: 2; /* Ensure it's above the scrolling content */
+	}
+
+	.dg-body {
+		flex: 1 1 auto; /* Grow and shrink as needed */
+		overflow: auto; /* Enable scrolling */
+		position: relative; /* For positioning the table header */
+	}
+
+	.dg-container2 {
 		display: flex;
 		flex-direction: column;
 
@@ -681,6 +708,10 @@
 	}
 
 	.dataview {
+		height: 100%;
+	}
+
+	.dataview2 {
 		display: flex;
 		flex-direction: column;
 		flex: 1 1 auto; /* Allow it to grow and shrink */
@@ -723,7 +754,7 @@
 		gap: 0.5rem;
 	}
 
-	table {
+	table2 {
 		width: 100%;
 		border-collapse: separate;
 		border-spacing: 0;
@@ -734,13 +765,34 @@
 		flex: 1 0 auto; /* Don't allow the table to shrink */
 	}
 
-	thead {
+	thead2 {
 		position: sticky;
 		top: -1px;
 		z-index: 1;
 		background-color: var(--liwe3-darker-paper);
 
 		border-bottom: 1px solid var(--liwe3-button-border);
+	}
+
+	table {
+		width: 100%;
+		border-collapse: separate;
+		border-spacing: 0;
+		border-radius: var(--liwe3-border-radius);
+		border-collapse: collapse;
+	}
+
+	thead {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		background-color: var(--liwe3-darker-paper);
+	}
+
+	.dg-footer {
+		flex: 0 0 auto; /* Don't grow or shrink */
+		background-color: var(--liwe3-darker-paper);
+		z-index: 2; /* Ensure it's above the scrolling content */
 	}
 
 	th,
