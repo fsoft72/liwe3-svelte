@@ -230,7 +230,7 @@
 		const newValue = input.value;
 		const oldValue = row[field];
 
-		if (newValue !== oldValue.toString()) {
+		if (newValue !== oldValue?.toString()) {
 			const updatedRow = { ...row, [field]: newValue };
 			data[editingCell!.rowIndex] = updatedRow;
 			// data = [...data]; // Trigger Svelte reactivity
