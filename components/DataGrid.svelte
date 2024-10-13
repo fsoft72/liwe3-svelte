@@ -669,11 +669,10 @@
 	.dg-container {
 		display: flex;
 		flex-direction: column;
-		flex-grow: 1;
 
 		position: relative;
 		width: 100%;
-		/* height: 100%; */
+		height: 100%;
 
 		min-height: 250px;
 
@@ -684,14 +683,13 @@
 	.dataview {
 		display: flex;
 		flex-direction: column;
-		flex-grow: 1;
+		flex: 1 1 auto; /* Allow it to grow and shrink */
+		overflow: auto; /* Enable scrolling */
 
 		position: relative;
 
 		width: 100%;
-		height: 100%; /* Set a fixed height or use a responsive value */
 
-		overflow: auto;
 		scrollbar-width: thin;
 		scrollbar-color: var(--liwe3-darker-paper) var(--liwe3-paper);
 
@@ -732,6 +730,8 @@
 
 		border-radius: var(--liwe3-border-radius);
 		border-collapse: collapse;
+
+		flex: 1 0 auto; /* Don't allow the table to shrink */
 	}
 
 	thead {
