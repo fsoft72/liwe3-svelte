@@ -9,7 +9,7 @@
 	import Avatar from './Avatar.svelte';
 	import Input from './Input.svelte';
 	import Paginator from './Paginator.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
 	export interface DataGridFieldExtra {
 		options?: { label: string; value: string }[];
@@ -219,10 +219,58 @@
 		document.addEventListener('mouseup', onMouseUp);
 	}
 
-	function startEditing(rowIndex: number, field: string): void {
-		if (fields.find((f) => f.name === field)?.editable) {
-			editingCell = { rowIndex, field };
+	async function startEditing(rowIndex: number, fieldName: string): Promise<void> {
+		const fieldDef = fields.find((f) => f.name === fieldName);
+		if (fieldDef?.editable) {
+			editingCell = { rowIndex, field: fieldName };
+
+			console.log('=== EDITING: ', editingCell);
+
+			// Wait for the next DOM update
+			await tick();
+
+			// Now try to focus the input
+			const input = document.querySelector(
+				`input[data-row="${rowIndex}"][data-field="${fieldName}"]`
+			) as HTMLInputElement;
+
+			if (input) {
+				input.focus();
+				input.select(); // This will select all text in the input
+			}
 		}
+	}
+
+	function handleTabKey(event: KeyboardEvent, rowIndex: number, fieldIndex: number): void {
+		event.preventDefault();
+		const currentField = fields[fieldIndex];
+		finishEditing(data[rowIndex], currentField.name, event);
+
+		const nextEditableField = findNextEditableField(rowIndex, fieldIndex);
+		if (nextEditableField) {
+			setTimeout(() => {
+				startEditing(nextEditableField.rowIndex, fields[nextEditableField.fieldIndex].name);
+			}, 50);
+			// startEditing(nextEditableField.rowIndex, fields[nextEditableField.fieldIndex].name);
+		}
+	}
+
+	function findNextEditableField(
+		currentRowIndex: number,
+		currentFieldIndex: number
+	): { rowIndex: number; fieldIndex: number } | null {
+		for (let rowIndex = currentRowIndex; rowIndex < data.length; rowIndex++) {
+			for (
+				let fieldIndex = rowIndex === currentRowIndex ? currentFieldIndex + 1 : 0;
+				fieldIndex < fields.length;
+				fieldIndex++
+			) {
+				if (fields[fieldIndex].editable && !fields[fieldIndex].hidden) {
+					return { rowIndex, fieldIndex };
+				}
+			}
+		}
+		return null;
 	}
 
 	function finishEditing(row: DataGridRow, field: string, event: Event): void {
@@ -232,8 +280,9 @@
 
 		if (newValue !== oldValue?.toString()) {
 			const updatedRow = { ...row, [field]: newValue };
-			data[editingCell!.rowIndex] = updatedRow;
-			// data = [...data]; // Trigger Svelte reactivity
+			if (!editingCell) return;
+
+			data[editingCell.rowIndex] = updatedRow;
 
 			if (onupdatefield) {
 				console.warn('=== WARN: onupdatefield is deprecated. Use oncelledit instead.');
@@ -247,11 +296,19 @@
 		editingCell = null;
 	}
 
-	function handleKeyDown(event: KeyboardEvent, row: DataGridRow, field: string): void {
+	function handleKeyDown(
+		event: KeyboardEvent,
+		row: DataGridRow,
+		field: string,
+		rowIndex: number,
+		fieldIndex: number
+	): void {
 		if (event.key === 'Enter') {
 			finishEditing(row, field, event);
 		} else if (event.key === 'Escape') {
 			editingCell = null;
+		} else if (event.key === 'Tab') {
+			handleTabKey(event, rowIndex, fieldIndex);
 		}
 	}
 
@@ -480,6 +537,7 @@
 	</tr>
 {/snippet}
 
+{console.log('=== ED: ', editingCell)}
 <div class="dg-container">
 	<div bind:this={dataView} class="dataview">
 		{@render titleBar()}
@@ -502,7 +560,10 @@
 											type="text"
 											value={row[field.name]}
 											onblur={(e) => finishEditing(row, field.name, e)}
-											onkeydown={(e) => handleKeyDown(e, row, field.name)}
+											onkeydown={(e) =>
+												handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+											data-row={rowIndex}
+											data-field={field.name}
 										/>
 									{:else if field.render}
 										{#if field.onclick}
