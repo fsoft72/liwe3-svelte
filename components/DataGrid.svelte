@@ -32,9 +32,13 @@
 		nowrap?: boolean;
 		pre?: string;
 		extra?: DataGridFieldExtra;
-		selectOptions?: { value: string; label: string }[]; // Options for select fields
-		validChars?: string; // chars that are allowed in the input field
-		forceLowercase?: boolean; // if true, the input will be forced to lowercase
+		options?: {
+			select?: { value: string; label: string }[];
+			validChars?: string;
+			lower?: boolean;
+			min?: number;
+			max?: number;
+		};
 
 		render?: (value: any, row: any) => any;
 
@@ -281,16 +285,14 @@
 		const oldValue = row[field];
 		const fieldDef = fields.find((f) => f.name === field);
 
-		if (fieldDef?.validChars) {
+		if (fieldDef?.options?.validChars) {
 			newValue = newValue
 				.split('')
-				.filter((char) => fieldDef.validChars!.includes(char))
+				.filter((char) => fieldDef.options!.validChars!.includes(char))
 				.join('');
 		}
 
-		if (fieldDef?.forceLowercase) {
-			newValue = newValue.toLowerCase();
-		}
+		if (fieldDef?.options?.lower) newValue = newValue.toLowerCase();
 
 		if (newValue !== oldValue?.toString()) {
 			const updatedRow = { ...row, [field]: newValue };
@@ -339,12 +341,12 @@
 		const input = event.target as HTMLInputElement;
 		let value = input.value;
 
-		if (field.forceLowercase) value = value.toLowerCase();
+		if (field.options?.lower) value = value.toLowerCase();
 
-		if (field.validChars) {
+		if (field.options?.validChars) {
 			value = value
 				.split('')
-				.filter((char) => field.validChars!.includes(char))
+				.filter((char) => field.options!.validChars!.includes(char))
 				.join('');
 		}
 
@@ -357,12 +359,12 @@
 		const pastedText = event.clipboardData?.getData('text') || '';
 		let value = pastedText;
 
-		if (field.forceLowercase) value = value.toLowerCase();
+		if (field.options?.lower) value = value.toLowerCase();
 
-		if (field.validChars) {
+		if (field.options?.validChars) {
 			value = value
 				.split('')
-				.filter((char) => field.validChars!.includes(char))
+				.filter((char) => field.options!.validChars!.includes(char))
 				.join('');
 		}
 
@@ -371,6 +373,34 @@
 		const currentValue = input.value;
 		input.value = currentValue.slice(0, start) + value + currentValue.slice(end);
 		input.setSelectionRange(start + value.length, start + value.length);
+	}
+
+	const _numeric_limit = (input: HTMLInputElement, value: number, field: DataGridField) => {
+		if (!isNaN(value)) {
+			if (field.options?.min !== undefined) {
+				value = Math.max(field.options?.min, value);
+			}
+			if (field.options?.max !== undefined) {
+				value = Math.min(field.options?.max, value);
+			}
+			input.value = value.toString();
+		}
+	};
+
+	function handleNumericInput(event: Event, field: DataGridField): void {
+		const input = event.target as HTMLInputElement;
+		let value = input.valueAsNumber;
+
+		_numeric_limit(input, value, field);
+	}
+
+	function handleNumericPaste(event: ClipboardEvent, field: DataGridField): void {
+		event.preventDefault();
+		const input = event.target as HTMLInputElement;
+		const pastedText = event.clipboardData?.getData('text') || '';
+		let value = parseFloat(pastedText);
+
+		_numeric_limit(input, value, field);
 	}
 
 	const viewModes = ['condensed', 'comfy', 'large'];
@@ -612,7 +642,7 @@
 										style:text-align={field.align}
 									>
 										{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
-											{#if field.selectOptions}
+											{#if field.options?.select}
 												<!-- Use select input if selectOptions are provided -->
 												<select
 													value={row[field.name]}
@@ -623,11 +653,26 @@
 													data-row={rowIndex}
 													data-field={field.name}
 												>
-													{#each field.selectOptions as option}
+													{#each field.options.select as option}
 														<option value={option.value}>{option.label}</option>
 													{/each}
 												</select>
+											{:else if field.type === 'number'}
+												<input
+													type="number"
+													value={row[field.name]}
+													min={field.options?.min}
+													max={field.options?.max}
+													onblur={(e) => finishEditing(row, field.name, e)}
+													onkeydown={(e) =>
+														handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+													oninput={(e) => handleNumericInput(e, field)}
+													onpaste={(e) => handleNumericPaste(e, field)}
+													data-row={rowIndex}
+													data-field={field.name}
+												/>
 											{:else}
+												<!-- Existing text input logic -->
 												<input
 													type="text"
 													value={row[field.name]}
@@ -825,26 +870,6 @@
 		display: flex;
 		flex-direction: row;
 		gap: 0.5rem;
-	}
-
-	table2 {
-		width: 100%;
-		border-collapse: separate;
-		border-spacing: 0;
-
-		border-radius: var(--liwe3-border-radius);
-		border-collapse: collapse;
-
-		flex: 1 0 auto; /* Don't allow the table to shrink */
-	}
-
-	thead2 {
-		position: sticky;
-		top: -1px;
-		z-index: 1;
-		background-color: var(--liwe3-darker-paper);
-
-		border-bottom: 1px solid var(--liwe3-button-border);
 	}
 
 	table {
