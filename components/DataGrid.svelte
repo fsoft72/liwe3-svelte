@@ -32,6 +32,7 @@
 		nowrap?: boolean;
 		pre?: string;
 		extra?: DataGridFieldExtra;
+		selectOptions?: { value: string; label: string }[]; // Options for select fields
 
 		render?: (value: any, row: any) => any;
 
@@ -225,17 +226,17 @@
 		if (fieldDef?.editable) {
 			editingCell = { rowIndex, field: fieldName };
 
-			// Wait for the next DOM update
 			await tick();
 
-			// Now try to focus the input
-			const input = document.querySelector(
-				`input[data-row="${rowIndex}"][data-field="${fieldName}"]`
-			) as HTMLInputElement;
+			const element = document.querySelector(
+				`[data-row="${rowIndex}"][data-field="${fieldName}"]`
+			) as HTMLInputElement | HTMLSelectElement;
 
-			if (input) {
-				input.focus();
-				input.select(); // This will select all text in the input
+			if (element) {
+				element.focus();
+				if (element instanceof HTMLInputElement) {
+					element.select();
+				}
 			}
 		}
 	}
@@ -273,8 +274,8 @@
 	}
 
 	function finishEditing(row: DataGridRow, field: string, event: Event): void {
-		const input = event.target as HTMLInputElement;
-		const newValue = input.value;
+		const element = event.target as HTMLInputElement | HTMLSelectElement;
+		const newValue = element.value;
 		const oldValue = row[field];
 
 		if (newValue !== oldValue?.toString()) {
@@ -282,8 +283,6 @@
 			if (!editingCell) return;
 
 			const rowIndex = editingCell.rowIndex + (page - 1) * rowsPerPage;
-
-			// runeDebug('=== ROW INDEX: ', { rowIndex, rowsPerPage, page, updatedRow });
 
 			data[rowIndex] = updatedRow;
 
@@ -561,15 +560,32 @@
 										style:text-align={field.align}
 									>
 										{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
-											<input
-												type="text"
-												value={row[field.name]}
-												onblur={(e) => finishEditing(row, field.name, e)}
-												onkeydown={(e) =>
-													handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
-												data-row={rowIndex}
-												data-field={field.name}
-											/>
+											{#if field.selectOptions}
+												<!-- Use select input if selectOptions are provided -->
+												<select
+													value={row[field.name]}
+													onblur={(e) => finishEditing(row, field.name, e)}
+													onchange={(e) => finishEditing(row, field.name, e)}
+													onkeydown={(e) =>
+														handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+													data-row={rowIndex}
+													data-field={field.name}
+												>
+													{#each field.selectOptions as option}
+														<option value={option.value}>{option.label}</option>
+													{/each}
+												</select>
+											{:else}
+												<input
+													type="text"
+													value={row[field.name]}
+													onblur={(e) => finishEditing(row, field.name, e)}
+													onkeydown={(e) =>
+														handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+													data-row={rowIndex}
+													data-field={field.name}
+												/>
+											{/if}
 										{:else if field.render}
 											{#if field.onclick}
 												<Button
