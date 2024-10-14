@@ -172,6 +172,15 @@ export const mkid = ( prefix: string, ext?: string ) => {
 	return `${ unique_code( false, prefix ) }${ ext }`;
 };
 
+export const mkid_simple = ( prefix: string, rnd: boolean = true, sep: string = '.' ) => {
+	const d = new Date().getTime().toString( 36 );
+	const rand = rand_int( 0, 999999 ).toString( 36 );
+
+	if ( rnd ) return `${ prefix }${ sep }${ d }${ sep }${ rand }`;
+
+	return `${ prefix }${ sep }${ d }`;
+};
+
 export const media_url = ( id: string, filename: string = '', thumbnail = false ) => {
 	if ( !id ) return '';
 
