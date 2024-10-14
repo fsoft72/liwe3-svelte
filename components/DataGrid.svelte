@@ -10,6 +10,7 @@
 	import Input from './Input.svelte';
 	import Paginator from './Paginator.svelte';
 	import { onMount, tick } from 'svelte';
+	import { runeDebug } from '$liwe3/utils/runes.svelte';
 
 	export interface DataGridFieldExtra {
 		options?: { label: string; value: string }[];
@@ -224,8 +225,6 @@
 		if (fieldDef?.editable) {
 			editingCell = { rowIndex, field: fieldName };
 
-			console.log('=== EDITING: ', editingCell);
-
 			// Wait for the next DOM update
 			await tick();
 
@@ -244,7 +243,7 @@
 	function handleTabKey(event: KeyboardEvent, rowIndex: number, fieldIndex: number): void {
 		event.preventDefault();
 		const currentField = fields[fieldIndex];
-		finishEditing(data[rowIndex], currentField.name, event);
+		finishEditing(data[rowIndex + (page - 1) * rowsPerPage], currentField.name, event);
 
 		const nextEditableField = findNextEditableField(rowIndex, fieldIndex);
 		if (nextEditableField) {
@@ -282,7 +281,11 @@
 			const updatedRow = { ...row, [field]: newValue };
 			if (!editingCell) return;
 
-			data[editingCell.rowIndex] = updatedRow;
+			const rowIndex = editingCell.rowIndex + (page - 1) * rowsPerPage;
+
+			// runeDebug('=== ROW INDEX: ', { rowIndex, rowsPerPage, page, updatedRow });
+
+			data[rowIndex] = updatedRow;
 
 			if (onupdatefield) {
 				console.warn('=== WARN: onupdatefield is deprecated. Use oncelledit instead.');
