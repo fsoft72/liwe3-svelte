@@ -621,6 +621,76 @@
 	</tr>
 {/snippet}
 
+{#snippet editField(row: DataGridRow, field: DataGridField, rowIndex: number)}
+	{#if field.options?.select}
+		<!-- Use select input if selectOptions are provided -->
+		<select
+			value={row[field.name]}
+			onblur={(e) => finishEditing(row, field.name, e)}
+			onchange={(e) => finishEditing(row, field.name, e)}
+			onkeydown={(e) => handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+			data-row={rowIndex}
+			data-field={field.name}
+		>
+			{#each field.options.select as option}
+				<option value={option.value}>{option.label}</option>
+			{/each}
+		</select>
+	{:else if field.type === 'number'}
+		<input
+			type="number"
+			value={row[field.name]}
+			min={field.options?.min}
+			max={field.options?.max}
+			onblur={(e) => finishEditing(row, field.name, e)}
+			onkeydown={(e) => handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+			oninput={(e) => handleNumericInput(e, field)}
+			onpaste={(e) => handleNumericPaste(e, field)}
+			data-row={rowIndex}
+			data-field={field.name}
+		/>
+	{:else}
+		<!-- Existing text input logic -->
+		<input
+			type="text"
+			value={row[field.name]}
+			onblur={(e) => finishEditing(row, field.name, e)}
+			onkeydown={(e) => handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+			oninput={(e) => handleInput(e, field)}
+			onpaste={(e) => handlePaste(e, field)}
+			data-row={rowIndex}
+			data-field={field.name}
+		/>
+	{/if}
+{/snippet}
+
+{#snippet renderActions(actions: DataGridAction[] | undefined, row: DataGridRow)}
+	{#if actions}
+		<td class="actions-cell">
+			<div class="actions">
+				{#each actions as action}
+					<Button
+						size="xs"
+						mode={action.mode || mode}
+						variant={action.variant}
+						icon={action.icon}
+						onclick={() => {
+							if (action.action) {
+								console.warn(
+									"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
+								);
+								action.action(row);
+								return;
+							}
+							action.onclick && action.onclick(row);
+						}}>{action.label ?? ''}</Button
+					>
+				{/each}
+			</div>
+		</td>
+	{/if}
+{/snippet}
+
 <div class="dg-container">
 	<div class="dg-header">
 		{@render titleBar()}
@@ -642,49 +712,7 @@
 										style:text-align={field.align}
 									>
 										{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
-											{#if field.options?.select}
-												<!-- Use select input if selectOptions are provided -->
-												<select
-													value={row[field.name]}
-													onblur={(e) => finishEditing(row, field.name, e)}
-													onchange={(e) => finishEditing(row, field.name, e)}
-													onkeydown={(e) =>
-														handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
-													data-row={rowIndex}
-													data-field={field.name}
-												>
-													{#each field.options.select as option}
-														<option value={option.value}>{option.label}</option>
-													{/each}
-												</select>
-											{:else if field.type === 'number'}
-												<input
-													type="number"
-													value={row[field.name]}
-													min={field.options?.min}
-													max={field.options?.max}
-													onblur={(e) => finishEditing(row, field.name, e)}
-													onkeydown={(e) =>
-														handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
-													oninput={(e) => handleNumericInput(e, field)}
-													onpaste={(e) => handleNumericPaste(e, field)}
-													data-row={rowIndex}
-													data-field={field.name}
-												/>
-											{:else}
-												<!-- Existing text input logic -->
-												<input
-													type="text"
-													value={row[field.name]}
-													onblur={(e) => finishEditing(row, field.name, e)}
-													onkeydown={(e) =>
-														handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
-													oninput={(e) => handleInput(e, field)}
-													onpaste={(e) => handlePaste(e, field)}
-													data-row={rowIndex}
-													data-field={field.name}
-												/>
-											{/if}
+											{@render editField(row, field, rowIndex)}
 										{:else if field.render}
 											{#if field.onclick}
 												<Button
@@ -740,30 +768,7 @@
 									</td>
 								{/if}
 							{/each}
-							{#if actions}
-								<td class="actions-cell">
-									<div class="actions">
-										{#each actions as action}
-											<Button
-												size="xs"
-												mode={action.mode || mode}
-												variant={action.variant}
-												icon={action.icon}
-												onclick={() => {
-													if (action.action) {
-														console.warn(
-															"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
-														);
-														action.action(row);
-														return;
-													}
-													action.onclick && action.onclick(row);
-												}}>{action.label ?? ''}</Button
-											>
-										{/each}
-									</div>
-								</td>
-							{/if}
+							{@render renderActions(actions, row)}
 						</tr>
 					{/each}
 				</tbody>
