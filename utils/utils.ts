@@ -371,3 +371,17 @@ export const challenge_create = ( params: string[], secret: string, debug = fals
 export const clone = ( obj: any ) => {
 	return structuredClone( obj );
 };
+
+
+/**
+ * this function returns a dict with only the keys that are not undefined
+ */
+export const clean = ( obj: Record<string, any> ) => {
+	const res: Record<string, any> = {};
+
+	for ( const key in obj ) {
+		if ( obj[ key ] !== undefined ) res[ key ] = obj[ key ];
+	}
+
+	return res;
+};
