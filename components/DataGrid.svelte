@@ -33,6 +33,8 @@
 		pre?: string;
 		extra?: DataGridFieldExtra;
 		selectOptions?: { value: string; label: string }[]; // Options for select fields
+		validChars?: string; // chars that are allowed in the input field
+		forceLowercase?: boolean; // if true, the input will be forced to lowercase
 
 		render?: (value: any, row: any) => any;
 
@@ -275,8 +277,20 @@
 
 	function finishEditing(row: DataGridRow, field: string, event: Event): void {
 		const element = event.target as HTMLInputElement | HTMLSelectElement;
-		const newValue = element.value;
+		let newValue = element.value;
 		const oldValue = row[field];
+		const fieldDef = fields.find((f) => f.name === field);
+
+		if (fieldDef?.validChars) {
+			newValue = newValue
+				.split('')
+				.filter((char) => fieldDef.validChars!.includes(char))
+				.join('');
+		}
+
+		if (fieldDef?.forceLowercase) {
+			newValue = newValue.toLowerCase();
+		}
 
 		if (newValue !== oldValue?.toString()) {
 			const updatedRow = { ...row, [field]: newValue };
@@ -319,6 +333,44 @@
 			button.checked = !button.checked;
 		}
 		button.onclick(button.checked);
+	}
+
+	function handleInput(event: Event, field: DataGridField): void {
+		const input = event.target as HTMLInputElement;
+		let value = input.value;
+
+		if (field.forceLowercase) value = value.toLowerCase();
+
+		if (field.validChars) {
+			value = value
+				.split('')
+				.filter((char) => field.validChars!.includes(char))
+				.join('');
+		}
+
+		input.value = value;
+	}
+
+	function handlePaste(event: ClipboardEvent, field: DataGridField): void {
+		event.preventDefault();
+		const input = event.target as HTMLInputElement;
+		const pastedText = event.clipboardData?.getData('text') || '';
+		let value = pastedText;
+
+		if (field.forceLowercase) value = value.toLowerCase();
+
+		if (field.validChars) {
+			value = value
+				.split('')
+				.filter((char) => field.validChars!.includes(char))
+				.join('');
+		}
+
+		const start = input.selectionStart || 0;
+		const end = input.selectionEnd || 0;
+		const currentValue = input.value;
+		input.value = currentValue.slice(0, start) + value + currentValue.slice(end);
+		input.setSelectionRange(start + value.length, start + value.length);
 	}
 
 	const viewModes = ['condensed', 'comfy', 'large'];
@@ -582,6 +634,8 @@
 													onblur={(e) => finishEditing(row, field.name, e)}
 													onkeydown={(e) =>
 														handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+													oninput={(e) => handleInput(e, field)}
+													onpaste={(e) => handlePaste(e, field)}
 													data-row={rowIndex}
 													data-field={field.name}
 												/>
