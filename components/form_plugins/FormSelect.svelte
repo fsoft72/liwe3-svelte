@@ -5,17 +5,19 @@
 	interface Props {
 		field: FormField;
 
+		name: string;
+
 		// dependency injection
 		_v: (field: FormField) => any;
 
 		// events
-		onchange: (name: string, value: any) => void;
+		onchange: (name: string, value: any, field: FormField) => void;
 
 		// extra
 		[key: string]: any;
 	}
 
-	let { field, onchange, _v, ...props }: Props = $props();
+	let { field, name, onchange, _v, ...props }: Props = $props();
 </script>
 
 <div class="custom-select">
@@ -24,13 +26,13 @@
 	{/if}
 	<div class="svelte-select mode3" style="width: 100%">
 		<Select
-			name={field.name}
+			{name}
 			value={_v(field)}
 			placeholder={field.placeholder}
 			{...field?.extra ?? {}}
 			{...props}
-			on:change={(e: any) => onchange(field.name, e.detail.value)}
-			on:clear={() => onchange(field.name, '')}
+			on:change={(e: any) => onchange(name, e.detail.value, field)}
+			on:clear={() => onchange(name, '', field)}
 			items={field.options ?? []}
 		/>
 	</div>

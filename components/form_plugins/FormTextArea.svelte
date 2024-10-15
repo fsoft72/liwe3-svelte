@@ -4,17 +4,19 @@
 	interface Props {
 		field: FormField;
 
+		name: string;
+
 		// dependency injection
 		_v: (field: FormField) => any;
 
 		// events
-		onchange: (name: string, value: any) => void;
+		onchange: (name: string, value: any, field: FormField) => void;
 
 		// extra
 		[key: string]: any;
 	}
 
-	let { field, onchange, _v, ...props }: Props = $props();
+	let { field, name, onchange, _v, ...props }: Props = $props();
 </script>
 
 <div class="title">{field?.label ?? ''}</div>
@@ -25,7 +27,7 @@
 	{...field}
 	{...field?.extra ?? {}}
 	{...props}
-	name={field.name}
+	{name}
 	value={_v(field)}
-	onchange={(e: any) => onchange(field.name, e)}
+	onchange={(e: any) => onchange(name, e, field)}
 ></textarea>

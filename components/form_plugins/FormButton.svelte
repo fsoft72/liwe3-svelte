@@ -5,19 +5,21 @@
 	interface Props {
 		field: FormField;
 
+		name: string;
+
 		// dependency injection
 		_v: (field: FormField) => any;
 
 		// events
-		onchange: (name: string, value: any) => void;
+		onchange: (name: string, value: any, field: FormField) => void;
 
 		// extra
 		[key: string]: any;
 	}
 
-	let { field, onchange, _v, ...props }: Props = $props();
+	let { field, name, onchange, _v, ...props }: Props = $props();
 </script>
 
-<Button {...field} {...field?.extra ?? {}} onclick={field?.onclick}>
+<Button {...field} {...field?.extra ?? {}} {name} onclick={field?.onclick}>
 	{field.label}
 </Button>

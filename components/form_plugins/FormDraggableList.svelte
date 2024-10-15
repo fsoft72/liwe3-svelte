@@ -5,22 +5,24 @@
 	interface Props {
 		field: FormField;
 
+		name: string;
+
 		// dependency injection
 		_v: (field: FormField) => any;
 
 		// events
-		onchange: (name: string, value: any) => void;
+		onchange: (name: string, value: any, field: FormField) => void;
 
 		// extra
 		[key: string]: any;
 	}
 
-	let { field, onchange, _v, ...props }: Props = $props();
+	let { field, name, onchange, _v, ...props }: Props = $props();
 </script>
 
 <DraggableTree
-	name={field.name}
+	{name}
 	tree={_v(field)}
 	{...field?.extra ?? {}}
-	onchange={(e: any) => onchange(field.name, e)}
+	onchange={(e: any) => onchange(name, e, field)}
 />

@@ -4,6 +4,8 @@
 	interface Props {
 		field: FormField;
 
+		name: string;
+
 		// dependency injection
 		_v: (field: FormField) => any;
 
@@ -14,7 +16,7 @@
 		[key: string]: any;
 	}
 
-	let { field, onchange, _v, ...props }: Props = $props();
+	let { field, name, onchange, _v, ...props }: Props = $props();
 </script>
 
-<input {...props} type="hidden" name={field.name} value={_v(field)} />
+<input {...props} type="hidden" {name} value={_v(field)} />

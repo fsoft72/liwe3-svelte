@@ -72,6 +72,8 @@
 		showButtons?: boolean;
 		showReset?: boolean;
 
+		nameField?: string;
+
 		// events
 		onsubmit?: (values: Record<string, any>) => void;
 		onchange?: (name: string, value: any) => void;
@@ -85,6 +87,8 @@
 		showButtons = true,
 		showReset = true,
 
+		nameField = 'name',
+
 		// events
 		onsubmit,
 		onchange
@@ -96,7 +100,7 @@
 		const required: string[] = [];
 
 		fields.forEach((field) => {
-			if (field.required && typeof values[field.name] == 'undefined') {
+			if (field.required && typeof values[(field as any)[nameField]] == 'undefined') {
 				required.push(field.label ?? field.name);
 			}
 		});
@@ -127,7 +131,7 @@
 		onsubmit && onsubmit(values);
 	};
 
-	const onChangeField = async (name: string, e: any) => {
+	const onChangeField = async (name: string, e: any, fld: FormField) => {
 		let value;
 
 		if (e.target) {
@@ -138,7 +142,7 @@
 			value = e;
 		}
 
-		runeDebug('=== FormCreator/onChangeField: ', name, value);
+		runeDebug('=== FormCreator/onChangeField: ', name, value, fld.name);
 
 		const field = fields.find((f) => f.name === name);
 		const onChange = field?.onchange;
@@ -152,7 +156,7 @@
 	};
 
 	const _v = (field: FormField) => {
-		let v = values[field?.name];
+		let v = values[(field as any)[nameField]] ?? '';
 
 		if (v === undefined) v = field?.default;
 		if (v === undefined) v = '';
@@ -171,7 +175,7 @@
 			this={plugin.component}
 			{_v}
 			{...plugin.extra ?? {}}
-			name={field.name}
+			name={(field as any)[nameField]}
 			value={_v(field)}
 			{field}
 			{...field?.extra ?? {}}
