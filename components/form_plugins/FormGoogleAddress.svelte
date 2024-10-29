@@ -120,7 +120,7 @@
 					}));
 			d[l]
 				? console.warn(p + ' only loads once. Ignoring:', g)
-				: (d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)));
+				: (d[l] = (f: any, ...n: any[]) => r.add(f) && u().then(() => d[l](f, ...n)));
 		})({
 			key: PUBLIC_GOOGLE_MAPS_API_KEY,
 			v: 'weekly'
