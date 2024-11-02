@@ -200,11 +200,23 @@
 			sortDirection = 'asc';
 		}
 
-		data = data.sort((a, b) => {
-			if (a[field] < b[field]) return sortDirection === 'asc' ? -1 : 1;
-			if (a[field] > b[field]) return sortDirection === 'asc' ? 1 : -1;
-			return 0;
-		});
+		// if field is numeric, sort as numbers
+		if (fieldDef.type === 'number') {
+			data = data.sort((a, b) => {
+				const va = parseFloat(a[field]);
+				const vb = parseFloat(b[field]);
+
+				if (va < vb) return sortDirection === 'asc' ? -1 : 1;
+				if (va > vb) return sortDirection === 'asc' ? 1 : -1;
+				return 0;
+			});
+		} else {
+			data = data.sort((a, b) => {
+				if (a[field] < b[field]) return sortDirection === 'asc' ? -1 : 1;
+				if (a[field] > b[field]) return sortDirection === 'asc' ? 1 : -1;
+				return 0;
+			});
+		}
 	}
 
 	function startResize(e: MouseEvent, field: string): void {
