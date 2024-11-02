@@ -650,7 +650,8 @@
 		</select>
 	{:else if field.type === 'number'}
 		<input
-			type="number"
+			type="text"
+			pattern="[0-9]*[.]?[0-9]*"
 			value={row[field.name]}
 			min={field.options?.min}
 			max={field.options?.max}
