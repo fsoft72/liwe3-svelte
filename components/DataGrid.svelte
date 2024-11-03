@@ -259,10 +259,15 @@
 		}
 	}
 
-	function handleTabKey(event: KeyboardEvent, rowIndex: number, fieldIndex: number): void {
+	function handleTabKey(
+		id_row: string,
+		event: KeyboardEvent,
+		rowIndex: number,
+		fieldIndex: number
+	): void {
 		event.preventDefault();
 		const currentField = fields[fieldIndex];
-		finishEditing(data[rowIndex + (page - 1) * rowsPerPage], currentField.name, event);
+		finishEditing(id_row, currentField.name, event);
 
 		const nextEditableField = findNextEditableField(rowIndex, fieldIndex);
 		if (nextEditableField) {
@@ -291,11 +296,23 @@
 		return null;
 	}
 
-	function finishEditing(row: DataGridRow, field: string, event: Event): void {
+	function finishEditing(id_row: string, field: string, event: Event): void {
+		console.log('=== FINISH ID ROW: ', id_row);
+
+		const row = data.find((r) => r.id === id_row);
+		if (!row) return;
+
 		const element = event.target as HTMLInputElement | HTMLSelectElement;
 		let newValue = element.value;
 		const oldValue = row[field];
 		const fieldDef = fields.find((f) => f.name === field);
+
+		if (fieldDef?.type === 'select') {
+			if (!fieldDef?.options?.select?.length) {
+				console.warn('=== WARN: select field must have options', fieldDef.name);
+				return;
+			}
+		}
 
 		if (fieldDef?.options?.validChars) {
 			newValue = newValue
@@ -309,6 +326,8 @@
 		if (newValue !== oldValue?.toString()) {
 			const updatedRow = { ...row, [field]: newValue };
 			if (!editingCell) return;
+
+			console.log('=== ROW: ', row.id);
 
 			const rowIndex = editingCell.rowIndex + (page - 1) * rowsPerPage;
 
@@ -328,17 +347,20 @@
 
 	function handleKeyDown(
 		event: KeyboardEvent,
-		row: DataGridRow,
+		id_row: string,
 		field: string,
 		rowIndex: number,
 		fieldIndex: number
 	): void {
+		const row = data.find((r) => r.id === id_row);
+		if (!row) return;
+
 		if (event.key === 'Enter') {
-			finishEditing(row, field, event);
+			finishEditing(row.id, field, event);
 		} else if (event.key === 'Escape') {
 			editingCell = null;
 		} else if (event.key === 'Tab') {
-			handleTabKey(event, rowIndex, fieldIndex);
+			handleTabKey(id_row, event, rowIndex, fieldIndex);
 		}
 	}
 
@@ -638,9 +660,9 @@
 		<!-- Use select input if selectOptions are provided -->
 		<select
 			value={row[field.name]}
-			onblur={(e) => finishEditing(row, field.name, e)}
-			onchange={(e) => finishEditing(row, field.name, e)}
-			onkeydown={(e) => handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+			onblur={(e) => finishEditing(row.id, field.name, e)}
+			onchange={(e) => finishEditing(row.id, field.name, e)}
+			onkeydown={(e) => handleKeyDown(e, row.id, field.name, rowIndex, fields.indexOf(field))}
 			data-row={rowIndex}
 			data-field={field.name}
 		>
@@ -655,8 +677,8 @@
 			value={row[field.name]}
 			min={field.options?.min}
 			max={field.options?.max}
-			onblur={(e) => finishEditing(row, field.name, e)}
-			onkeydown={(e) => handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+			onblur={(e) => finishEditing(row.id, field.name, e)}
+			onkeydown={(e) => handleKeyDown(e, row.id, field.name, rowIndex, fields.indexOf(field))}
 			oninput={(e) => handleNumericInput(e, field)}
 			onpaste={(e) => handleNumericPaste(e, field)}
 			data-row={rowIndex}
@@ -667,8 +689,8 @@
 		<input
 			type="text"
 			value={row[field.name]}
-			onblur={(e) => finishEditing(row, field.name, e)}
-			onkeydown={(e) => handleKeyDown(e, row, field.name, rowIndex, fields.indexOf(field))}
+			onblur={(e) => finishEditing(row.id, field.name, e)}
+			onkeydown={(e) => handleKeyDown(e, row.id, field.name, rowIndex, fields.indexOf(field))}
 			oninput={(e) => handleInput(e, field)}
 			onpaste={(e) => handlePaste(e, field)}
 			data-row={rowIndex}
