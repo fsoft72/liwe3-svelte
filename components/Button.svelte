@@ -116,12 +116,12 @@
 		color: var(--liwe3-button-background) !important;
 	}
 
-	.liwe3-button.liwe3-link:hover:not(:disabled) {
+	.liwe3-button.liwe3-link:hover:not(:global(:disabled)) {
 		background-color: transparent !important;
 		text-decoration: underline !important;
 	}
 
-	.liwe3-button.liwe3-outline:not(:hover) {
+	.liwe3-button.liwe3-outline:not(:global(:hover)) {
 		background-color: transparent !important;
 		color: var(--liwe3-button-background) !important;
 	}

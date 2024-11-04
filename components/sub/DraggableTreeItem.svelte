@@ -1,4 +1,5 @@
 <script lang="ts">
+	import DraggableTreeItem from './DraggableTreeItem.svelte';
 	import { Icon, ChevronDown, ChevronRight, Trash, Plus, PencilSquare } from 'svelte-hero-icons';
 	import type { TreeItem } from '$liwe3/utils/tree';
 	import Button from '../Button.svelte';
@@ -183,7 +184,7 @@
 			</div>
 			{#if item.children}
 				{#if item.children.length > 0 && item.isOpen}
-					<svelte:self
+					<DraggableTreeItem
 						items={item.children}
 						{mode}
 						{canAdd}

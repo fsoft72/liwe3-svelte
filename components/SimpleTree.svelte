@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SimpleTree from './SimpleTree.svelte';
 	import { Icon, ChevronDown, ChevronRight } from 'svelte-hero-icons';
 	import Button from './Button.svelte';
 	import { tree_set_meta, type TreeItem } from '$liwe3/utils/tree';
@@ -112,7 +113,7 @@
 				</div>
 			</div>
 			{#if item.isOpen && item.children && item.children.length > 0}
-				<svelte:self
+				<SimpleTree
 					items={item.children}
 					level={level + 1}
 					{multipleSelection}
