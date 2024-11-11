@@ -126,7 +126,7 @@
 		onfilterchange,
 
 		// paginator event
-		onpagechange
+		onpagechange,
 	}: Props = $props();
 
 	let sortField: string | null = $state(null);
@@ -475,8 +475,8 @@
 			...filters,
 			[name]: {
 				mode,
-				value
-			}
+				value,
+			},
 		};
 
 		// remove from new_filters the filters that have an empty value
@@ -753,7 +753,6 @@
 												<Button
 													mode="mode4"
 													size="sm"
-													variant="outline"
 													onclick={() => field.onclick && field.onclick(row)}
 												>
 													{@html field.render(row[field.name], row)}
@@ -782,7 +781,6 @@
 											<Button
 												mode="mode4"
 												size="sm"
-												variant="outline"
 												onclick={() => field.onclick && field.onclick(row)}
 											>
 												{row[field.name]}
