@@ -57,8 +57,8 @@
 		items = items;
 	};
 
-	const onSelect = (e: CustomEvent<{ selected: string[] }>) => {
-		selected = e.detail.selected;
+	const onSelect = (new_selected: string[]) => {
+		selected = new_selected;
 		onselect && onselect(selected);
 	};
 
