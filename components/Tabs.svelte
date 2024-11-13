@@ -3,19 +3,21 @@
 	import type { Color } from '$liwe3/types/types';
 	import { onMount } from 'svelte';
 
-	let {
-		active,
-		minHeight = '',
-		height = '',
-		mode = 'mode3',
-		children
-	}: {
+	interface Props {
 		active?: string;
 		minHeight?: string;
 		height?: string;
 		mode?: Color;
 		children: any;
-	} = $props();
+	}
+
+	let {
+		active = $bindable(''),
+		minHeight = '',
+		height = '',
+		mode = 'mode3',
+		children
+	}: Props = $props();
 
 	interface TabInfo {
 		id: string;
