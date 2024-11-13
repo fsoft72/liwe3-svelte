@@ -19,7 +19,7 @@
 	let {
 		mode = 'mode1',
 		tags = [],
-		selected = [],
+		selected = $bindable([]),
 		allowNewTags = false,
 		name = '',
 		value = '',

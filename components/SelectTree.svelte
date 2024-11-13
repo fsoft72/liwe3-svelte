@@ -18,7 +18,7 @@
 		name = '',
 		fontSize = '1.2em',
 		addEmpty = true,
-		value = '',
+		value = $bindable(''),
 		mode = 'mode3',
 		onchange
 	}: SelectTreeProps = $props();
