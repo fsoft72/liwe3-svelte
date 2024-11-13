@@ -11,7 +11,7 @@
 		icon?: IconSource;
 		iconRight?: IconSource;
 		solid?: boolean;
-		disabled?: boolean | number;
+		disabled?: boolean;
 
 		// events
 		onclick?: (e: MouseEvent) => void;
@@ -59,6 +59,7 @@
 	{...restProps}
 	class={`liwe3-button ${mode} ${variant ? 'liwe3-' + variant : ''} ${size} ${cssClass}`}
 	onclick={onClick}
+	{disabled}
 >
 	{#if icon}
 		<div class="liwe3-button-icon-left">
