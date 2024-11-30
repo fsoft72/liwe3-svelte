@@ -55,6 +55,7 @@
 		icon?: IconSource;
 		mode?: Color;
 		variant?: Variant;
+		hide?: boolean;
 
 		onclick?: (row: DataGridRow) => void;
 		action?: (row: DataGridRow) => void;
@@ -703,22 +704,24 @@
 		<td class="actions-cell">
 			<div class="actions">
 				{#each actions as action}
-					<Button
-						size="xs"
-						mode={action.mode || mode}
-						variant={action.variant}
-						icon={action.icon}
-						onclick={() => {
-							if (action.action) {
-								console.warn(
-									"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
-								);
-								action.action(row);
-								return;
-							}
-							action.onclick && action.onclick(row);
-						}}>{action.label ?? ''}</Button
-					>
+					{#if !action.hide}
+						<Button
+							size="xs"
+							mode={action.mode || mode}
+							variant={action.variant}
+							icon={action.icon}
+							onclick={() => {
+								if (action.action) {
+									console.warn(
+										"WARNING: use of deprecated 'action' property in DataGridAction. Use 'onclick' instead."
+									);
+									action.action(row);
+									return;
+								}
+								action.onclick && action.onclick(row);
+							}}>{action.label ?? ''}</Button
+						>
+					{/if}
 				{/each}
 			</div>
 		</td>
