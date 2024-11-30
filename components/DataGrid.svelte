@@ -10,7 +10,6 @@
 	import Input from './Input.svelte';
 	import Paginator from './Paginator.svelte';
 	import { onMount, tick } from 'svelte';
-	import { runeDebug } from '$liwe3/utils/runes.svelte';
 
 	export interface DataGridFieldExtra {
 		options?: { label: string; value: string }[];
@@ -126,7 +125,7 @@
 		onfilterchange,
 
 		// paginator event
-		onpagechange,
+		onpagechange
 	}: Props = $props();
 
 	let sortField: string | null = $state(null);
@@ -475,8 +474,8 @@
 			...filters,
 			[name]: {
 				mode,
-				value,
-			},
+				value
+			}
 		};
 
 		// remove from new_filters the filters that have an empty value
