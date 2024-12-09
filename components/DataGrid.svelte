@@ -1,6 +1,6 @@
 <script module lang="ts">
 	import Button from '$liwe3/components/Button.svelte';
-	import type { Color, Variant } from '$liwe3/types/types';
+	import type { Color, Size, Variant } from '$liwe3/types/types';
 	import { filterModes } from '$liwe3/utils/match_filter';
 
 	import type { IconSource } from 'svelte-hero-icons';
@@ -9,6 +9,7 @@
 	import Avatar from './Avatar.svelte';
 	import Input from './Input.svelte';
 	import Paginator from './Paginator.svelte';
+	import type { PaginatorButtons } from './Paginator.svelte';
 	import { onMount, tick } from 'svelte';
 
 	export interface DataGridFieldExtra {
@@ -93,6 +94,7 @@
 		rowsPerPage?: number;
 		page?: number;
 		totalRows?: number;
+		paginatorButtons?: PaginatorButtons;
 
 		// events
 		oncelledit?: (row: DataGridRow, field: string, oldValue: any, newValue: any) => void;
@@ -119,6 +121,7 @@
 		page = $bindable(1),
 		totalRows,
 		rowsPerPage = $bindable(10),
+		paginatorButtons,
 
 		// events
 		oncelledit,
@@ -137,6 +140,7 @@
 	let has_filters = fields.some((f) => f.filterable);
 	let dataView: HTMLDivElement | null = $state(null);
 	let paginator: any = $state(null);
+	let buttonSize: Size = $state('md');
 
 	$effect(() => {
 		data = $state.snapshot(_data);
@@ -440,6 +444,13 @@
 	const viewModes = ['condensed', 'comfy', 'large'];
 	const changeViewMode = (mode: string) => {
 		viewMode = mode;
+		if ( mode === 'condensed' ) {
+			buttonSize = 'xs';
+		} else if ( mode === 'comfy' ) {
+			buttonSize = 'md';
+		} else {
+			buttonSize = 'lg';
+		}
 	};
 
 	const _do_filter = (filters: Record<string, any>) => {
@@ -522,7 +533,7 @@
 				{#if !field.hidden}
 					<td class="filter" style={`width: ${field.width || 'min-content'};`}>
 						{#if field.filterable}
-							{#if field.type == 'string'}
+							{#if field.type == 'string' || field.type == 'text'}
 								<Input
 									{mode}
 									width={field.width}
@@ -595,15 +606,18 @@
 			</div>
 
 			<div class="view-modes">
-				{#each viewModes as vm}
-					<Button
-						mode={vm == viewMode ? 'mode4' : 'mode1'}
-						onclick={() => changeViewMode(vm)}
-						size="xs"
-					>
-						{vm}
-					</Button>
-				{/each}
+				<div class="mode1 radio-group liwe3-form-radio-group">
+					{#each viewModes as vm}
+						<input
+							type="radio"
+							id={`swicth-${vm}`}
+							name="viewMode"
+							checked={vm === viewMode}
+							onchange={() => changeViewMode(vm)}
+						/>
+						<label for={`swicth-${vm}`}>{vm}</label>
+					{/each}
+				</div>
 			</div>
 
 			{#if buttons}
@@ -611,7 +625,7 @@
 					{#each buttons as button}
 						{#if button.type === 'checkbox'}
 							<Checkbox
-								size="xs"
+								size= "md"
 								mode={button.mode || mode}
 								checked={button.checked || false}
 								onchange={() => handleButtonClick(button)}
@@ -619,7 +633,7 @@
 							/>
 						{:else}
 							<Button
-								size="xs"
+								size= "md"
 								mode={button.mode || mode}
 								variant={button.variant}
 								icon={button.icon}
@@ -706,7 +720,7 @@
 				{#each actions as action}
 					{#if !action.hide}
 						<Button
-							size="xs"
+							size= { buttonSize }
 							mode={action.mode || mode}
 							variant={action.variant}
 							icon={action.icon}
@@ -817,6 +831,7 @@
 				total={totRows}
 				rows={rowsPerPage}
 				onpagechange={internalPageChange}
+				buttons={paginatorButtons}
 			/>
 		</div>
 	{/if}
@@ -834,14 +849,14 @@
 		flex-direction: column;
 		height: 100%; /* Or a specific height */
 		min-height: 250px;
-		border: 1px solid var(--liwe3-button-border);
+		border: 1px solid var(--liwe3-datagrid-container-border, var(--liwe3-button-border));
 		border-radius: var(--liwe3-border-radius);
 		overflow: hidden; /* Hide overflow */
 	}
 
 	.dg-header {
 		flex: 0 0 auto; /* Don't grow or shrink */
-		background-color: var(--liwe3-darker-paper);
+		background-color: var(--liwe3-datagrid-container-header-bg, var(--liwe3-darker-paper));
 		z-index: 2; /* Ensure it's above the scrolling content */
 	}
 
@@ -861,7 +876,7 @@
 
 		min-height: 250px;
 
-		border: 1px solid var(--liwe3-button-border);
+		border: 1px solid var(--liwe3-datagrid-container2-border, var(--liwe3-button-border));
 		border-radius: var(--liwe3-border-radius);
 	}
 
@@ -880,10 +895,10 @@
 		width: 100%;
 
 		scrollbar-width: thin;
-		scrollbar-color: var(--liwe3-darker-paper) var(--liwe3-paper);
+		scrollbar-color: var(--liwe3-datagrid-scrollbar-track, var(--liwe3-darker-paper)) var(--liwe3-datagrid-scrollbar-thumb, var(--liwe3-paper));
 
-		background-color: var(--liwe3-paper);
-		color: var(--liwe3-color);
+		background-color: var(--liwe3-datagrid-bg, var(--liwe3-paper));
+		color: var(--liwe3-datagrid-color, var(--liwe3-color));
 
 		font-size: var(--table-font-size);
 		font-family: var(--table-font-family);
@@ -898,7 +913,7 @@
 		align-items: center;
 		padding: 4px;
 
-		background-color: var(--liwe3-darker-paper);
+		background-color: var(--liwe3-datagrid-title-bg, var(--liwe3-darker-paper));
 	}
 
 	.title {
@@ -924,61 +939,80 @@
 		position: sticky;
 		top: 0;
 		z-index: 1;
-		background-color: var(--liwe3-darker-paper);
+		background-color: var(--liwe3-datagrid-head-bg, var(--liwe3-darker-paper));
 	}
 
 	.dg-footer {
 		flex: 0 0 auto; /* Don't grow or shrink */
-		background-color: var(--liwe3-darker-paper);
+		background-color: var(--liwe3-datagrid-footer-bg, var(--liwe3-darker-paper));
 		z-index: 2; /* Ensure it's above the scrolling content */
 	}
 
 	th,
 	td {
 		text-align: left;
-		border: 1px solid var(--liwe3-secondary-color);
+		border: 1px solid var(--liwe3-datagrid-td-border-color, var(--liwe3-secondary-color));
 	}
 
 	th {
 		padding: 8px;
-		background-color: var(--liwe3-darker-paper);
+		/*background-color: var(--liwe3-darker-paper);*/
+	}
+
+	thead > tr:first-child {
+		background-color: var(--liwe3-datagrid-header-bg, var(--liwe3-secondary-color));
+	}
+
+
+	thead tr:hover {
+		background-color: var(--liwe3-datagrid-header-bg, var(--liwe3-secondary-color)) !important;
+	}
+
+	.full-width,
+	.condensed,
+	.confy,
+	.large {
+		width: 100%;
+		min-width: 100%;
 	}
 
 	.condensed td {
-		padding: 3px;
+		padding: .3rem;
+		font-size: 0.8rem;
 	}
 
 	.comfy td {
-		padding: 8px;
+		padding: .5rem;
+		font-size: 1rem;
 	}
 
 	.large td {
-		padding: 24px;
+		padding: 1.4rem;
+		font-size: 1.1rem;
 	}
 
 	th {
 		cursor: pointer;
 		position: relative;
-		background-color: var(--liwe3-secondary-color);
-
+		/*background-color: var(--liwe3-secondary-color);*/
 		user-select: none;
 	}
 
 	tr {
-		border-bottom: 1px solid var(--liwe3-tertiary-color);
+		border-bottom: 1px solid var(--liwe3-datagrid-tr-border-color,var(--liwe3-tertiary-color));
 		max-height: 2rem;
 	}
 
 	tr:hover {
-		background-color: var(--liwe3-lighter-paper) !important;
+		background-color: var(--liwe3-datagrid-tr-hover, var(--liwe3-secondary-color)) !important;
 	}
 
 	td {
-		border-right: 1px solid var(--liwe3-button-border);
+		border-right: 1px solid var(--liwe3-datagrid-td-border-color, var(--liwe3-button-border));
 	}
 
 	tbody tr:nth-child(even) {
-		background-color: var(--liwe3-darker-paper);
+		background-color: var(--liwe3-datagrid-tr-even-bg, var(--liwe3-darker-paper));
 	}
 
 	.resizer {
@@ -987,7 +1021,7 @@
 		top: 0;
 		height: 100%;
 		width: 5px;
-		background: rgba(0, 0, 0, 0.3);
+		background: var(--liwe3-datagrid-th-resizer-bg, var(--liwe3-mode2-600));
 		cursor: col-resize;
 	}
 
