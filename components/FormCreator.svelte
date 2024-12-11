@@ -134,9 +134,9 @@
 	const onChangeField = async (name: string, e: any, fld: FormField) => {
 		let value;
 
-		if (e.target) {
+		if (e?.target) {
 			value = e.target?.type === 'checkbox' ? e.target?.checked : e.target?.value;
-		} else if (e.detail) {
+		} else if (e?.detail) {
 			value = e.detail;
 		} else {
 			value = e;
