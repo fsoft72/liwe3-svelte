@@ -101,6 +101,7 @@
 
 		onupdatefield?: (row: DataGridRow, field_name: string, value: any) => void;
 		onfilterchange?: (filters: Record<string, any>) => void;
+		onsortchange?: (field: string, direction: 'asc' | 'desc') => void;
 
 		// paginator event
 		onpagechange?: (page: number, rows: number) => void;
@@ -127,6 +128,7 @@
 		oncelledit,
 		onupdatefield,
 		onfilterchange,
+		onsortchange,
 
 		// paginator event
 		onpagechange
@@ -163,7 +165,7 @@
 			for (const field in filters) {
 				const filter = filters[field];
 
-				if (filter.mode == filterModes.contains) {
+				if (filter.mode == filterModes.CONTAINS) {
 					if (filter) {
 						if (!row[field] || row[field].toLowerCase().indexOf(filter.value.toLowerCase()) == -1) {
 							add = false;
@@ -203,6 +205,8 @@
 			sortField = field;
 			sortDirection = 'asc';
 		}
+
+		onsortchange?.(field, sortDirection);
 
 		// if field is numeric, sort as numbers
 		if (fieldDef.type === 'number') {
@@ -444,9 +448,9 @@
 	const viewModes = ['condensed', 'comfy', 'large'];
 	const changeViewMode = (mode: string) => {
 		viewMode = mode;
-		if ( mode === 'condensed' ) {
+		if (mode === 'condensed') {
 			buttonSize = 'xs';
-		} else if ( mode === 'comfy' ) {
+		} else if (mode === 'comfy') {
 			buttonSize = 'md';
 		} else {
 			buttonSize = 'lg';
@@ -463,12 +467,12 @@
 		const name = input.name.replace('f_', '');
 		const field = fields.find((f) => f.name === name);
 		let value: any = input.value;
-		let mode = field?.searchMode || filterModes.contains;
+		let mode = field?.searchMode || filterModes.CONTAINS;
 
 		if (name.endsWith('_1')) {
-			mode = filterModes['>='];
+			mode = filterModes.GREATER_THAN_OR_EQUAL;
 		} else if (name.endsWith('_2')) {
-			mode = filterModes['<='];
+			mode = filterModes.LESS_THAN_OR_EQUAL;
 		}
 
 		// we add to the query only checkboxes that are set to true
@@ -625,7 +629,7 @@
 					{#each buttons as button}
 						{#if button.type === 'checkbox'}
 							<Checkbox
-								size= "md"
+								size="md"
 								mode={button.mode || mode}
 								checked={button.checked || false}
 								onchange={() => handleButtonClick(button)}
@@ -633,7 +637,7 @@
 							/>
 						{:else}
 							<Button
-								size= "md"
+								size="md"
 								mode={button.mode || mode}
 								variant={button.variant}
 								icon={button.icon}
@@ -720,7 +724,7 @@
 				{#each actions as action}
 					{#if !action.hide}
 						<Button
-							size= { buttonSize }
+							size={buttonSize}
 							mode={action.mode || mode}
 							variant={action.variant}
 							icon={action.icon}
@@ -895,7 +899,8 @@
 		width: 100%;
 
 		scrollbar-width: thin;
-		scrollbar-color: var(--liwe3-datagrid-scrollbar-track, var(--liwe3-darker-paper)) var(--liwe3-datagrid-scrollbar-thumb, var(--liwe3-paper));
+		scrollbar-color: var(--liwe3-datagrid-scrollbar-track, var(--liwe3-darker-paper))
+			var(--liwe3-datagrid-scrollbar-thumb, var(--liwe3-paper));
 
 		background-color: var(--liwe3-datagrid-bg, var(--liwe3-paper));
 		color: var(--liwe3-datagrid-color, var(--liwe3-color));
@@ -963,7 +968,6 @@
 		background-color: var(--liwe3-datagrid-header-bg, var(--liwe3-secondary-color));
 	}
 
-
 	thead tr:hover {
 		background-color: var(--liwe3-datagrid-header-bg, var(--liwe3-secondary-color)) !important;
 	}
@@ -977,12 +981,12 @@
 	}
 
 	.condensed td {
-		padding: .3rem;
+		padding: 0.3rem;
 		font-size: 0.8rem;
 	}
 
 	.comfy td {
-		padding: .5rem;
+		padding: 0.5rem;
 		font-size: 1rem;
 	}
 
@@ -999,7 +1003,7 @@
 	}
 
 	tr {
-		border-bottom: 1px solid var(--liwe3-datagrid-tr-border-color,var(--liwe3-tertiary-color));
+		border-bottom: 1px solid var(--liwe3-datagrid-tr-border-color, var(--liwe3-tertiary-color));
 		max-height: 2rem;
 	}
 
