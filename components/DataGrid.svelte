@@ -468,6 +468,7 @@
 		const field = fields.find((f) => f.name === name);
 		let value: any = input.value;
 		let mode = field?.searchMode || filterModes.CONTAINS;
+		let type = field?.type || 'string';
 
 		if (name.endsWith('_1')) {
 			mode = filterModes.GREATER_THAN_OR_EQUAL;
@@ -486,21 +487,17 @@
 			value = true;
 		}
 
-		const new_filters = {
+		let new_filters = {
 			...filters,
 			[name]: {
 				mode,
-				value
+				value,
+				type
 			}
 		};
 
 		// remove from new_filters the filters that have an empty value
-		for (const key in new_filters) {
-			const filter = new_filters[key];
-			if (!filter.value) delete new_filters[key];
-		}
-
-		filters = new_filters;
+		filters = new_filters.filter((f: Record<string, any>) => typeof f.value !== 'undefined');
 
 		_do_filter(filters);
 	};
