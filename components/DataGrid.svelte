@@ -497,7 +497,12 @@
 		};
 
 		// remove from new_filters the filters that have an empty value
-		filters = new_filters.filter((f: Record<string, any>) => typeof f.value !== 'undefined');
+		for (const key in new_filters) {
+			const filter = new_filters[key];
+			if (!filter.value) delete new_filters[key];
+		}
+
+		filters = new_filters;
 
 		_do_filter(filters);
 	};
