@@ -143,6 +143,7 @@
 	let dataView: HTMLDivElement | null = $state(null);
 	let paginator: any = $state(null);
 	let buttonSize: Size = $state('md');
+	let dontSendPaginationChange: boolean = $state(false);
 
 	$effect(() => {
 		data = $state.snapshot(_data);
@@ -458,6 +459,7 @@
 	};
 
 	const _do_filter = (filters: Record<string, any>) => {
+		dontSendPaginationChange = true;
 		paginator && paginator.resetPage();
 		if (onfilterchange) onfilterchange(filters);
 	};
@@ -508,10 +510,13 @@
 	};
 
 	const internalPageChange = (page_: number, rows: number) => {
-		if (onpagechange) {
+		if (onpagechange && !dontSendPaginationChange) {
 			onpagechange(page_, rows);
+			dontSendPaginationChange = false;
 			return;
 		}
+
+		dontSendPaginationChange = false;
 
 		page = page_;
 	};
