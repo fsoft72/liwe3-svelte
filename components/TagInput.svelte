@@ -27,9 +27,9 @@
 		...restProps
 	}: TagInputProps = $props();
 
-	const set_tag = (e: CustomEvent) => {
-		console.log('=== SET: ', e.detail, allowNewTags);
-		const t = e.detail.trim();
+	const set_tag = (value: string) => {
+		console.log('=== SET: ', value);
+		const t = value.trim();
 
 		if (selected.includes(t)) return;
 		if (!allowNewTags && !tags.includes(t)) return;
@@ -65,7 +65,7 @@
 
 <div class={`tag-input ${mode}`}>
 	<input type="hidden" {name} value={finalValue} />
-	<AutoComplete items={tags} selectedItems={selected} {...restProps} on:set={set_tag} />
+	<AutoComplete items={tags} selectedItems={selected} {mode} {...restProps} onset={(value:string) => {set_tag (value);}} />
 	<div class="tags-list">
 		{#each selected as tag (tag)}
 			<div class="tag">

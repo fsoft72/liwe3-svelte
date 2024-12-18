@@ -385,3 +385,37 @@ export const clean = ( obj: Record<string, any> ) => {
 
 	return res;
 };
+
+/**
+ * This function returns a shortened text with a maximum number of words and if specified, a maximum length.
+ */
+export const short_text = ( text: string, words: number, max_length?: number ) => {
+
+	const words_arr = text.split( ' ' );
+	words_arr.map( ( w, idx ) => {
+		if ( w.length < 4 && idx > 1 ) {
+			words_arr[ idx - 1 ] += ' ' + w;
+			words_arr.splice( idx, 1 );
+		}
+	}
+	);
+
+	let output = words_arr.join( ' ' );
+
+	if ( words_arr.length <= words ) {
+		if ( !max_length ) return text;
+		else if ( output.length <= max_length ) return text;
+	}
+
+	words_arr.splice( words, -1 );
+
+	output = words_arr.join( ' ' );
+
+	if ( max_length && output.length > max_length ) {
+		output = output.slice( 0, max_length ) + '...';
+	} else {
+		output += '...';
+	}
+
+	return output;
+};
