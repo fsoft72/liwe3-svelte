@@ -835,7 +835,7 @@
 			</table>
 		</div>
 	</div>
-	{#if !disablePaginator}
+	{#if !disablePaginator && internalFilteredData.length > rowsPerPage}
 		<div class="dg-footer">
 			<Paginator
 				bind:this={paginator}
