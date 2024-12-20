@@ -772,6 +772,7 @@
 									<td
 										ondblclick={() => startEditing(rowIndex, field.name)}
 										style:text-align={field.align}
+										class:editable={field.editable}
 									>
 										{#if editingCell && editingCell.rowIndex === rowIndex && editingCell.field === field.name}
 											{@render editField(row, field, rowIndex)}
@@ -1046,5 +1047,21 @@
 		width: 100%;
 		box-sizing: border-box;
 		padding: 4px;
+	}
+
+	td.editable {
+		cursor: pointer;
+		position: relative;
+	}
+
+	td.editable::after {
+		content: '';
+		position: absolute;
+		top: 2px;
+		right: 2px;
+		width: 8px;
+		height: 8px;
+		background-color: red;
+		border-radius: 50%;
 	}
 </style>
