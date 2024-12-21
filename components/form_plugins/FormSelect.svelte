@@ -31,15 +31,7 @@
 			placeholder={field.placeholder}
 			{...field?.extra ?? {}}
 			{...props}
-			on:change={(e: any) => {
-				let vl:any[] | any;
-				if (props?.multiple) {
-					vl = Object.values(e.detail as Record<number, {label:string, value:any}>).map( (v:{label:string, value:any}) => v.value );
-				} else {
-					vl = e.detail.value;
-				}
-				onchange(name, vl, field)
-			}}
+			on:change={(e: any) => onchange(name, e.detail.value, field)}
 			on:clear={() => onchange(name, '', field)}
 			items={field.options ?? []}
 		/>
