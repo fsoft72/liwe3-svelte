@@ -864,6 +864,7 @@
 		border: 1px solid var(--liwe3-datagrid-container-border, var(--liwe3-button-border));
 		border-radius: var(--liwe3-border-radius);
 		overflow: hidden; /* Hide overflow */
+		width: 100%;
 	}
 
 	.dg-header {
