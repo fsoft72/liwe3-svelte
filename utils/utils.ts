@@ -397,20 +397,24 @@ export const short_text = ( text: string, words: number, max_length?: number ) =
 			words_arr[ idx - 1 ] += ' ' + w;
 			words_arr.splice( idx, 1 );
 		}
-	}
-	);
+	} );
+
 
 	let output = words_arr.join( ' ' );
 
+	// text doesn't need to be shortened
 	if ( words_arr.length <= words ) {
 		if ( !max_length ) return text;
 		else if ( output.length <= max_length ) return text;
 	}
 
-	words_arr.splice( words, -1 );
+	console.log( '=== SHORT TEXT: ', words, words_arr.length );
 
+	words_arr.splice( words, words_arr.length - words );
 	output = words_arr.join( ' ' );
 
+	console.log( '=== SHORT TEXT shortened: ', words, words_arr.length );
+	// trim output to the max number of chars
 	if ( max_length && output.length > max_length ) {
 		output = output.slice( 0, max_length ) + '...';
 	} else {
