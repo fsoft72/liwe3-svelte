@@ -94,9 +94,9 @@
 <div class={`container ${mode}`}>
 	<div class="autocomplete">
 		<Input
-			{mode}
-			class="input"
+			class="liwe3-form liwe3-form-custom-input input"
 			{...restProps}
+			{mode}
 			type="text"
 			bind:value
 			{onchange}
@@ -128,6 +128,7 @@
 	.autocomplete-items-list {
 		position: relative;
 		margin: 0;
+		margin-left: .3rem;
 		padding: 0;
 		top: 0;
 		width: 297px;
@@ -138,6 +139,8 @@
 
 		max-height: 300px;
 		overflow-y: auto;
+		border-bottom-right-radius: var(--liwe3-border-radius);
+		border-bottom-left-radius: var(--liwe3-border-radius);
 	}
 
 	.container {

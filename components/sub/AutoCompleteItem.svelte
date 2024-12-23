@@ -27,24 +27,27 @@
 		right: 0;
 		padding: 10px;
 		cursor: pointer;
-		background-color: var(--paper);
+		background-color: var(--liwe3-paper);
+		color: var(--liwe3-color);
+		border-bottom-right-radius: var(--liwe3-border-radius);
+		border-bottom-left-radius: var(--liwe3-border-radius);
 	}
 
 	li.autocomplete-items:hover {
 		/*when hovering an item:*/
-		background-color: var(--dark);
-		color: white;
+		background-color: var(--liwe3-darker-paper);
+		color: var(--liwe3-accent-color);
 	}
 
 	li.autocomplete-items:active {
 		/*when navigating through the items using the arrow keys:*/
-		background-color: var(--dark);
-		color: #ffffff;
+		background-color: var(--liwe3-paper);
+		color: var(--liwe3-color);
 	}
 
 	.autocomplete-active {
 		/*when navigating through the items using the arrow keys:*/
-		background-color: var(--dark);
-		color: #ffffff;
+		background-color: var(--liwe3-darker-paper);
+		color: var(--liwe3-color);
 	}
 </style>
