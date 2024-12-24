@@ -145,9 +145,11 @@
 	let buttonSize: Size = $state('md');
 	let dontSendPaginationChange: boolean = $state(false);
 
+	/*
 	$effect(() => {
 		data = $state.snapshot(_data);
 	});
+	*/
 
 	$effect(() => {
 		if (page) dataView?.scrollTo(0, 0);
