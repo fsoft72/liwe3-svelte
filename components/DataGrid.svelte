@@ -606,7 +606,9 @@
 					</td>
 				{/if}
 			{/each}
-			<td></td>
+			{#if actions && actions.length > 0}
+				<td></td>
+			{/if}
 		</tr>
 	{/if}
 {/snippet}
@@ -676,7 +678,7 @@
 				</th>
 			{/if}
 		{/each}
-		{#if actions}
+		{#if actions && actions.length > 0}
 			<th class="actions-header">Actions</th>
 		{/if}
 	</tr>
@@ -727,7 +729,8 @@
 {/snippet}
 
 {#snippet renderActions(actions: DataGridAction[] | undefined, row: DataGridRow)}
-	{#if actions}
+	{#if actions && actions.length > 0}
+		{console.log('=== ACTIONS: ', actions)}
 		<td class="actions-cell">
 			<div class="actions">
 				{#each actions as action}
