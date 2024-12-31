@@ -109,7 +109,7 @@
 
 	let {
 		fields,
-		data: _data,
+		data, // : _data,
 		filters = $bindable({}),
 		actions,
 		buttons,
@@ -138,16 +138,18 @@
 	let sortDirection: 'asc' | 'desc' = $state('asc');
 	let tableElement: HTMLTableElement | null = $state(null);
 	let editingCell: { rowIndex: number; field: string } | null = $state(null);
-	let data: DataGridRow[] = $state($state.snapshot(_data));
+	// let data: DataGridRow[] = $state($state.snapshot(_data));
 	let has_filters = fields.some((f) => f.filterable);
 	let dataView: HTMLDivElement | null = $state(null);
 	let paginator: any = $state(null);
 	let buttonSize: Size = $state('md');
 	let dontSendPaginationChange: boolean = $state(false);
 
+	/*
 	$effect(() => {
 		data = $state.snapshot(_data);
 	});
+	*/
 
 	$effect(() => {
 		if (page) dataView?.scrollTo(0, 0);
@@ -728,7 +730,6 @@
 
 {#snippet renderActions(actions: DataGridAction[] | undefined, row: DataGridRow)}
 	{#if actions && actions.length > 0}
-		{console.log('=== ACTIONS: ', actions)}
 		<td class="actions-cell">
 			<div class="actions">
 				{#each actions as action}
