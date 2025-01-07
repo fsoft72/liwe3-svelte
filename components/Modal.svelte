@@ -3,15 +3,8 @@
 		label: string;
 		action: Function;
 	};
-</script>
 
-<script lang="ts">
-	import type { Color, Size } from '$liwe3/types/types';
-	import { onMount } from 'svelte';
-	import Button from './Button.svelte';
-	import { XCircle } from 'svelte-hero-icons';
-
-	interface ModalProps {
+	export interface ModalProps {
 		title: string;
 		size?: Size | string;
 		mode?: Color;
@@ -27,6 +20,14 @@
 		children?: any;
 	}
 
+</script>
+
+<script lang="ts">
+	import type { Color, Size } from '$liwe3/types/types';
+	import { onMount } from 'svelte';
+	import Button from './Button.svelte';
+	import { XCircle } from 'svelte-hero-icons';
+
 	let {
 		title = '',
 		size = 'md',
@@ -41,22 +42,37 @@
 		children
 	}: ModalProps = $props();
 
+	let bodyOverflow:string = $state('');
+
+	const setBodyOverflow = {
+		orig: () => {
+			bodyOverflow = document.body.style.overflow || '';
+		},
+		open: () => document.body.style.overflow = 'hidden',
+		close: () => document.body.style.overflow = bodyOverflow,
+	}
+
 	const onCloseOnOutside = (e: MouseEvent) => {
 		if (closeOnOutsideClick && e.target === e.currentTarget) {
+			setBodyOverflow.close();
 			oncancel && oncancel(false);
 		}
 	};
 
 	const onCloseOnEsc = (e: KeyboardEvent) => {
 		if (closeOnEsc && e.key === 'Escape') {
+			setBodyOverflow.close();
 			oncancel && oncancel(false);
 		}
 	};
 
 	onMount(() => {
 		window.addEventListener('keydown', onCloseOnEsc);
+		setBodyOverflow.orig();
+		setBodyOverflow.open();
 
 		return () => {
+			setBodyOverflow.close();
 			window.removeEventListener('keydown', onCloseOnEsc);
 		};
 	});
