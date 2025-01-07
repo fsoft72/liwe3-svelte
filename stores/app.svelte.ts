@@ -39,6 +39,16 @@ const store = {
     return appData[ name ];
   },
 
+  del ( name: string ) {
+    delete appData[ name ];
+  },
+
+  /** returns all values in the store as key/value pairs */
+  dump () {
+    const values: Record<string, any> = $state.snapshot( appData );
+    return values;
+  },
+
 };
 
 export default store;
