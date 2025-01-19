@@ -21,6 +21,7 @@
 
 <div class="title">{field?.label ?? ''}</div>
 <textarea
+	class="liwe3-form liwe3-form-custom-input"
 	style="width: 100%;"
 	rows={10}
 	cols={40}

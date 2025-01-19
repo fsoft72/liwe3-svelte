@@ -390,6 +390,7 @@ export const clean = ( obj: Record<string, any> ) => {
  * This function returns a shortened text with a maximum number of words and if specified, a maximum length.
  */
 export const short_text = ( text: string, words: number, max_length?: number ) => {
+	if ( !text || text.length == 0 ) return '';
 	const words_arr = text.split( ' ' );
 	words_arr.map( ( w, idx ) => {
 		if ( w.length < 4 && idx > 1 ) {
