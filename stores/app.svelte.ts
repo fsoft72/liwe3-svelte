@@ -1,3 +1,5 @@
+import type SSEClient from '$liwe3/lib/sse';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface LiWEApp {
   /** If the requests should show an error message */
@@ -5,13 +7,17 @@ interface LiWEApp {
   /** The authentication token of the user */
   token: string;
 
+  /** The Server Sent Events client */
+  sse: SSEClient | null;
+
   /** Add a new property to the app data */
   [ key: string ]: any;
 }
 
 const appData: LiWEApp = $state( {
   showRequestsError: true,
-  token: ''
+  token: '',
+  sse: null,
 } );
 
 const store = {
@@ -47,6 +53,14 @@ const store = {
   dump () {
     const values: Record<string, any> = $state.snapshot( appData );
     return values;
+  },
+
+  set sse ( value: SSEClient | null ) {
+    appData.sse = value;
+  },
+
+  get sse (): SSEClient | null {
+    return appData.sse;
   },
 
 };
