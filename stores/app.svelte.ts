@@ -10,6 +10,9 @@ interface LiWEApp {
   /** The Server Sent Events client */
   sse: SSEClient | null;
 
+  /** If the SSE client is connected */
+  sseConnected: boolean;
+
   /** Add a new property to the app data */
   [ key: string ]: any;
 }
@@ -18,6 +21,7 @@ const appData: LiWEApp = $state( {
   showRequestsError: true,
   token: '',
   sse: null,
+  sseConnected: false,
 } );
 
 const store = {
@@ -61,6 +65,14 @@ const store = {
 
   get sse (): SSEClient | null {
     return appData.sse;
+  },
+
+  set sseConnected ( value: boolean ) {
+    appData.sseConnected = value;
+  },
+
+  get sseConnected (): boolean {
+    return appData.sseConnected;
   },
 
 };
