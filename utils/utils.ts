@@ -184,6 +184,8 @@ export const mkid_simple = ( prefix: string, rnd: boolean = true, sep: string = 
 export const media_url = ( id: string, filename: string = '', thumbnail = false ) => {
 	if ( !id ) return '';
 
+	if ( ( id as any ).id ) id = ( id as any ).id;
+
 	if ( !filename ) filename = id;
 
 	const { url } = url_and_headers( `/static/public/uploads` );
@@ -418,4 +420,16 @@ export const short_text = ( text: string, words: number, max_length?: number ) =
 	}
 
 	return output;
+};
+
+/**
+ * This function returns the file extension of a filename.
+ *
+ * @param filename - The filename to extract the extension from.
+ */
+export const ext = ( filename: string ) => {
+	if ( !filename ) return '';
+	const parts = filename.split( '.' );
+	if ( parts.length < 2 ) return '';
+	return parts[ parts.length - 1 ].toLowerCase();
 };
