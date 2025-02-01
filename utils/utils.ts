@@ -5,6 +5,7 @@
 import md5 from './md5';
 import type { UserAuth } from '../types/user_auth';
 import type { TreeItem } from './tree';
+import type { FormField } from '$liwe3/components/FormCreator.svelte';
 import { url_and_headers } from './fetcher';
 
 // Format a date string like '2023-08-01T17:15:09.388Z' into a readable date string
@@ -432,4 +433,21 @@ export const ext = ( filename: string ) => {
 	const parts = filename.split( '.' );
 	if ( parts.length < 2 ) return '';
 	return parts[ parts.length - 1 ].toLowerCase();
+};
+
+/** Check if all required fields of multiple FormCreator instances are filled
+ * @param formFields - array of form FormCreator fields
+ * @param data - object with all the form fields values from all FormCreator instances
+**/
+export const checkRequiredFields = ( formFields: FormField[][], data: Record<string, any> ) => {
+	const required: string[] = [];
+	formFields.forEach( ( fields ) => {
+		fields.forEach( ( field ) => {
+			//if ( field.required && typeof data[ field.name ] === 'undefined' || data[ field.name ] === '' ) {
+			if ( field.required && !data[ field.name ] ) {
+				required.push( field.label ?? field.name );
+			}
+		} );
+	} );
+	return required;
 };
