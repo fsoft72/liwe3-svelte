@@ -53,6 +53,23 @@
 
 		return plug;
 	};
+
+	/** Check if all required fields of multiple FormCreator instances are filled
+	 * @param formFields - array of form FormCreator fields
+	 * @param data - object with all the form fields values from all FormCreator instances
+	 **/
+	export const checkRequiredFields = (formFields: FormField[][], data: Record<string, any>) => {
+		const required: string[] = [];
+		formFields.forEach((fields) => {
+			fields.forEach((field) => {
+				//if ( field.required && typeof data[ field.name ] === 'undefined' || data[ field.name ] === '' ) {
+				if (field.required && !data[field.name]) {
+					required.push(field.label ?? field.name);
+				}
+			});
+		});
+		return required;
+	};
 </script>
 
 <script lang="ts">
