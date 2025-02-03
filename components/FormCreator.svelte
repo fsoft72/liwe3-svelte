@@ -34,6 +34,7 @@
 		name: string;
 		component: any;
 		extra?: Record<string, any>;
+		validate?: (field: FormField, values: Record<string, any>) => string[];
 	};
 
 	const formCreatorPlugins: Record<string, FormCreatorPlugin> = {};
@@ -44,7 +45,10 @@
 		extra?: Record<string, any>
 	) => {
 		name = name.toLowerCase();
-		formCreatorPlugins[name] = { name, component, extra };
+		let validate = extra?.validate;
+		delete extra?.validate;
+
+		formCreatorPlugins[name] = { name, component, extra, validate };
 	};
 
 	export const formCreatorPluginGet = (name: string) => {
@@ -117,8 +121,17 @@
 		const required: string[] = [];
 
 		fields.forEach((field) => {
+			// Check plugin validation if available
+			const plugin = formCreatorPluginGet(field?.type ?? '---');
+			if (plugin?.validate) {
+				const pluginErrors = plugin.validate(field, values);
+				if (pluginErrors.length) required.push(...pluginErrors);
+			}
+
+			// Check standard required fields
 			if (field.required && typeof values[(field as any)[nameField]] == 'undefined') {
 				required.push(field.label ?? field.name);
+				return;
 			}
 		});
 
@@ -131,6 +144,8 @@
 		e.stopPropagation();
 
 		const missing = _check_required_fields();
+
+		console.log('=== REQUIRED: ', missing);
 
 		// verify required fields
 		if (missing.length) {

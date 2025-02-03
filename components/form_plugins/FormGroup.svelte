@@ -1,3 +1,24 @@
+<script module lang="ts">
+	// Export validation function to be used by FormCreator plugin system
+	export const validate = (field: FormField, values: Record<string, any>) => {
+		const required: string[] = [];
+		const groupFields = field.extra?.fields as FormField[];
+		const groupValues = values[field.name] ?? {};
+
+		console.log('=== GROUP: ', { groupFields, groupValues });
+
+		if (!groupFields) return required;
+
+		groupFields.forEach((subField) => {
+			if (subField.required && !groupValues[subField.name]) {
+				required.push(`${field.label} > ${subField.label ?? subField.name}`);
+			}
+		});
+
+		return required;
+	};
+</script>
+
 <script lang="ts">
 	import FormCreator from '$liwe3/components/FormCreator.svelte';
 	import type { FormField } from '$liwe3/components/FormCreator.svelte';
