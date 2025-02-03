@@ -121,6 +121,9 @@
 		const required: string[] = [];
 
 		fields.forEach((field) => {
+			// if the field is hidden for the user, we cannot validate its fields
+			if (field.hide) return;
+
 			// Check plugin validation if available
 			const plugin = formCreatorPluginGet(field?.type ?? '---');
 			if (plugin?.validate) {
