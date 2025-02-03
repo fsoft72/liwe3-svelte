@@ -77,6 +77,8 @@
 </script>
 
 <script lang="ts">
+	import Modal from './Modal.svelte';
+
 	interface Props {
 		fields: DataGridField[];
 		data: DataGridRow[];
@@ -108,7 +110,7 @@
 	}
 
 	let {
-		fields,
+		fields: _fields,
 		data, // : _data,
 		filters = $bindable({}),
 		actions,
@@ -138,18 +140,14 @@
 	let sortDirection: 'asc' | 'desc' = $state('asc');
 	let tableElement: HTMLTableElement | null = $state(null);
 	let editingCell: { rowIndex: number; field: string } | null = $state(null);
-	// let data: DataGridRow[] = $state($state.snapshot(_data));
+	let fields = $state(_fields);
 	let has_filters = fields.some((f) => f.filterable);
 	let dataView: HTMLDivElement | null = $state(null);
 	let paginator: any = $state(null);
 	let buttonSize: Size = $state('md');
 	let dontSendPaginationChange: boolean = $state(false);
 
-	/*
-	$effect(() => {
-		data = $state.snapshot(_data);
-	});
-	*/
+	let showFieldsModal = $state(false);
 
 	$effect(() => {
 		if (page) dataView?.scrollTo(0, 0);
@@ -522,26 +520,12 @@
 
 		page = page_;
 	};
-
-	onMount(() => {
-		// console.log('=== DataGrid mounted');
-		// get the container height
-		/*
-        if (dataView) {
-            const container = dataView.parentElement;
-            if (container) {
-                const height = container.clientHeight;
-                dataView.style.height = `${height - 40}px`;
-            }
-        }
-            */
-	});
 </script>
 
 {#snippet filtersRow()}
 	<!-- filters -->
 	{#if has_filters}
-		<tr>
+		<tr style="background-color: var(--liwe3-lighter-paper)">
 			{#each fields as field}
 				{#if !field.hidden}
 					<td class="filter" style={`width: ${field.width || 'min-content'};`}>
@@ -617,6 +601,7 @@
 	{#if title || buttons}
 		<div class="title-bar">
 			<div class="title">
+				<Button size="xs" onclick={() => (showFieldsModal = true)}>Fields</Button>
 				{title}
 			</div>
 
@@ -852,6 +837,26 @@
 		</div>
 	{/if}
 </div>
+
+{#if showFieldsModal}
+	<Modal
+		title="Fields show"
+		onclose={() => (showFieldsModal = false)}
+		oncancel={() => (showFieldsModal = false)}
+	>
+		<div class="fields-cont">
+			{#each fields as field}
+				<div class="field">
+					<Checkbox
+						checked={!field.hidden}
+						onchange={(e: any) => (field.hidden = !e.target?.checked)}
+						label={field.label || field.name}
+					/>
+				</div>
+			{/each}
+		</div>
+	</Modal>
+{/if}
 
 <style>
 	:root {
