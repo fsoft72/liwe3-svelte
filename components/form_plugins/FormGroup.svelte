@@ -4,6 +4,8 @@
 	import type { FormField } from '$liwe3/components/FormCreator.svelte';
 	import { onMount } from 'svelte';
 
+	const SEP = '|';
+
 	interface Props {
 		field: FormField;
 
@@ -25,13 +27,22 @@
 	let values: Record<string, any> = $state({});
 
 	const groupFieldChange = (name: string, value: any) => {
+		// console.log('=== CHANGE: ', { name, value });
 		// onchange(name, value, field);
 		values[name] = value;
 
 		const myValues: Record<string, any> = {};
 		fields.map((f: FormField) => {
-			myValues[f.name.split('!')[1]] = values[f.name];
+			const splits = f.name.split(SEP);
+			// name is the last part of the name
+			const name = splits[splits.length - 1];
+
+			// console.log('=== SPLIT: ', name);
+
+			myValues[name] = values[f.name];
 		});
+
+		// console.log('=== CHANGE VALS: ', myValues);
 
 		onchange(field.name, myValues, field);
 	};
@@ -42,12 +53,12 @@
 		(field.extra?.fields as FormField[]).map((f) => {
 			fields.push({
 				...f,
-				name: field.name + '!' + f.name
+				name: field.name + SEP + f.name
 			});
-			values[field.name + '!' + f.name] = allVals[f.name];
+			values[field.name + SEP + f.name] = allVals[f.name];
 		});
 
-		console.log('=== V: ', _v(field));
+		// console.log('=== V: ', _v(field));
 
 		isReady = true;
 	});
