@@ -3,7 +3,13 @@
 	import { Icon } from 'svelte-hero-icons';
 	import type { IconSource } from 'svelte-hero-icons';
 
-	interface _props {
+	type Gradient = {
+		colors: string[];
+		mode?: 'linear' | 'radial';
+		angle?: number;
+	};
+
+	interface Props {
 		size?: Size;
 		cssClass?: string;
 		mode?: Color;
@@ -12,6 +18,7 @@
 		iconRight?: IconSource;
 		solid?: boolean;
 		disabled?: boolean;
+		gradient?: Gradient;
 
 		// events
 		onclick?: (e: MouseEvent) => void;
@@ -29,13 +36,14 @@
 		mode = 'mode1',
 		variant = 'solid',
 		disabled = false,
-		icon = null,
-		iconRight = null,
+		icon,
+		iconRight,
 		solid = true,
+		gradient,
 		onclick,
 		children,
 		...restProps
-	}: _props = $props();
+	}: Props = $props();
 
 	const iconSizes = {
 		xxs: '0.6rem',
@@ -53,6 +61,14 @@
 		// emit the event
 		onclick && onclick(e);
 	};
+
+	const gradientStyle: string = $derived(
+		gradient
+			? `background: ${gradient.mode || 'linear'}-gradient(${
+					gradient.mode === 'radial' ? 'circle' : gradient.angle ? `${gradient.angle}deg` : '90deg'
+				}, ${gradient.colors.join(', ')})`
+			: ''
+	);
 </script>
 
 <button
@@ -60,6 +76,7 @@
 	class={`liwe3-button ${mode} ${variant ? 'liwe3-' + variant : ''} ${size} ${cssClass}`}
 	onclick={onClick}
 	{disabled}
+	style={gradientStyle}
 >
 	{#if icon}
 		<div class="liwe3-button-icon-left">
@@ -125,6 +142,7 @@
 	.liwe3-button.liwe3-outline:not(:global(:hover)) {
 		background-color: transparent !important;
 		color: var(--liwe3-button-background) !important;
+		background-image: none !important;
 	}
 
 	.xxs {
