@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Button from '$liwe3/components/Button.svelte';
 	import FormCreator from '$liwe3/components/FormCreator.svelte';
 	import type { FormField } from '$liwe3/components/FormCreator.svelte';
 	import { onMount } from 'svelte';
@@ -25,10 +24,9 @@
 	let isReady = $state(false);
 	let fields: FormField[] = $state([]);
 	let values: Record<string, any> = $state({});
+	let form: FormCreator | null = $state(null);
 
 	const groupFieldChange = (name: string, value: any) => {
-		// console.log('=== CHANGE: ', { name, value });
-		// onchange(name, value, field);
 		values[name] = value;
 
 		const myValues: Record<string, any> = {};
@@ -37,12 +35,8 @@
 			// name is the last part of the name
 			const name = splits[splits.length - 1];
 
-			// console.log('=== SPLIT: ', name);
-
 			myValues[name] = values[f.name];
 		});
-
-		// console.log('=== CHANGE VALS: ', myValues);
 
 		onchange(field.name, myValues, field);
 	};
@@ -67,7 +61,13 @@
 <div class="frm-group">
 	<span class="label">{field.label}</span>
 	{#if isReady}
-		<FormCreator {fields} {values} showButtons={false} onchange={groupFieldChange} />
+		<FormCreator
+			bind:this={form}
+			{fields}
+			{values}
+			showButtons={false}
+			onchange={groupFieldChange}
+		/>
 	{/if}
 </div>
 
