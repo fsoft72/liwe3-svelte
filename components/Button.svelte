@@ -73,10 +73,10 @@
 
 <button
 	{...restProps}
-	class={`liwe3-button ${mode} ${variant ? 'liwe3-' + variant : ''} ${size} ${cssClass}`}
+	class={`liwe3-button ${mode} ${variant ? 'liwe3-' + variant : ''} ${size} ${cssClass} ${restProps.class ? restProps.class : ''}`}
+	style={restProps.style ? `${restProps.style} ${gradientStyle}` : gradientStyle}
 	onclick={onClick}
 	{disabled}
-	style={gradientStyle}
 >
 	{#if icon}
 		<div class="liwe3-button-icon-left">
