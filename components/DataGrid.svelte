@@ -306,8 +306,6 @@
 	}
 
 	function finishEditing(id_row: string, field: string, event: Event): void {
-		console.log('=== FINISH ID ROW: ', id_row);
-
 		const row = data.find((r) => r.id === id_row);
 		if (!row) return;
 
@@ -335,8 +333,6 @@
 		if (newValue !== oldValue?.toString()) {
 			const updatedRow = { ...row, [field]: newValue };
 			if (!editingCell) return;
-
-			console.log('=== ROW: ', row.id);
 
 			const rowIndex = editingCell.rowIndex + (page - 1) * rowsPerPage;
 
@@ -825,7 +821,7 @@
 			</table>
 		</div>
 	</div>
-	{#if !disablePaginator && internalFilteredData.length > rowsPerPage}
+	{#if !disablePaginator}
 		<div class="dg-footer">
 			<Paginator
 				bind:this={paginator}
