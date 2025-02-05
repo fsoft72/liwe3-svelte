@@ -15,19 +15,24 @@
 
 <script lang="ts">
 	import { PUBLIC_GOOGLE_MAPS_API_KEY } from '$env/static/public';
-	import type { FormField } from '$liwe3/components/FormCreator.svelte';
+
 	import Input from '$liwe3/components/Input.svelte';
 	import Button from '$liwe3/components/Button.svelte';
+
 	import { slide } from 'svelte/transition';
 	import { sineInOut } from 'svelte/easing';
-	import { Trash, Plus } from 'svelte-hero-icons';
 	import { onDestroy, onMount } from 'svelte';
+
+	import { Trash, Plus } from 'svelte-hero-icons';
+
+	import type { FormField } from '$liwe3/components/FormCreator.svelte';
 
 	interface Props {
 		field: FormField;
 		name: string;
 		telephone?: boolean; // show telephone field
 		multiple?: boolean; // multiple addresses
+		addressOnly?: boolean; // show only address, no regions or establishments
 		// dependency injection
 		_v: (field: FormField) => any;
 		// events
@@ -37,8 +42,6 @@
 	}
 
 	type ValuesType = Record<string, GoogleAddressType> | { [key: string]: GoogleAddressType };
-
-	const API_URL = `https://maps.googleapis.com/maps/api/js?key=${PUBLIC_GOOGLE_MAPS_API_KEY}&loading=async`;
 
 	// Keys must be the same as AutoCompleteType, also used to check if all keys/values are present
 	const emptyValues: GoogleAddressType = {
@@ -53,7 +56,7 @@
 	};
 
 	const prefix = 'address';
-	let { onchange, name, _v, field, telephone = false, multiple = true, ...props }: Props = $props();
+	let { onchange, name, _v, field, telephone = false, multiple = true, addressOnly = true, ...props }: Props = $props();
 
 	let maps: any;
 	let google: any;
@@ -63,6 +66,7 @@
 	let current: number = $state(0); // current address index
 	let values: ValuesType = $state({}); // all addresses values
 	let counter: number = $derived(Object.keys(values).length);
+	let searchType: string[] = $derived( addressOnly ? ['address'] : ['geocode', 'establishment'] );
 
 	/**
 	 * @description Clear undefined values from object and add missing keys to be compliant with AutoCompleteType
@@ -248,8 +252,8 @@
 		listenerHandle && listenerHandle.remove();
 		// @ts-ignore
 		google = new window.google.maps.places.Autocomplete(input, {
-			types: ['address'],
-			fields: ['address_components', 'formatted_address']
+			types: searchType,
+			fields: ['address_components', 'formatted_address', 'geometry']
 		});
 		listenerHandle = google.addListener(`place_changed`, autoComplete);
 	};
