@@ -33,6 +33,7 @@
 		pre?: string;
 		extra?: DataGridFieldExtra;
 		options?: {
+			filterSelect?: { value: string; label: string }[];
 			select?: { value: string; label: string }[];
 			validChars?: string;
 			lower?: boolean;
@@ -575,7 +576,18 @@
 				{#if !field.hidden}
 					<td class="filter" style={`width: ${field.width || 'min-content'};`}>
 						{#if field.filterable}
-							{#if field.type == 'string' || field.type == 'text'}
+							{#if field.options?.filterSelect}
+								<select
+									name={`f_${field.name}`}
+									onchange={filter_change}
+									value={filters[field.name]?.value}
+								>
+									<option value="">(Select)</option>
+									{#each field.options.filterSelect as option}
+										<option value={option.value}>{option.label}</option>
+									{/each}
+								</select>
+							{:else if field.type == 'string' || field.type == 'text'}
 								<Input
 									{mode}
 									width={field.width}
