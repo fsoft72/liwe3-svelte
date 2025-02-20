@@ -105,6 +105,8 @@
 		onfilterchange?: (filters: Record<string, any>) => void;
 		onsortchange?: (field: string, direction: 'asc' | 'desc') => void;
 
+		keyboardInputTimeout?: any;
+
 		// paginator event
 		onpagechange?: (page: number, rows: number) => void;
 	}
@@ -131,6 +133,7 @@
 		onupdatefield,
 		onfilterchange,
 		onsortchange,
+		keyboardInputTimeout,
 
 		// paginator event
 		onpagechange
@@ -146,6 +149,7 @@
 	let paginator: any = $state(null);
 	let buttonSize: Size = $state('md');
 	let dontSendPaginationChange: boolean = $state(false);
+	let kiTimeout: any = $state(null);
 
 	let showFieldsModal = $state(false);
 
@@ -164,14 +168,41 @@
 			let add = true;
 
 			for (const field in filters) {
+				if (add == false) break;
+
 				const filter = filters[field];
 
-				if (filter.mode == filterModes.CONTAINS) {
-					if (filter) {
-						if (!row[field] || row[field].toLowerCase().indexOf(filter.value.toLowerCase()) == -1) {
-							add = false;
-						}
-					}
+				// console.log('=== FILTER: ', { field, filter }) ;
+
+				if (!row[field]) {
+					add = false;
+					break;
+				}
+
+				let v = row[field];
+
+				switch (filter.mode) {
+					case filterModes.CONTAINS:
+						if (v.toLowerCase().indexOf(filter.value.toLowerCase()) == -1) add = false;
+						break;
+
+					case filterModes.LESS_THAN_OR_EQUAL:
+						if (filter.type == 'date') {
+							if (new Date(v) > new Date(filter.value)) add = false;
+						} else if (filter.type == 'number') {
+							if (parseFloat(v) > parseFloat(filter.value)) add = false;
+						} else if (v > filter.value) add = false;
+
+						break; // Ensure to add a break statement for case completeness
+					// Add additional filter modes as necessary here
+					case filterModes.GREATER_THAN_OR_EQUAL:
+						if (filter.type == 'date') {
+							if (new Date(v) < new Date(filter.value)) add = false;
+						} else if (filter.type == 'number') {
+							if (parseFloat(v) < parseFloat(filter.value)) add = false;
+						} else if (v < filter.value) add = false;
+						break;
+					// Add other necessary filter modes
 				}
 			}
 
@@ -460,19 +491,37 @@
 		if (onfilterchange) onfilterchange(filters);
 	};
 
+	const filter_oninput = (e: Event) => {
+		if (!keyboardInputTimeout) return;
+
+		// if the user stops inserting chars, the filter_change() is triggered
+		let input = e.target as HTMLInputElement;
+		clearTimeout(kiTimeout);
+		kiTimeout = setTimeout(() => {
+			filter_change(e);
+		}, keyboardInputTimeout);
+	};
+
 	const filter_change = (e: Event) => {
 		const input = e.target as HTMLInputElement;
-		const name = input.name.replace('f_', '');
-		const field = fields.find((f) => f.name === name);
-		let value: any = input.value;
-		let mode = field?.searchMode || filterModes.CONTAINS;
-		let type = field?.type || 'string';
+		let full_name = input.name.replace('f_', '');
+		let name = full_name;
 
-		if (name.endsWith('_1')) {
+		if (full_name.endsWith('_1') || full_name.endsWith('_2')) {
+			name = name.slice(0, -2);
+		}
+
+		const field = fields.find((f) => f.name === name);
+		let mode = field?.searchMode || filterModes.CONTAINS;
+
+		if (full_name.endsWith('_1')) {
 			mode = filterModes.GREATER_THAN_OR_EQUAL;
-		} else if (name.endsWith('_2')) {
+		} else if (full_name.endsWith('_2')) {
 			mode = filterModes.LESS_THAN_OR_EQUAL;
 		}
+
+		let value: any = input.value;
+		let type = field?.type || 'string';
 
 		// we add to the query only checkboxes that are set to true
 		if (input.type == 'checkbox' && toBool(value) == false) {
@@ -533,6 +582,7 @@
 									size="xs"
 									name={`f_${field.name}`}
 									onchange={filter_change}
+									oninput={filter_oninput}
 									value={filters[field.name]?.value}
 								/>
 							{:else if field.type == 'number'}
@@ -1072,34 +1122,34 @@
 		background-size: contain;
 		background-repeat: no-repeat;
 		/*transform:
-			height 0.8s ease,
-			width 0.8s ease;*/
+            height 0.8s ease,
+            width 0.8s ease;*/
 	}
 
 	/*
-	td.editable:hover::before {
-		width: 1rem;
-		height: 1rem;
-	}
-		*/
+    td.editable:hover::before {
+        width: 1rem;
+        height: 1rem;
+    }
+        */
 
 	table.condensed {
 		td.editable::before {
 			top: 0.5rem;
 		}
 		/*
-		td.editable:hover::before {
-			width: .9rem;
-			height: .9rem;
-		}
-		*/
+        td.editable:hover::before {
+            width: .9rem;
+            height: .9rem;
+        }
+        */
 	}
 
 	/*
-	table.large {
-		td.editable::before {
-			top: 2rem;
-		}
-	}
-		*/
+    table.large {
+        td.editable::before {
+            top: 2rem;
+        }
+    }
+        */
 </style>
