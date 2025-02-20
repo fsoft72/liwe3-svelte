@@ -20,6 +20,7 @@
 		onchange?: (event: Event) => void;
 		onkeydown?: (event: KeyboardEvent) => void;
 		onkeyup?: (event: KeyboardEvent) => void;
+		oninput?: (event: Event) => void;
 
 		// rest
 		[k: string]: any;
@@ -40,6 +41,7 @@
 		onchange,
 		onkeydown,
 		onkeyup,
+		oninput,
 		...rest
 	}: Props = $props();
 
@@ -78,12 +80,14 @@
 				(event.target as HTMLInputElement).value = filteredValue;
 				_dispatchEvent(event, filteredValue);
 				value = filteredValue;
+				oninput && oninput(event);
 			}
 		} else {
 			const el = event.target as HTMLInputElement;
 
 			_dispatchEvent(event, el.value);
 			value = el.value;
+			oninput && oninput(event);
 		}
 	};
 </script>
