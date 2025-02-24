@@ -503,6 +503,46 @@
 		}, keyboardInputTimeout);
 	};
 
+	const filter_change_range = (e: Event) => {
+		const input = e.target as HTMLInputElement;
+		let full_name = input.name.replace('f_', '');
+		let name = full_name.slice(0, -2);
+		let v1, v2;
+
+		if (full_name.endsWith('_1')) {
+			v1 = input.value;
+			v2 = (document.querySelector(`input[name="f_${name}_2"]`) as HTMLInputElement)?.value;
+		} else {
+			v1 = (document.querySelector(`input[name="f_${name}_1"]`) as HTMLInputElement)?.value;
+			v2 = input.value;
+		}
+
+		const field = fields.find((f) => f.name === name);
+		let mode = field?.searchMode || filterModes.BETWEEN;
+
+		if (typeof v1 == 'undefined' || typeof v2 == 'undefined') return;
+		if (!v1 || !v2) return;
+
+		let new_filters = {
+			...filters,
+			[name]: {
+				mode,
+				value: `${v1}|${v2}`,
+				type: field?.type || 'string'
+			}
+		};
+
+		// remove from new_filters the filters that have an empty value
+		for (const key in new_filters) {
+			const filter = new_filters[key];
+			if (!filter.value) delete new_filters[key];
+		}
+
+		filters = new_filters;
+
+		_do_filter(filters);
+	};
+
 	const filter_change = (e: Event) => {
 		const input = e.target as HTMLInputElement;
 		let full_name = input.name.replace('f_', '');
@@ -616,24 +656,24 @@
 									value={filters[fn2]?.value}
 									onchange={filter_change}
 								/>
-							{:else if field.type == 'date'}
+							{:else if ['date', 'datetime', 'datetimelocal'].indexOf(field.type) != -1}
 								{@const fn1 = `f_${field.name}_1`}
 								{@const fn2 = `f_${field.name}_2`}
 								<Input
 									{mode}
 									size="xs"
-									type="date"
+									type={field.type}
 									name={fn1}
 									value={filters[fn1]?.value}
-									onchange={filter_change}
+									onchange={filter_change_range}
 								/>
 								<Input
 									{mode}
 									size="xs"
-									type="date"
+									type={field.type}
 									name={fn2}
 									value={filters[fn2]?.value}
-									onchange={filter_change}
+									onchange={filter_change_range}
 								/>
 							{:else if ['bool', 'boolean', 'checkbox'].indexOf(field.type) != -1}
 								<Checkbox
