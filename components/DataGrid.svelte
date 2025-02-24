@@ -637,26 +637,7 @@
 									oninput={filter_oninput}
 									value={filters[field.name]?.value}
 								/>
-							{:else if field.type == 'number'}
-								{@const fn1 = `f_${field.name}_1`}
-								{@const fn2 = `f_${field.name}_2`}
-								<Input
-									{mode}
-									size="xs"
-									type="number"
-									name={fn1}
-									onchange={filter_change}
-									value={filters[fn1]?.value}
-								/>
-								<Input
-									{mode}
-									size="xs"
-									type="number"
-									name={fn2}
-									value={filters[fn2]?.value}
-									onchange={filter_change}
-								/>
-							{:else if ['date', 'datetime', 'datetimelocal'].indexOf(field.type) != -1}
+							{:else if ['date', 'datetime-local', 'time', 'number'].indexOf(field.type) != -1}
 								{@const fn1 = `f_${field.name}_1`}
 								{@const fn2 = `f_${field.name}_2`}
 								<Input
