@@ -12,7 +12,14 @@ export enum filterModes {
 	CONTAINS = 'contains',
 	NOT_CONTAINS = 'not_contains',
 	STARTS_WITH = 'starts_with',
-	ENDS_WITH = 'ends_with'
+	ENDS_WITH = 'ends_with',
+	BETWEEN = 'between',
+	NOT_BETWEEN = 'not_between',
+	IN = 'in',
+	NOT_IN = 'not_in',
+	IS_NULL = 'is_null',
+	IS_NOT_NULL = 'is_not_null',
+
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -35,6 +42,12 @@ export const matchFilter = ( obj: Record<string, any>, name: string, value: stri
 		case filterModes.NOT_EQUAL: return fld != value;
 		case filterModes.STARTS_WITH: return fld.toLowerCase().startsWith( value.toLowerCase() );
 		case filterModes.ENDS_WITH: return fld.toLowerCase().endsWith( value.toLowerCase() );
+		case filterModes.BETWEEN: return fld >= value.split( '|' )[ 0 ] && fld <= value.split( '|' )[ 1 ];
+		case filterModes.NOT_BETWEEN: return fld < value.split( '|' )[ 0 ] || fld > value.split( '|' )[ 1 ];
+		case filterModes.IN: return value.split( '|' ).includes( fld );
+		case filterModes.NOT_IN: return !value.split( '|' ).includes( fld );
+		case filterModes.IS_NULL: return fld === null;
+		case filterModes.IS_NOT_NULL: return fld !== null;
 
 		default:
 			return false;
