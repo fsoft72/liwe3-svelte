@@ -611,7 +611,7 @@
 {#snippet filtersRow()}
 	<!-- filters -->
 	{#if has_filters}
-		<tr style="background-color: var(--liwe3-lighter-paper)">
+		<tr class="filter" style="background-color: var(--liwe3-lighter-paper)">
 			{#each fields as field}
 				{#if !field.hidden}
 					<td class="filter" style={`width: ${field.width || 'min-content'};`}>
@@ -1159,30 +1159,13 @@
             width 0.8s ease;*/
 	}
 
-	/*
-    td.editable:hover::before {
-        width: 1rem;
-        height: 1rem;
-    }
-        */
-
 	table.condensed {
 		td.editable::before {
 			top: 0.5rem;
 		}
-		/*
-        td.editable:hover::before {
-            width: .9rem;
-            height: .9rem;
-        }
-        */
 	}
 
-	/*
-    table.large {
-        td.editable::before {
-            top: 2rem;
-        }
-    }
-        */
+	.filter {
+		vertical-align: top;
+	}
 </style>
