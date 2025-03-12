@@ -1,5 +1,4 @@
 import type { IconSource } from 'svelte-hero-icons';
-import { runeDebug } from './runes.svelte';
 
 export type Tree = {
 	children: TreeItem[];
@@ -20,7 +19,7 @@ export type TreeItem = {
 	// internal use only
 	id_parent?: string;
 	pos?: number;
-	level?: number;
+	level: number;
 };
 
 // recursively set the tree meta info (pos and level)
@@ -146,6 +145,7 @@ const _tree_convert_list = ( items: any[], id = 'id', title = 'title', id_parent
 			name: item[ title ],
 			id_parent: item[ id_parent ],
 			children: [],
+			level: 0
 		};
 
 		if ( !newItem.id_parent ) {
