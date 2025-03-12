@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import {
 		tree_add_item,
 		tree_del_item,
@@ -47,7 +46,6 @@
 	let {
 		tree: origTree,
 		mode = 'mode1',
-		name = '',
 		maxDepth = 2,
 		canAdd = true,
 		canEdit = true,
@@ -88,7 +86,14 @@
 
 		if (!sourceItem || !targetItem) return;
 
-		// remove the sourceItem from the sourceItem's parent
+		// Check constraints BEFORE removing the item from its original position
+		if (pos == -1) {
+			// We're trying to append the sourceItem to the targetItem
+			if (!onbeforedraginto(sourceItem, targetItem)) return;
+			if ((targetItem?.level || 0) >= maxDepth) return;
+		}
+
+		// Remove the sourceItem from the sourceItem's parent
 		if (parentItem) {
 			parentItem.children = parentItem.children?.filter((item) => item.id !== sourceId);
 		} else {
@@ -99,9 +104,6 @@
 
 		// if pos == -1, append the sourceItem to the targetItem (if it has children)
 		if (pos == -1) {
-			if (!onbeforedraginto(sourceItem, targetItem)) return;
-			if ((targetItem?.level || 0) >= maxDepth) return;
-
 			if (targetItem.children) {
 				targetItem.children.push(sourceItem);
 			} else {
