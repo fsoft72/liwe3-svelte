@@ -26,6 +26,7 @@
 		canAdd?: boolean;
 		canEdit?: boolean;
 		canDelete?: boolean;
+		canDragInto?: (item: TreeItem) => boolean; // New prop to determine if an item can accept drag operations
 
 		showNew?: boolean;
 		newLabel?: string;
@@ -50,6 +51,7 @@
 		canAdd = true,
 		canEdit = true,
 		canDelete = true,
+		canDragInto = () => true, // Default to allowing drag into all items
 		showNew = true,
 		newLabel = 'New',
 		debug = false,
@@ -91,6 +93,7 @@
 			// We're trying to append the sourceItem to the targetItem
 			if (!onbeforedraginto(sourceItem, targetItem)) return;
 			if ((targetItem?.level || 0) >= maxDepth) return;
+			if (!canDragInto(targetItem)) return; // Check if the target item accepts drag operations
 		}
 
 		// Remove the sourceItem from the sourceItem's parent
@@ -209,6 +212,7 @@
 		{canAdd}
 		{canEdit}
 		{canDelete}
+		{canDragInto}
 		{maxDepth}
 		onadditem={onAddItem}
 		onedititem={onEditItem}

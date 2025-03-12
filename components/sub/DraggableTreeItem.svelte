@@ -12,6 +12,7 @@
 		canDelete: boolean;
 		canEdit: boolean;
 		maxDepth: number;
+		canDragInto?: (item: TreeItem) => boolean;
 
 		// events
 		onreorder?: (event: { sourceId: string; targetId: string; pos: number }) => void;
@@ -27,6 +28,9 @@
 		canAdd = true,
 		canDelete = true,
 		canEdit = true,
+		canDragInto = (item: TreeItem) => {
+			return item.level < maxDepth; // added this logic to restrict dragging into deeper levels
+		},
 		maxDepth = 2,
 
 		// events
@@ -48,6 +52,14 @@
 	}
 
 	function onDragOver(event: DragEvent, item: TreeItem) {
+		if (!canDragInto(item)) {
+			if (event.dataTransfer) {
+				event.dataTransfer.dropEffect = 'none'; // Shows the "not allowed" cursor
+			}
+			// Don't add the "drag-over" class that would show the dashed border
+			return;
+		}
+
 		event.preventDefault();
 		event.dataTransfer!.dropEffect = 'move';
 
@@ -225,7 +237,8 @@
 		align-items: center;
 		justify-content: space-between;
 
-		/* max-width: 300px; */
+		/* Add transitions for smooth highlighting effect */
+		transition: all 0.2s ease-in-out;
 	}
 
 	.btn {
@@ -248,6 +261,9 @@
 	.mini {
 		border: 0;
 		padding: 0.2rem;
+
+		/* Add transitions for spacing indicators too */
+		transition: all 0.2s ease-in-out;
 	}
 
 	.is-dragging-over {
@@ -260,5 +276,8 @@
 		align-items: center;
 		gap: 0.5rem;
 		margin-left: 1rem;
+	}
+	.no-drop {
+		cursor: not-allowed;
 	}
 </style>
