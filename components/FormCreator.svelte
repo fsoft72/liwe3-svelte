@@ -79,11 +79,13 @@
 <script lang="ts">
 	import type { Size } from '$liwe3/types/types';
 	import { addToast } from '$liwe3/stores/ToastStore.svelte';
-	import { _ } from '$liwe3/stores/LocalizationStore';
+	import LocalizationStore from '$liwe3/stores/LocalizationStore.svelte';
 	import { has_one_perm, isTrue } from '$liwe3/utils/utils';
 	import { storeUser } from '$modules/user/store.svelte';
 	import Button from '$liwe3/components/Button.svelte';
 	import { runeDebug } from '$liwe3/utils/runes.svelte';
+
+	const _ = LocalizationStore._;
 
 	interface Props {
 		fields: FormField[];
@@ -155,7 +157,7 @@
 			addToast({
 				type: 'error',
 				message:
-					$_('Please fill all required fields:<br /><ul><li>') +
+					_('Please fill all required fields:<br /><ul><li>') +
 					missing.join('</li><li>') +
 					'</li></ul>'
 			});
