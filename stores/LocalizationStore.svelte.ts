@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
+import { runeDebug } from '$liwe3/utils/runes.svelte';
 
-export type Language = 'it_IT' | 'en_US' | 'es_ES' | 'fr_FR' | 'de_DE' | 'pt_PT';
+export type Language = 'it_IT' | 'en_US' | 'es_ES' | 'fr_FR' | 'de_DE' | 'pt_PT' | 'sv_SE';
 
 type Translations = {
     [ key: string ]: {
@@ -37,7 +38,7 @@ const _createKey = ( key: string ) => {
 const _getLanguage = () => {
     if ( browser ) {
         const lang = navigator.language;
-        return lang as Language;
+        return ( lang.replace( '-', '_' ) ) as Language;
     }
     return 'en_US';
 };
@@ -62,7 +63,7 @@ const ops = {
         if ( store.language === 'en_US' ) return key;
 
         const k = _createKey( key );
-        console.log( "=== K: ", k );
+        console.log( "=== K: ", k, store.language );
         return store.translations[ k ]?.[ store.language ] ?? key;
     },
     _t ( key: string, language: Language ) {
@@ -74,12 +75,20 @@ const ops = {
         store.translations[ k ] = translations;
     },
 
+    update ( translations: Translations ) {
+        Object.assign( store.translations, translations );
+    },
+
     add ( key: string, translation: string, language?: Language ) {
         if ( !language ) language = store.language;
 
         const k = _createKey( key );
         if ( !store.translations[ k ] ) store.translations[ k ] = {};
         store.translations[ k ][ language ] = translation;
+    },
+
+    debug () {
+        runeDebug( { translations: store.translations, lang: store.language } );
     }
 };
 
