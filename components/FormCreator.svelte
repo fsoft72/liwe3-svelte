@@ -24,6 +24,9 @@
 		// list of perms the user must have to see this field
 		perms?: string[];
 
+		// functions that can be exposed by the field
+		submit?: () => Promise<boolean>;
+
 		// events
 		onchange?: (name: string, value: any, values: Record<string, any>) => Promise<boolean>;
 		onsubmit?: (values: Record<string, any>) => void;
@@ -118,6 +121,7 @@
 	}: Props = $props();
 
 	let formID: HTMLFormElement;
+	let formFieldInstances: Record<string, any> = $state({});
 
 	const _check_required_fields = () => {
 		const required: string[] = [];
@@ -143,10 +147,36 @@
 		return required;
 	};
 
-	const handleSubmit = (e: Event) => {
+	/* This function will scan all fields and, if the field has a 'submit' function,
+	 * it will call it with the field value and the form values.
+	 */
+	const handleFieldSubmit = async () => {
+		let res = true;
+
+		await Promise.all(
+			fields.map(async (field) => {
+				let p = formFieldInstances[field.name];
+				if (!p || !p.submit) return;
+
+				return p.submit();
+			})
+		).catch((err) => {
+			console.log('=== FormCreator/handleFieldSubmit: ', err);
+			res = false;
+		});
+
+		return res;
+	};
+
+	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 		e.stopImmediatePropagation();
 		e.stopPropagation();
+
+		const isValid = await handleFieldSubmit();
+		if (!isValid) return;
+
+		console.log('=== IS VALID: ', isValid);
 
 		const missing = _check_required_fields();
 
@@ -210,6 +240,7 @@
 	{#if plugin}
 		<plugin.component
 			this={plugin.component}
+			bind:this={formFieldInstances[field.name]}
 			{_v}
 			{...plugin.extra ?? {}}
 			name={(field as any)[nameField]}
