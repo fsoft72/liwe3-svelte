@@ -123,7 +123,7 @@
 	let formID: HTMLFormElement;
 	let formFieldInstances: Record<string, any> = $state({});
 
-	const _check_required_fields = () => {
+	export const checkRequiredFields = () => {
 		const required: string[] = [];
 
 		fields.forEach((field) => {
@@ -150,7 +150,7 @@
 	/* This function will scan all fields and, if the field has a 'submit' function,
 	 * it will call it with the field value and the form values.
 	 */
-	const handleFieldSubmit = async () => {
+	export const handleFieldSubmit = async () => {
 		let res = true;
 
 		await Promise.all(
@@ -168,7 +168,18 @@
 		return res;
 	};
 
-	const handleSubmit = async (e: Event) => {
+	/**
+	 * This function can be called programatically to submit the form.
+	 * It is the function that is also called internally when the user clicks 'submit'.
+	 * The function calls these other functions:
+	 * - handleFieldSubmit: this function will call the submit function of each field that has one.
+	 * - checkRequiredFields: this function will check if all required fields are filled.
+	 *
+	 * If everything is OK, it will also call the onsubmit callback with the form values.
+	 *
+	 * @param e - the event that triggered the submit
+	 */
+	export const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 		e.stopImmediatePropagation();
 		e.stopPropagation();
@@ -176,11 +187,7 @@
 		const isValid = await handleFieldSubmit();
 		if (!isValid) return;
 
-		console.log('=== IS VALID: ', isValid);
-
-		const missing = _check_required_fields();
-
-		console.log('=== REQUIRED: ', missing);
+		const missing = checkRequiredFields();
 
 		// verify required fields
 		if (missing.length) {
