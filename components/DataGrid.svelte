@@ -1100,20 +1100,20 @@
 	}
 
 	tr {
-		border-bottom: 1px solid var(--liwe3-datagrid-tr-border-color, var(--liwe3-tertiary-color));
+		border-bottom: 1px solid var(--liwe3-tertiary-color);
 		max-height: 2rem;
 	}
 
 	tr:hover {
-		background-color: var(--liwe3-datagrid-tr-hover, var(--liwe3-secondary-color)) !important;
+		background-color: var(--liwe3-secondary-color) !important;
 	}
 
 	td {
-		border-right: 1px solid var(--liwe3-datagrid-td-border-color, var(--liwe3-button-border));
+		border-right: 1px solid var(--liwe3-button-border);
 	}
 
 	tbody tr:nth-child(even) {
-		background-color: var(--liwe3-datagrid-tr-even-bg, var(--liwe3-darker-paper));
+		background-color: var(--liwe3-darker-paper);
 	}
 
 	.resizer {
