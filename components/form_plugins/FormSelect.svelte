@@ -20,7 +20,7 @@
 	let { field, name, onchange, _v, ...props }: Props = $props();
 </script>
 
-<div class="custom-select">
+<div class="custom-select input-container">
 	{#if field?.label ?? ''}
 		<div class="label">{field?.label ?? ''}</div>
 	{/if}
@@ -42,6 +42,13 @@
 	.custom-select {
 		position: relative;
 		width: 100%;
-		top: -4px;
+		top: -1px;
+	}
+
+	.label {
+		white-space: nowrap;
+		font-size: 0.6rem;
+		margin: var(--liwe3-input-w-unit) 0;
+		user-select: none;
 	}
 </style>
