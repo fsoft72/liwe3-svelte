@@ -179,10 +179,12 @@
 	 *
 	 * @param e - the event that triggered the submit
 	 */
-	export const handleSubmit = async (e: Event) => {
-		e.preventDefault();
-		e.stopImmediatePropagation();
-		e.stopPropagation();
+	export const handleSubmit = async (e?: Event) => {
+		if (e) {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			e.stopPropagation();
+		}
 
 		const isValid = await handleFieldSubmit();
 		if (!isValid) return;
