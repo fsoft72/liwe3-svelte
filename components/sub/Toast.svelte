@@ -87,13 +87,16 @@
 	}
 
 	.error {
-		background: IndianRed;
+		background: var(--liwe3-error-500, IndianRed);
+		color: var(--liwe3-error-500-text, white);
 	}
 	.success {
-		background: MediumSeaGreen;
+		background: var(--liwe3-success-500, MediumSeaGreen);
+		color: var(--liwe3-success-500-text, white);
 	}
 	.info {
-		background: SkyBlue;
+		background: var(--liwe3-info-500, SkyBlue);
+		color: var(--liwe3-info-500-text, white);
 	}
 
 	.text {
