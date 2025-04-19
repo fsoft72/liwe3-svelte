@@ -28,7 +28,6 @@
 	}: TagInputProps = $props();
 
 	const set_tag = (value: string) => {
-		console.log('=== SET: ', value);
 		const t = value.trim();
 
 		if (selected.includes(t)) return;
@@ -65,7 +64,15 @@
 
 <div class={`tag-input ${mode}`}>
 	<input type="hidden" {name} value={finalValue} />
-	<AutoComplete items={tags} selectedItems={selected} {mode} {...restProps} onset={(value:string) => {set_tag (value);}} />
+	<AutoComplete
+		items={tags}
+		selectedItems={selected}
+		{mode}
+		{...restProps}
+		onset={(value: string) => {
+			set_tag(value);
+		}}
+	/>
 	<div class="tags-list">
 		{#each selected as tag (tag)}
 			<div class="tag">
@@ -93,7 +100,7 @@
 		align-items: center;
 		justify-content: space-between;
 
-		background-color: var(--liwe3-background);
+		background-color: var(--liwe3-mode4);
 		color: var(--liwe3-color);
 		border: 1px solid var(--liwe3-button-border);
 
