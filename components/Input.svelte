@@ -5,7 +5,7 @@
 	interface Props {
 		id?: string;
 		name?: string;
-		value?: string | number;
+		value?: string | number | boolean; // Allow boolean for checkbox
 
 		divClass?: string;
 		label?: string;
@@ -14,6 +14,7 @@
 		type?: string;
 		validChars?: string;
 		width?: string;
+		checked?: boolean; // For checkbox binding
 
 		// events
 		onblur?: (event: FocusEvent) => void;
@@ -21,6 +22,7 @@
 		onkeydown?: (event: KeyboardEvent) => void;
 		onkeyup?: (event: KeyboardEvent) => void;
 		oninput?: (event: Event) => void;
+		onpaste?: (event: ClipboardEvent) => void; // Add onpaste
 
 		// rest
 		[k: string]: any;
@@ -35,59 +37,146 @@
 		width = '100%',
 		mode = 'mode3',
 		divClass = '',
-		value = $bindable(''),
+		value: valueProp = $bindable(''),
 		type = 'text',
+		checked = $bindable(false), // Bindable checked state for checkbox
 		onblur,
 		onchange,
-		onkeydown,
+		onkeydown, // User's onkeydown
 		onkeyup,
-		oninput,
+		oninput, // User's oninput
+		onpaste, // User's onpaste
 		...rest
 	}: Props = $props();
 
+	// Use local state derived from props for binding, handling checkbox separately
+	let value = $derived(type === 'checkbox' ? checked : valueProp);
+	$effect(() => {
+		if (type === 'checkbox') {
+			checked = Boolean(valueProp);
+		} else {
+			valueProp = value;
+		}
+	});
+
+	// if (validChars) type = 'text'; // Force type to text if validChars is set
+
 	const inputClass = `liwe3-form liwe3-form-custom-input ${rest.class ? rest.class : ''} ${mode} input ${size}`;
 
-	let rx = validChars ? new RegExp(`[^${validChars}]*`, 'g') : null;
+	const handleKeyDown = (event: KeyboardEvent) => {
+		// Call user's onkeydown first
+		if (onkeydown) {
+			onkeydown(event);
+			// If user prevented default, respect it
+			if (event.defaultPrevented) {
+				return;
+			}
+		}
 
-	let isDispatching = false;
+		// Only apply logic if validChars is set (inputType will be 'text' in this case)
+		if (!validChars) return;
 
-	const _dispatchEvent = (event: Event, data: string) => {
-		if (!event || !event.target) return;
+		const key = event.key;
+		const isCtrlCmd = event.ctrlKey || event.metaKey;
 
-		// dispatch standard 'input' event with the new filteredValue
+		// Allow navigation, control keys, and specific combinations
+		if (
+			[
+				'Backspace',
+				'Delete',
+				'Tab',
+				'Escape',
+				'Enter',
+				'Home',
+				'End',
+				'ArrowLeft',
+				'ArrowRight',
+				'ArrowUp',
+				'ArrowDown',
+				'Shift',
+				'Control',
+				'Alt',
+				'Meta'
+			].includes(key) ||
+			(isCtrlCmd && ['a', 'c', 'v', 'x', 'z', 'y'].includes(key.toLowerCase()))
+		) {
+			return; // Allow the event
+		}
+
+		// Check if the key is a printable character
+		if (key.length === 1) {
+			// If the character is not in validChars, prevent it
+			if (!validChars.includes(key)) {
+				event.preventDefault();
+			}
+		}
+		// Allow other keys (like F1-F12) by default
+	};
+
+	const handlePaste = (event: ClipboardEvent) => {
+		// Call user's onpaste first
+		if (onpaste) {
+			onpaste(event);
+			// If user prevented default, respect it
+			if (event.defaultPrevented) {
+				return;
+			}
+		}
+
+		// Only apply logic if validChars is set (inputType will be 'text' in this case)
+		if (!validChars) return;
+
+		event.preventDefault(); // Prevent default paste
+
+		const text = event.clipboardData?.getData('text/plain') || '';
+		if (!text) return;
+
+		const filteredText = text
+			.split('')
+			.filter((char) => validChars.includes(char))
+			.join('');
+		if (!filteredText) return; // Nothing valid to paste
+
+		const inputElement = event.target as HTMLInputElement;
+		const start = inputElement.selectionStart ?? 0;
+		const end = inputElement.selectionEnd ?? 0;
+		const originalValue = inputElement.value;
+
+		// Construct the new value
+		const newValue =
+			originalValue.substring(0, start) + filteredText + originalValue.substring(end);
+
+		// Update the input value directly and the bindable state
+		inputElement.value = newValue;
+		value = newValue; // Update bindable value
+
+		// Manually set cursor position after paste
+		const newCursorPos = start + filteredText.length;
+		inputElement.selectionStart = inputElement.selectionEnd = newCursorPos;
+
+		// Dispatch an 'input' event manually so Svelte bindings and user's oninput handler are triggered
 		const inputEvent = new InputEvent('input', {
 			bubbles: true,
-			cancelable: true,
+			cancelable: false, // Typically false for programmatic changes
 			composed: true,
-			data
+			data: filteredText, // Optionally include the inserted data
+			inputType: 'insertFromPaste' // Indicate the type of input
 		});
-		isDispatching = true;
-		event.target.dispatchEvent(inputEvent);
-		isDispatching = false;
+		inputElement.dispatchEvent(inputEvent);
 	};
 
 	const handleInput = (event: Event) => {
-		if (isDispatching) return;
-		if (!event || !event.target) return;
-		event.stopImmediatePropagation();
-		event.stopPropagation();
-
-		if (rx) {
-			const inputValue = (event.target as HTMLInputElement).value;
-			const filteredValue: string = inputValue.replace(rx, '');
-
-			if (filteredValue !== inputValue) {
-				(event.target as HTMLInputElement).value = filteredValue;
-				_dispatchEvent(event, filteredValue);
-				value = filteredValue;
-				oninput && oninput(event);
-			}
+		// Simplified: Update state based on DOM value after keydown/paste filtering
+		const target = event.target as HTMLInputElement;
+		if (type === 'checkbox') {
+			value = target.checked;
 		} else {
-			const el = event.target as HTMLInputElement;
+			value = target.value;
+		}
 
-			_dispatchEvent(event, el.value);
-			value = el.value;
-			oninput && oninput(event);
+		// Call user's oninput handler
+		if (oninput) {
+			oninput(event);
 		}
 	};
 </script>
@@ -97,27 +186,31 @@
 	class:checkbox={type === 'checkbox'}
 	style={`width: ${width}`}
 >
-	{#if label}
+	{#if label && type !== 'checkbox'}
 		<label for={id} class="label">{label}</label>
 	{/if}
 	<input
 		{id}
 		{name}
 		class={inputClass}
-		{type}
 		{value}
+		{checked}
+		{type}
 		{onblur}
 		{onchange}
-		{onkeydown}
+		onkeydown={handleKeyDown}
 		{onkeyup}
 		oninput={handleInput}
+		onpaste={handlePaste}
 		title={rest.title || rest.placeholder || label || ''}
 		{...rest}
 	/>
+	{#if label && type === 'checkbox'}
+		<label for={id} class="label">{label}</label>
+	{/if}
 </div>
 
 <style>
-	/* generic input rules --------------------------*/
 	:global(:root) {
 		--liwe3-input-w-unit: 0.3rem;
 	}
@@ -134,11 +227,12 @@
 		width: 100%;
 	}
 	.checkbox {
-		/* width: 100%; */
 		flex-direction: row-reverse;
-		align-items: flex-end;
+		align-items: center; /* Better alignment for checkbox and label */
 		justify-content: flex-end;
-		gap: 0.2rem;
+		gap: 0.5rem; /* Increased gap */
+		padding-block: 0; /* Remove vertical padding for checkbox container */
+		padding-inline: 0; /* Remove horizontal padding for checkbox container */
 	}
 
 	.label {
@@ -147,7 +241,6 @@
 		margin: var(--liwe3-input-w-unit) 0;
 		user-select: none;
 	}
-	/* generic size rules for inputs and labels--------------------------*/
 	.xxs {
 		padding: 0.12rem 0.2rem !important;
 		font-size: 0.75rem;
@@ -167,7 +260,6 @@
 	}
 
 	.md {
-		/* padding is the default value defined in css variables */
 		font-size: 1rem;
 		min-width: calc(var(--liwe3-input-w-unit) * 7);
 	}
@@ -195,6 +287,11 @@
 		min-width: 1rem;
 		min-height: 1rem;
 		background: var(--liwe3-form-bg);
+		margin: 0; /* Remove default margins */
+		vertical-align: middle; /* Align checkbox vertically */
 	}
-	/* end generic size rules for inputs and labels--------------------------*/
+	.checkbox .label {
+		margin: 0; /* Remove margins for checkbox label */
+		font-size: 1rem; /* Match default font size or adjust as needed */
+	}
 </style>
