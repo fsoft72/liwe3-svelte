@@ -50,7 +50,7 @@
 	}: Props = $props();
 
 	// Use local state derived from props for binding, handling checkbox separately
-	let value = $derived(type === 'checkbox' ? checked : valueProp);
+	let value = $state(type === 'checkbox' ? checked : valueProp);
 	$effect(() => {
 		if (type === 'checkbox') {
 			checked = Boolean(valueProp);
