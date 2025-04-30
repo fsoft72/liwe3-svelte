@@ -114,7 +114,7 @@
 
 	let {
 		fields: _fields,
-		data, // : _data,
+		data: _data,
 		filters = $bindable({}),
 		actions,
 		buttons,
@@ -145,6 +145,7 @@
 	let tableElement: HTMLTableElement | null = $state(null);
 	let editingCell: { rowIndex: number; field: string } | null = $state(null);
 	let fields = $state(_fields);
+	let data = $state($state.snapshot(_data));
 	let has_filters = fields.some((f) => f.filterable);
 	let dataView: HTMLDivElement | null = $state(null);
 	let paginator: any = $state(null);
