@@ -19,7 +19,6 @@
 
 		children?: any;
 	}
-
 </script>
 
 <script lang="ts">
@@ -34,7 +33,7 @@
 		mode = 'mode1',
 		closeOnEsc = true,
 		closeOnOutsideClick = true,
-		padding = '0.5rem',
+		padding = '',
 		showCloseButton = true,
 		actions = [],
 		oncancel,
@@ -42,15 +41,15 @@
 		children
 	}: ModalProps = $props();
 
-	let bodyOverflow:string = $state('');
+	let bodyOverflow: string = $state('');
 
 	const setBodyOverflow = {
 		orig: () => {
 			bodyOverflow = document.body.style.overflow || '';
 		},
-		open: () => document.body.style.overflow = 'hidden',
-		close: () => document.body.style.overflow = bodyOverflow,
-	}
+		open: () => (document.body.style.overflow = 'hidden'),
+		close: () => (document.body.style.overflow = bodyOverflow)
+	};
 
 	const onCloseOnOutside = (e: MouseEvent) => {
 		if (closeOnOutsideClick && e.target === e.currentTarget) {
