@@ -114,7 +114,7 @@
 
 	let {
 		fields: _fields,
-		data,
+		data = $bindable([]),
 		filters = $bindable({}),
 		actions,
 		buttons,
