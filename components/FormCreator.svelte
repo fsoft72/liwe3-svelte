@@ -240,7 +240,7 @@
 		return v;
 	};
 
-	const resetForm = () => {
+	export const resetForm = () => {
 		formID.reset();
 	};
 </script>
