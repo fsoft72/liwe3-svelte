@@ -103,6 +103,7 @@
 		// events
 		onsubmit?: (values: Record<string, any>) => void;
 		onchange?: (name: string, value: any) => void;
+		onfieldsel?: (name: string, value: any) => void;
 	}
 
 	let {
@@ -117,7 +118,8 @@
 
 		// events
 		onsubmit,
-		onchange
+		onchange,
+		onfieldsel
 	}: Props = $props();
 
 	let formID: HTMLFormElement;
@@ -240,6 +242,13 @@
 		return v;
 	};
 
+	const onMouseDown = (e: MouseEvent) => {
+		// check if the CTLRL key is pressed
+		if (!e.ctrlKey) return;
+
+		onfieldsel && onfieldsel(e.target?.name ?? 'no-field-name', e.target.value ?? 'no-field-value');
+	};
+
 	export const resetForm = () => {
 		formID.reset();
 	};
@@ -257,6 +266,8 @@
 			{field}
 			{...field?.extra ?? {}}
 			onchange={onChangeField}
+			onmousedown={onMouseDown}
+			{onfieldsel}
 		/>
 	{/if}
 {/snippet}

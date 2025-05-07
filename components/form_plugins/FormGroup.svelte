@@ -36,12 +36,13 @@
 
 		// events
 		onchange: (name: string, value: any, field: FormField) => void;
+		onfieldsel?: (name: string, value: any) => void;
 
 		// extra
 		[key: string]: any;
 	}
 
-	let { field, name, onchange, _v, ...props }: Props = $props();
+	let { field, name, onchange, onfieldsel, _v, ...props }: Props = $props();
 	let isReady = $state(false);
 	let fields: FormField[] = $state([]);
 	let values: Record<string, any> = $state({});
@@ -88,6 +89,7 @@
 			{values}
 			showButtons={false}
 			onchange={groupFieldChange}
+			{onfieldsel}
 		/>
 	{/if}
 </div>

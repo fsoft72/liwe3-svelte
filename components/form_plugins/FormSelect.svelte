@@ -13,11 +13,13 @@
 		// events
 		onchange: (name: string, value: any, field: FormField) => void;
 
+		onmousedown?: any;
+
 		// extra
 		[key: string]: any;
 	}
 
-	let { field, name, onchange, _v, ...props }: Props = $props();
+	let { field, name, onchange, onmousedown, _v, ...props }: Props = $props();
 </script>
 
 <div class="custom-select input-container">
@@ -33,6 +35,7 @@
 			{...props}
 			on:change={(e: any) => onchange(name, e.detail.value, field)}
 			on:clear={() => onchange(name, '', field)}
+			on:mousedown={(e: any) => onmousedown(e)}
 			items={field.options ?? []}
 		/>
 	</div>
