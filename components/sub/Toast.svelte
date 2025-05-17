@@ -4,12 +4,13 @@
 		CheckCircle as SuccessIcon,
 		ExclamationCircle as ErrorIcon,
 		InformationCircle as InfoIcon,
+		QuestionMarkCircle as WarningIcon,
 		XMark as CloseIcon,
 		Icon
 	} from 'svelte-hero-icons';
 
 	interface ToastProps {
-		type?: 'success' | 'error' | 'info';
+		type?: 'success' | 'error' | 'warning' | 'info';
 		dismissible?: boolean;
 		title?: string;
 		message?: string;
@@ -33,6 +34,8 @@
 			<Icon src={SuccessIcon} width="1.1em" />
 		{:else if type === 'error'}
 			<Icon src={ErrorIcon} width="1.1em" />
+		{:else if type === 'warning'}
+			<Icon src={WarningIcon} width="1.1em" />
 		{:else}
 			<Icon src={InfoIcon} width="1.1em" />
 		{/if}
@@ -93,6 +96,10 @@
 	.success {
 		background: var(--liwe3-success-500, MediumSeaGreen);
 		color: var(--liwe3-success-500-text, white);
+	}
+	.warning {
+		background: var(--liwe3-warning-500, Gold);
+		color: var(--liwe3-warning-500-text, rgb(36, 36, 36));
 	}
 	.info {
 		background: var(--liwe3-info-500, SkyBlue);
