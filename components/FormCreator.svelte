@@ -140,7 +140,7 @@
 			}
 
 			// Check standard required fields
-			if (field.required && typeof values[(field as any)[nameField]] == 'undefined') {
+			if (field.required && (typeof values[(field as any)[nameField]] == 'undefined' || values[(field as any)[nameField]] === '')) {
 				required.push(field.label ?? field.name);
 				return;
 			}
@@ -163,7 +163,7 @@
 				return p.submit();
 			})
 		).catch((err) => {
-			console.log('=== FormCreator/handleFieldSubmit: ', err);
+			console.error('=== FormCreator/handleFieldSubmit: ', err);
 			res = false;
 		});
 
@@ -192,7 +192,7 @@
 		if (!isValid) return;
 
 		const missing = checkRequiredFields();
-
+		console.log('=== FormCreator/handleSubmit missing: ', missing);
 		// verify required fields
 		if (missing.length) {
 			addToast({

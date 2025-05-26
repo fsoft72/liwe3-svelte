@@ -13,7 +13,9 @@
 	let width: string = $state('100px');
 	let height: string = $state('100px');
 
-	onMount(() => {
+	let observer: IntersectionObserver;
+
+	const imageElement = () => {
 		// set the div size according to the parent size in pixels
 		let parent = el.parentElement;
 
@@ -25,7 +27,25 @@
 		if (parent) {
 			width = `${parent.clientWidth}px`;
 			height = `${parent.clientHeight}px`;
+			// observer needs to be called only once
+			observer.unobserve(el);
 		}
+	};
+
+	onMount(() => {
+		observer = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if(entry.isIntersecting){
+					imageElement();
+				}
+			});
+		});
+
+		observer.observe(el);
+
+		return () => {
+			observer.disconnect();
+		};
 	});
 </script>
 

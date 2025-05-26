@@ -1,6 +1,6 @@
 interface Toast {
   id?: number;
-  type?: 'success' | 'info' | 'error';
+  type?: 'success' | 'info' | 'error' | 'warning';
   title?: string;
   message: string;
   dismissible?: boolean;

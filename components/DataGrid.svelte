@@ -174,7 +174,7 @@
 
 				const filter = filters[field];
 
-				// console.log('=== FILTER: ', { field, filter }) ;
+				 console.log('=== FILTER: ', { field, filter }) ;
 
 				if (!row[field]) {
 					add = false;
@@ -203,6 +203,18 @@
 						} else if (filter.type == 'number') {
 							if (parseFloat(v) < parseFloat(filter.value)) add = false;
 						} else if (v < filter.value) add = false;
+						break;
+					case filterModes.BETWEEN:
+						if (filter.type == 'date') {
+							const [start, end] = filter.value.split('|');
+							if (new Date(v) < new Date(start) || new Date(v) > new Date(end)) add = false;
+						} else if (filter.type == 'number') {
+							const [start, end] = filter.value.split('|');
+							if (parseFloat(v) < parseFloat(start) || parseFloat(v) > parseFloat(end)) add = false;
+						} else {
+							const [start, end] = filter.value.split('|');
+							if (v < start || v > end) add = false;
+						}
 						break;
 					// Add other necessary filter modes
 				}

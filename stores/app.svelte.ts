@@ -1,4 +1,5 @@
 import type SSEClient from '$liwe3/lib/sse';
+import { browser } from '$app/environment';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface LiWEApp {
@@ -13,6 +14,9 @@ interface LiWEApp {
   /** If the SSE client is connected */
   sseConnected: boolean;
 
+  /** Flag T/F if the app is running on a mobile device */
+  isMobile: boolean;
+
   /** Add a new property to the app data */
   [ key: string ]: any;
 }
@@ -22,9 +26,28 @@ const appData: LiWEApp = $state( {
   token: '',
   sse: null,
   sseConnected: false,
+  isMobile: false,
 } );
 
 const store = {
+  init () {
+    console.log( "=== LIWE APP STORE INIT" );
+    if ( browser ) {
+      const mediaQuery = window.matchMedia( '(max-width: 768px)' );
+      appData.isMobile = mediaQuery.matches;
+
+      const listener = ( event: any ) => {
+        appData.isMobile = event.matches;
+      };
+
+      mediaQuery.addEventListener( 'change', listener );
+    }
+  },
+
+  get isMobile () {
+    return appData.isMobile;
+  },
+
   get showRequestsError () {
     return appData.showRequestsError ?? false;
   },
