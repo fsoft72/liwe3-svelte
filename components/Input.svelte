@@ -37,7 +37,7 @@
 		width = '100%',
 		mode = 'mode3',
 		divClass = '',
-		value: valueProp = $bindable(''),
+		value = $bindable(''),
 		type = 'text',
 		checked = $bindable(false), // Bindable checked state for checkbox
 		onblur,
@@ -48,18 +48,6 @@
 		onpaste, // User's onpaste
 		...rest
 	}: Props = $props();
-
-	// Use local state derived from props for binding, handling checkbox separately
-	let value = $state(type === 'checkbox' ? checked : valueProp);
-	/*
-	$effect(() => {
-		if (type === 'checkbox') {
-			checked = Boolean(valueProp);
-		} else {
-			valueProp = value;
-		}
-	});
-	*/
 
 	// if (validChars) type = 'text'; // Force type to text if validChars is set
 
