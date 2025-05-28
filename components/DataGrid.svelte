@@ -34,6 +34,7 @@
 		extra?: DataGridFieldExtra;
 		options?: {
 			filterSelect?: { value: string; label: string }[];
+			filterSelectShowSelect?: boolean; // Show a select option in the filter
 			select?: { value: string; label: string }[];
 			validChars?: string;
 			lower?: boolean;
@@ -145,7 +146,6 @@
 	let tableElement: HTMLTableElement | null = $state(null);
 	let editingCell: { rowIndex: number; field: string } | null = $state(null);
 	let fields = $state(_fields);
-	// let data = $state($state.snapshot(_data));
 	let has_filters = fields.some((f) => f.filterable);
 	let dataView: HTMLDivElement | null = $state(null);
 	let paginator: any = $state(null);
@@ -174,7 +174,7 @@
 
 				const filter = filters[field];
 
-				 console.log('=== FILTER: ', { field, filter }) ;
+				// console.log('=== FILTER: ', { field, filter }) ;
 
 				if (!row[field]) {
 					add = false;
@@ -634,8 +634,11 @@
 									name={`f_${field.name}`}
 									onchange={filter_change}
 									value={filters[field.name]?.value}
+									class="filter-select"
 								>
-									<option value="">(Select)</option>
+									{#if field.options?.filterSelectShowSelect}
+										<option value="">(Select)</option>
+									{/if}
 									{#each field.options.filterSelect as option}
 										<option value={option.value}>{option.label}</option>
 									{/each}
@@ -1113,20 +1116,20 @@
 	}
 
 	tr {
-		border-bottom: 1px solid var(--liwe3-tertiary-color);
+		border-bottom: 1px solid var(--liwe3-datagrid-tr-border-color, var(--liwe3-tertiary-color));
 		max-height: 2rem;
 	}
 
 	tr:hover {
-		background-color: var(--liwe3-secondary-color) !important;
+		background-color: var(--liwe3-datagrid-tr-hover, var(--liwe3-secondary-color)) !important;
 	}
 
 	td {
-		border-right: 1px solid var(--liwe3-button-border);
+		border-right: 1px solid var(--liwe3-datagrid-td-border-color, var(--liwe3-button-border));
 	}
 
 	tbody tr:nth-child(even) {
-		background-color: var(--liwe3-darker-paper);
+		background-color: var(--liwe3-datagrid-tr-even-bg, var(--liwe3-darker-paper));
 	}
 
 	.resizer {
@@ -1180,5 +1183,16 @@
 
 	.filter {
 		vertical-align: top;
+	}
+
+	.filter-select {
+		width: 100%;
+		box-sizing: border-box;
+		padding: 4px;
+
+		background-color: var(--liwe3-mode3);
+		color: var(--liwe3-text-color);
+
+		border-radius: var(--liwe3-border-radius);
 	}
 </style>
