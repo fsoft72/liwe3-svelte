@@ -392,35 +392,56 @@ export const clean = ( obj: Record<string, any> ) => {
 /**
  * This function returns a shortened text with a maximum number of words and if specified, a maximum length.
  */
-export const short_text = ( text: string, words: number, max_length?: number ) => {
-	if ( !text || text.length == 0 ) return '';
-	const words_arr = text.split( ' ' );
-	words_arr.map( ( w, idx ) => {
-		if ( w.length < 4 && idx > 1 ) {
-			words_arr[ idx - 1 ] += ' ' + w;
-			words_arr.splice( idx, 1 );
-		}
-	} );
+export const short_text = (
+    text: string,
+    words: number,
+    maxLength?: number,
+    maxRows?: number
+) => {
+    if (!text || text.length === 0) return '';
 
-	let output = words_arr.join( ' ' );
+    const words_arr = text.split(' ');
+    // Merge short words into previous word
+    for (let idx = 2; idx < words_arr.length; idx++) {
+        if (words_arr[idx].length < 4) {
+            words_arr[idx - 1] += ' ' + words_arr[idx];
+            words_arr.splice(idx, 1);
+            idx--; // Adjust index after splice
+        }
+    }
 
-	// text doesn't need to be shortened
-	if ( words_arr.length <= words ) {
-		if ( !max_length ) return text;
-		else if ( output.length <= max_length ) return text;
-	}
+    let output = words_arr.join(' ');
 
-	words_arr.splice( words, words_arr.length - words );
-	output = words_arr.join( ' ' );
+    // If text doesn't need to be shortened
+    if (
+        words_arr.length <= words &&
+        (!maxRows || text.split('\n').length <= maxRows)
+    ) {
+        if (!maxLength || output.length <= maxLength) return text;
+    }
 
-	// trim output to the max number of chars
-	if ( max_length && output.length > max_length ) {
-		output = output.slice( 0, max_length ) + '...';
-	} else {
-		output += '...';
-	}
+    // Limit by words
+    if (words_arr.length > words) {
+        words_arr.splice(words, words_arr.length - words);
+        output = words_arr.join(' ');
+    }
 
-	return output;
+    // Limit by maxLength
+    if (maxLength && output.length > maxLength) {
+        output = output.slice(0, maxLength) + '...';
+    } else {
+        output += '...';
+    }
+
+    // Limit by maxRows
+    if (maxRows && maxRows > 0) {
+        const lines = output.split('\n');
+        if (lines.length > maxRows) {
+            output = lines.slice(0, maxRows).join('\n') + '...';
+        }
+    }
+
+    return output;
 };
 
 /**
