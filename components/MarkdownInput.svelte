@@ -68,6 +68,8 @@
 	.preview {
 		position: relative;
 		padding: 0.5rem;
+		max-height: 100%;
+		overflow-y: auto;
 	}
 
 	textarea {
