@@ -192,7 +192,7 @@
 		if (!isValid) return;
 
 		const missing = checkRequiredFields();
-		console.log('=== FormCreator/handleSubmit missing: ', missing);
+		// console.log('=== FormCreator/handleSubmit missing: ', missing);
 		// verify required fields
 		if (missing.length) {
 			addToast({
@@ -220,7 +220,7 @@
 			value = e;
 		}
 
-		runeDebug('=== FormCreator/onChangeField: ', name, value, fld.name);
+		// runeDebug('=== FormCreator/onChangeField: ', name, value, fld.name);
 
 		const field = fields.find((f) => f.name === name);
 		const onChange = field?.onchange;
