@@ -211,10 +211,10 @@
 		// Create visual clone that follows mouse vertically only
 		_dragState.draggedClone = _createDragClone(target, clientX, clientY);
 
-		// Remove the original element from the DOM
-		target.remove();
-		// Update childElements state after removal for accurate placeholder calculation
-		_updateChildren();
+		// Make the original element faint instead of removing it, for touch compatibility
+		target.style.opacity = '0.1';
+		// target.remove(); // Do not remove here
+		// _updateChildren(); // Not needed here as DOM structure hasn't changed yet
 
 		// Show initial placeholder (or hide if it's at original spot)
 		_updatePlaceholder();
@@ -308,6 +308,11 @@
 	const _handleDragEnd = (): void => {
 		if (!_dragState.isDragging) return;
 
+		// Restore original element opacity if it exists
+		if (_dragState.draggedElement) {
+			_dragState.draggedElement.style.opacity = '';
+		}
+
 		// Remove clone
 		_removeDragClone();
 
@@ -317,38 +322,38 @@
 			placeholder = null;
 		}
 
-		// Reorder elements if position changed, or re-insert if not moved but was removed
-		if (_dragState.draggedElement) {
+		// Reorder elements if position changed
+		if (
+			_dragState.draggedElement &&
+			_dragState.placeholderBeforeItemId !== _dragState.originalNextSiblingId
+		) {
 			const draggedItem = _dragState.draggedElement;
+
+			// Remove from old position before inserting into new
+			draggedItem.remove();
 
 			// Insert at the new position
 			if (_dragState.placeholderBeforeItemId === null) {
 				container.appendChild(draggedItem);
 			} else {
-				// Find target element in the container by ID
-				// Note: childElements is up-to-date because of _updateChildren in _handleDragStart
-				// or if it wasn't, querySelector is safer here.
 				const targetElement = container.querySelector(
 					`[data-dnd-id="${_dragState.placeholderBeforeItemId}"]`
 				);
 				if (targetElement) {
 					container.insertBefore(draggedItem, targetElement);
 				} else {
-					// Fallback: if target not found (e.g. list was empty after removing dragged item)
-					// or if placeholderBeforeItemId was for the dragged item itself (should not happen with current logic)
-					container.appendChild(draggedItem);
+					container.appendChild(draggedItem); // Fallback
 				}
 			}
 
-			// Update children list and notify parent
-			_updateChildren(); // This re-populates childElements based on new DOM order
+			_updateChildren(); // Update after DOM change
 
-			// Create order array with new indices (this is for compatibility,
-			// but parent should read the actual DOM order or use IDs if API changes)
-			if (_dragState.placeholderBeforeItemId !== _dragState.originalNextSiblingId) {
-				const newOrder = childElements.map((el) => el.id || el.dataset.dndId!);
-				onreorder?.(newOrder);
-			}
+			const newOrder = childElements.map((el) => el.id || el.dataset.dndId!);
+			onreorder?.(newOrder);
+		} else {
+			// Item was not moved, or no dragged element.
+			// If not moved, its opacity is restored. Ensure childElements is up-to-date.
+			_updateChildren();
 		}
 
 		// Clean up event listeners
