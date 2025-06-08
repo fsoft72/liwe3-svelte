@@ -1,6 +1,6 @@
 <!-- VerticalDND.svelte - Vertical Drag and Drop Component -->
 <script lang="ts">
-	import { onDestroy } from 'svelte'; // onMount removed, $effect will handle setup
+	import { onDestroy, onMount } from 'svelte'; // onMount removed, $effect will handle setup
 
 	type PropsType = {
 		disabled?: boolean;
@@ -175,6 +175,7 @@
 		clone.style.left = `${_dragState.fixedLeft}px`; // Use fixed left position
 		clone.style.width = `${rect.width}px`;
 		clone.style.height = `${rect.height}px`;
+		clone.style.boxSizing = 'border-box'; // Add for consistent sizing
 		clone.style.zIndex = '9999';
 		clone.style.transform = 'scale(1.05)';
 		clone.style.opacity = '0.9';
@@ -185,7 +186,8 @@
 		clone.style.border = '1px solid var(--liwe3-border-color)';
 
 		// Ensure visibility
-		clone.style.display = 'block';
+		// clone.style.display = 'block'; // REMOVED: This was causing the flex layout to break.
+		// The 'dnd-item-wrapper' class already provides 'display: flex'.
 		clone.style.visibility = 'visible';
 
 		document.body.appendChild(clone);
@@ -469,10 +471,11 @@
 		});
 	};
 
-	$effect(() => {
+	onMount(() => {
+		// Initial setup of children and drag handlers
 		if (container) {
-			_updateChildren(); // Ensure all slotted items are wrapped and have IDs
-			_setupDragHandlers(); // Setup or update drag handlers respecting 'disabled' state
+			_updateChildren(); // Wrap children in dnd-item-wrapper
+			_setupDragHandlers(); // Setup drag handlers for the wrapped items
 		}
 	});
 
