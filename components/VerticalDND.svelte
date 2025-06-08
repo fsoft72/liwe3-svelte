@@ -3,11 +3,11 @@
 	import { onMount } from 'svelte';
 
 	type PropsType = {
-		onreorder?: (newOrder: number[]) => void;
 		disabled?: boolean;
 		placeholderText?: string;
 		threshold?: number;
 		children?: import('svelte').Snippet;
+		onreorder?: (newOrder: string[]) => void; // Changed from number[] to string[]
 	};
 
 	let {
@@ -23,13 +23,17 @@
 	let draggedItemHeight = $state(0);
 	let placeholder: HTMLDivElement | null = null;
 
+	let dndIdCounter = 0;
+	const getUniqueDndId = () => `dnd-item-${dndIdCounter++}`;
+
 	// Drag and drop state
 	let _dragState = $state({
 		isDragging: false,
-		draggedIndex: -1,
+		draggedItemId: null as string | null,
 		draggedElement: null as HTMLElement | null,
 		draggedClone: null as HTMLElement | null,
-		placeholderIndex: -1,
+		placeholderBeforeItemId: null as string | null, // ID of item placeholder is before, null for end
+		originalNextSiblingId: null as string | null, // ID of the item originally after the dragged one
 		startY: 0,
 		currentY: 0,
 		lastPlaceholderY: 0,
@@ -75,19 +79,26 @@
 			placeholder.remove();
 		}
 
-		// Don't show placeholder at the dragged item's original position
-		if (_dragState.placeholderIndex === _dragState.draggedIndex) return;
+		// Don't show placeholder if it's at the dragged item's original effective position
+		if (_dragState.placeholderBeforeItemId === _dragState.originalNextSiblingId) {
+			return;
+		}
 
 		// Create new placeholder
-		_createPlaceholder();
+		_createPlaceholder(); // placeholder is a global var, created here
 
 		// Insert placeholder at the correct position
-		if (_dragState.placeholderIndex >= childElements.length) {
+		if (_dragState.placeholderBeforeItemId === null) {
 			if (placeholder) container.appendChild(placeholder);
 		} else {
-			const targetElement = childElements[_dragState.placeholderIndex];
+			const targetElement = childElements.find(
+				(el) => el.dataset.dndId === _dragState.placeholderBeforeItemId
+			);
 			if (targetElement && placeholder) {
 				container.insertBefore(placeholder, targetElement);
+			} else if (placeholder) {
+				// Fallback if target not found (should ideally not happen)
+				container.appendChild(placeholder);
 			}
 		}
 	};
@@ -96,9 +107,16 @@
 	 */
 	const _updateChildren = (): void => {
 		if (!container) return;
-		childElements = Array.from(container.children).filter(
-			(child) => !child.classList.contains('dnd-placeholder')
-		) as HTMLElement[];
+		const newChildElements: HTMLElement[] = [];
+		Array.from(container.children).forEach((child) => {
+			if (child instanceof HTMLElement && !child.classList.contains('dnd-placeholder')) {
+				if (!child.dataset.dndId) {
+					child.dataset.dndId = getUniqueDndId();
+				}
+				newChildElements.push(child);
+			}
+		});
+		childElements = newChildElements;
 	};
 
 	/**
@@ -163,28 +181,42 @@
 	/**
 	 * Handle drag start
 	 */
-	const _handleDragStart = (e: MouseEvent | TouchEvent, index: number): void => {
+	const _handleDragStart = (e: MouseEvent | TouchEvent, itemId: string): void => {
 		if (disabled) return;
 
-		const target = childElements[index];
+		_updateChildren(); // Ensure childElements and IDs are fresh
+		const target = childElements.find((el) => el.dataset.dndId === itemId);
 		if (!target) return;
 
 		const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
 		const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
 
 		_dragState.isDragging = true;
-		_dragState.draggedIndex = index;
+		_dragState.draggedItemId = itemId;
 		_dragState.draggedElement = target;
-		_dragState.placeholderIndex = index;
+
+		const currentIndex = childElements.findIndex((el) => el.dataset.dndId === itemId);
+		if (currentIndex !== -1 && currentIndex + 1 < childElements.length) {
+			_dragState.originalNextSiblingId = childElements[currentIndex + 1].dataset.dndId!;
+		} else {
+			_dragState.originalNextSiblingId = null; // Dragged item was last
+		}
+		// Initially, the placeholder conceptually occupies the original spot.
+		_dragState.placeholderBeforeItemId = _dragState.originalNextSiblingId;
+
 		_dragState.startY = clientY;
 		_dragState.currentY = clientY;
 		_dragState.lastPlaceholderY = clientY;
 
 		// Create visual clone that follows mouse vertically only
 		_dragState.draggedClone = _createDragClone(target, clientX, clientY);
-		target.style.opacity = '0.1';
 
-		// Show initial placeholder
+		// Remove the original element from the DOM
+		target.remove();
+		// Update childElements state after removal for accurate placeholder calculation
+		_updateChildren();
+
+		// Show initial placeholder (or hide if it's at original spot)
 		_updatePlaceholder();
 
 		document.addEventListener('mousemove', _handleDragMove);
@@ -196,41 +228,48 @@
 	};
 
 	/**
-	 * Calculate new placeholder index based on mouse position
+	 * Calculate new placeholder position based on mouse position
+	 * Returns the ID of the item before which the placeholder should be, or null for the end.
 	 */
-	const _calculatePlaceholderIndex = (clientY: number): number => {
-		if (!container) return _dragState.placeholderIndex;
+	const _calculateTargetBeforeId = (clientY: number): string | null => {
+		if (!container) return _dragState.placeholderBeforeItemId;
 
 		const containerRect = container.getBoundingClientRect();
 		const relativeY = clientY - containerRect.top;
-
 		let cumulativeHeight = 0;
-		let targetIndex = 0;
 
-		for (let i = 0; i < childElements.length; i++) {
-			const child = childElements[i];
-			const childHeight = child.getBoundingClientRect().height;
+		// Consider all items *except* the one being dragged for position calculation
+		const elementsToConsider = childElements.filter(
+			(el) => el.dataset.dndId !== _dragState.draggedItemId
+		);
 
-			if (relativeY < cumulativeHeight + childHeight / 2) {
-				targetIndex = i;
-				break;
+		if (elementsToConsider.length === 0) return null;
+
+		for (let i = 0; i < elementsToConsider.length; i++) {
+			const child = elementsToConsider[i];
+			// It's crucial to get the live bounding rect as items might have different heights
+			const childRect = child.getBoundingClientRect();
+			const childHeight = childRect.height;
+			// childTop relative to container, considering current scroll
+			const childTopInContainer = childRect.top - containerRect.top;
+
+			// If mouse is in the top half of this child (relative to its current position)
+			// The drop should be before this child
+			if (relativeY < childTopInContainer + childHeight / 2) {
+				return child.dataset.dndId!;
 			}
-
-			cumulativeHeight += childHeight;
-			targetIndex = i + 1;
 		}
-
-		// Clamp to valid range
-		return Math.max(0, Math.min(childElements.length, targetIndex));
+		// If cursor is below all elements
+		return null; // Drop at the end
 	};
 
 	/**
 	 * Check if placeholder should change position based on threshold
 	 */
-	const _shouldUpdatePlaceholder = (clientY: number, newIndex: number): boolean => {
-		if (newIndex === _dragState.placeholderIndex) return false;
+	const _shouldUpdatePlaceholder = (clientY: number, newBeforeId: string | null): boolean => {
+		if (newBeforeId === _dragState.placeholderBeforeItemId) return false;
 
-		// Only update if we've moved significantly from the last position
+		// Only update if we've moved significantly from the last position where placeholder was updated
 		const yDiff = Math.abs(clientY - _dragState.lastPlaceholderY);
 		return yDiff > threshold;
 	};
@@ -252,11 +291,11 @@
 		_dragState.draggedClone.style.top = `${newTop}px`;
 
 		// Calculate new placeholder position with threshold check
-		const newPlaceholderIndex = _calculatePlaceholderIndex(clientY);
+		const newPlaceholderBeforeId = _calculateTargetBeforeId(clientY);
 
-		if (_shouldUpdatePlaceholder(clientY, newPlaceholderIndex)) {
-			_dragState.placeholderIndex = newPlaceholderIndex;
-			_dragState.lastPlaceholderY = clientY;
+		if (_shouldUpdatePlaceholder(clientY, newPlaceholderBeforeId)) {
+			_dragState.placeholderBeforeItemId = newPlaceholderBeforeId;
+			_dragState.lastPlaceholderY = clientY; // Update Y pos for next threshold check
 			_updatePlaceholder();
 		}
 
@@ -269,11 +308,6 @@
 	const _handleDragEnd = (): void => {
 		if (!_dragState.isDragging) return;
 
-		// Restore original element opacity
-		if (_dragState.draggedElement) {
-			_dragState.draggedElement.style.opacity = '';
-		}
-
 		// Remove clone
 		_removeDragClone();
 
@@ -283,37 +317,36 @@
 			placeholder = null;
 		}
 
-		// Reorder elements if position changed
-		if (_dragState.draggedIndex !== _dragState.placeholderIndex) {
-			const draggedElement = childElements[_dragState.draggedIndex];
+		// Reorder elements if position changed, or re-insert if not moved but was removed
+		if (_dragState.draggedElement) {
+			const draggedItem = _dragState.draggedElement;
 
-			if (draggedElement && container) {
-				// Remove the dragged element temporarily
-				draggedElement.remove();
-
-				// Insert at the new position
-				if (_dragState.placeholderIndex >= childElements.length) {
-					container.appendChild(draggedElement);
+			// Insert at the new position
+			if (_dragState.placeholderBeforeItemId === null) {
+				container.appendChild(draggedItem);
+			} else {
+				// Find target element in the container by ID
+				// Note: childElements is up-to-date because of _updateChildren in _handleDragStart
+				// or if it wasn't, querySelector is safer here.
+				const targetElement = container.querySelector(
+					`[data-dnd-id="${_dragState.placeholderBeforeItemId}"]`
+				);
+				if (targetElement) {
+					container.insertBefore(draggedItem, targetElement);
 				} else {
-					// Calculate the correct target element after the draggedElement was removed
-					const remainingChildren = Array.from(container.children).filter(
-						(child) => !child.classList.contains('dnd-placeholder')
-					) as HTMLElement[];
-
-					const targetElement = remainingChildren[_dragState.placeholderIndex];
-					if (targetElement) {
-						container.insertBefore(draggedElement, targetElement);
-					} else {
-						container.appendChild(draggedElement);
-					}
+					// Fallback: if target not found (e.g. list was empty after removing dragged item)
+					// or if placeholderBeforeItemId was for the dragged item itself (should not happen with current logic)
+					container.appendChild(draggedItem);
 				}
+			}
 
-				// Update children list and notify parent
-				_updateChildren();
+			// Update children list and notify parent
+			_updateChildren(); // This re-populates childElements based on new DOM order
 
-				// Create order array with new indices (this is for compatibility,
-				// but parent should read the actual DOM order)
-				const newOrder = Array.from({ length: childElements.length }, (_, i) => i);
+			// Create order array with new indices (this is for compatibility,
+			// but parent should read the actual DOM order or use IDs if API changes)
+			if (_dragState.placeholderBeforeItemId !== _dragState.originalNextSiblingId) {
+				const newOrder = childElements.map((el) => el.id || el.dataset.dndId!);
 				onreorder?.(newOrder);
 			}
 		}
@@ -326,9 +359,10 @@
 
 		// Reset drag state
 		_dragState.isDragging = false;
-		_dragState.draggedIndex = -1;
+		_dragState.draggedItemId = null;
 		_dragState.draggedElement = null;
-		_dragState.placeholderIndex = -1;
+		_dragState.placeholderBeforeItemId = null;
+		_dragState.originalNextSiblingId = null;
 		draggedItemHeight = 0;
 	};
 
@@ -338,14 +372,14 @@
 	const _setupDragHandlers = (): void => {
 		if (!container || disabled) return;
 
-		_updateChildren();
+		_updateChildren(); // Ensure children have IDs before attaching handlers
 
-		childElements.forEach((child, index) => {
+		childElements.forEach((child) => {
 			child.style.cursor = 'move';
 			child.style.userSelect = 'none';
 			child.style.touchAction = 'none';
 
-			// Remove existing listeners first
+			// Remove existing listeners first to prevent duplicates if called multiple times
 			if (child._dndMouseDown) {
 				child.removeEventListener('mousedown', child._dndMouseDown);
 			}
@@ -353,9 +387,11 @@
 				child.removeEventListener('touchstart', child._dndTouchStart);
 			}
 
+			const itemId = child.dataset.dndId!; // ID is guaranteed by _updateChildren
+
 			// Create bound handlers
-			const mouseDownHandler = (e: MouseEvent) => _handleDragStart(e, index);
-			const touchStartHandler = (e: TouchEvent) => _handleDragStart(e, index);
+			const mouseDownHandler = (e: MouseEvent) => _handleDragStart(e, itemId);
+			const touchStartHandler = (e: TouchEvent) => _handleDragStart(e, itemId);
 
 			// Store handlers on element for later removal
 			child._dndMouseDown = mouseDownHandler;
@@ -370,9 +406,13 @@
 	onMount(() => {
 		// Initial setup
 		if (container) {
+			_updateChildren(); // Ensure IDs are set on initial children
 			_setupDragHandlers();
-			_updateChildren();
 		}
+
+		// Optional: Observe container for child changes if items can be added/removed externally
+		// This would make it more robust to dynamic children not managed by this component's reordering.
+		// For now, assuming _setupDragHandlers is sufficient for items managed by this DND.
 	});
 </script>
 
