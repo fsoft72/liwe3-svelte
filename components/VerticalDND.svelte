@@ -1,12 +1,13 @@
 <!-- VerticalDND.svelte - Vertical Drag and Drop Component -->
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte'; // onMount removed, $effect will handle setup
+	import { onDestroy, onMount, type Snippet } from 'svelte'; // onMount removed, $effect will handle setup
 
 	type PropsType = {
 		disabled?: boolean;
 		placeholderText?: string;
 		threshold?: number;
-		children?: import('svelte').Snippet;
+		children?: Snippet;
+		handlePosition?: 'left' | 'right'; // Not used in this version, but can be extended
 		onreorder?: (newOrder: string[]) => void; // Changed from number[] to string[]
 	};
 
@@ -15,6 +16,7 @@
 		disabled = false,
 		placeholderText = '',
 		threshold = 20,
+		handlePosition = 'right', // Not used in this version, but can be extended
 		children
 	}: PropsType = $props();
 
@@ -173,21 +175,14 @@
 		clone.style.position = 'fixed';
 		clone.style.top = `${mouseY - _dragState.mouseOffsetY}px`;
 		clone.style.left = `${_dragState.fixedLeft}px`; // Use fixed left position
-		clone.style.width = `${rect.width}px`;
-		clone.style.height = `${rect.height}px`;
+		clone.style.width = `${rect.width - 10}px`;
+		clone.style.height = `${rect.height - 10}px`;
 		clone.style.boxSizing = 'border-box'; // Add for consistent sizing
 		clone.style.zIndex = '9999';
-		clone.style.transform = 'scale(1.05)';
+		clone.style.transform = 'scale(1.03)';
 		clone.style.opacity = '0.9';
 		clone.style.pointerEvents = 'none';
-		clone.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.3)';
-		clone.style.borderRadius = 'var(--liwe3-border-radius)';
-		clone.style.backgroundColor = 'var(--liwe3-background)';
-		clone.style.border = '1px solid var(--liwe3-border-color)';
-
-		// Ensure visibility
-		// clone.style.display = 'block'; // REMOVED: This was causing the flex layout to break.
-		// The 'dnd-item-wrapper' class already provides 'display: flex'.
+		clone.style.backgroundColor = 'transparent'; // Use original background color
 		clone.style.visibility = 'visible';
 
 		document.body.appendChild(clone);
@@ -520,9 +515,7 @@
 	}
 
 	:global(.dnd-drag-handle) {
-		width: auto; /* Adjust as needed, e.g., 30px */
 		padding: 4px; /* Makes the touch target a bit larger */
-		height: auto; /* e.g., 30px */
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -531,7 +524,7 @@
 		flex-shrink: 0; /* Prevent handle from shrinking */
 		touch-action: none; /* Crucial for touch dragging without page scroll */
 		color: var(--liwe3-color-subtle, #555); /* Icon color */
-		border-radius: var(--liwe3-border-radius-sm, 2px);
+		border-radius: var(--liwe3-border-radius, 4px);
 	}
 	:global(.dnd-drag-handle:hover) {
 		background-color: var(--liwe3-background-alt, rgba(0, 0, 0, 0.05));
@@ -579,10 +572,10 @@
 		position: fixed !important;
 		z-index: 9999 !important;
 		pointer-events: none !important;
-		background-color: var(--liwe3-background, #fff) !important;
-		border: 1px solid var(--liwe3-border-color, #ccc) !important;
-		border-radius: var(--liwe3-border-radius, 4px) !important;
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+		/* background-color: var(--liwe3-background, #fff) !important; */
+		/* background-color: red !important; Temporary for visibility */
+		/* border-radius: var(--liwe3-border-radius, 4px) !important; */
+		/* box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important; */
 	}
 
 	:global(.vertical-dnd-container > *) {
