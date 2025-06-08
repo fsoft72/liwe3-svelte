@@ -120,6 +120,8 @@
 					if (!childNode.dataset.dndId) {
 						childNode.dataset.dndId = getUniqueDndId();
 					}
+					// If handlePosition could change dynamically, we might need to re-adjust handle order here.
+					// For now, assuming it's set on init.
 					newWrappedElements.push(childNode);
 				} else {
 					// This is a content element, needs to be wrapped
@@ -137,10 +139,21 @@
                     `;
 					handle.setAttribute('aria-label', 'Drag handle');
 
-					// Insert wrapper before contentElement, then move contentElement into wrapper
+					// Insert wrapper before contentElement
 					container.insertBefore(wrapper, contentElement);
-					wrapper.appendChild(contentElement); // Moves the original content element
-					wrapper.appendChild(handle);
+
+					if (handlePosition === 'left') {
+						wrapper.appendChild(handle);
+						wrapper.appendChild(contentElement); // Moves the original content element
+						handle.style.marginRight = '8px';
+						handle.style.marginLeft = '0px';
+					} else {
+						// 'right' or default
+						wrapper.appendChild(contentElement); // Moves the original content element
+						wrapper.appendChild(handle);
+						handle.style.marginLeft = '8px';
+						handle.style.marginRight = '0px';
+					}
 
 					newWrappedElements.push(wrapper);
 				}
@@ -508,19 +521,15 @@
 		/* background-color: rgba(0,0,0,0.02); */
 	}
 
-	:global(.dnd-item-wrapper > :first-child) {
-		/* This is the original content element */
-		flex-grow: 1; /* Content takes available space */
-		min-width: 0; /* Prevent content from overflowing if it's too wide */
-	}
-
 	:global(.dnd-drag-handle) {
+		width: 32px;
+		height: 32px;
 		padding: 4px; /* Makes the touch target a bit larger */
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		cursor: move;
-		margin-left: 8px; /* Space between content and handle */
+		/* margin-left: 8px; */ /* Removed: Will be set dynamically based on handlePosition */
 		flex-shrink: 0; /* Prevent handle from shrinking */
 		touch-action: none; /* Crucial for touch dragging without page scroll */
 		color: var(--liwe3-color-subtle, #555); /* Icon color */

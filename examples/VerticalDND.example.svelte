@@ -23,6 +23,18 @@
 			{/each}
 		{/snippet}
 	</VerticalDND>
+
+	<h2>Second DND Example</h2>
+	<VerticalDND onreorder={handleReorder} placeholderText="Drop here" handlePosition="left">
+		{#snippet children()}
+			{#each items as item}
+				<div id={item.replace(/ /g, '_').toLowerCase()} class="example-item">
+					<h3>{item}</h3>
+					<p>This is a draggable item. You can drag it up or down to reorder.</p>
+				</div>
+			{/each}
+		{/snippet}
+	</VerticalDND>
 </div>
 
 <style>
