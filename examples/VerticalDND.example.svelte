@@ -24,8 +24,8 @@
 		{/snippet}
 	</VerticalDND>
 
-	<h2>Second DND Example</h2>
-	<VerticalDND onreorder={handleReorder} placeholderText="Drop here" handlePosition="left">
+	<h2>Second DND Example (with ITEMS)</h2>
+	<VerticalDND onreorder={handleReorder} placeholderText="Drop here" handlePosition="left" {items}>
 		{#snippet children()}
 			{#each items as item}
 				<div id={item.replace(/ /g, '_').toLowerCase()} class="example-item">

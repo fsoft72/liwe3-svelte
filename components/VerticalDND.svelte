@@ -7,8 +7,9 @@
 		placeholderText?: string;
 		threshold?: number;
 		children?: Snippet;
-		handlePosition?: 'left' | 'right'; // Not used in this version, but can be extended
-		onreorder?: (newOrder: string[]) => void; // Changed from number[] to string[]
+		handlePosition?: 'left' | 'right';
+		onreorder?: (newOrder: any[]) => void;
+		items?: any[]; // Optional items list to reorder
 	};
 
 	let {
@@ -17,6 +18,7 @@
 		placeholderText = '',
 		threshold = 20,
 		handlePosition = 'right', // Not used in this version, but can be extended
+		items: _items = [], // Optional items list to reorder
 		children
 	}: PropsType = $props();
 
@@ -25,8 +27,11 @@
 	let draggedItemHeight = $state(0);
 	let placeholder: HTMLDivElement | null = null;
 
+	let dndIdToOriginalItemMap = new Map<string, any>(); // Maps dndId of wrapper to original item object
+
 	let dndIdCounter = 0;
-	const getUniqueDndId = () => `dnd-item-${dndIdCounter++}`;
+	const base = new Date().getTime().toString(36); // Base for unique IDs
+	const getUniqueDndId = () => `dnd-${base}-${dndIdCounter++}`;
 
 	// Drag and drop state
 	let _dragState = $state({
@@ -63,7 +68,7 @@
 		} else {
 			// Add the default indicator line
 			const line = document.createElement('div');
-			line.className = 'placeholder-line';
+			line.className = 'placeholder-line'; // Ensure this class is styled if you prefer it over ::after
 			placeholder.appendChild(line);
 		}
 
@@ -160,6 +165,26 @@
 			}
 		});
 		childElements = newWrappedElements; // These are all wrappers
+	};
+
+	/**
+	 * Build map from dnd-id to original item object.
+	 * Assumes childElements and _items are in corresponding initial order.
+	 */
+	const _buildInitialDndIdToItemMap = (): void => {
+		dndIdToOriginalItemMap.clear();
+		if (_items.length > 0 && childElements.length === _items.length) {
+			childElements.forEach((wrapper, index) => {
+				const dndId = wrapper.dataset.dndId;
+				if (dndId && _items[index] !== undefined) {
+					dndIdToOriginalItemMap.set(dndId, _items[index]);
+				}
+			});
+		} else if (_items.length > 0 && childElements.length !== _items.length) {
+			console.warn(
+				'VerticalDND: Mismatch between items count and rendered children count during map creation. Item mapping may be incorrect.'
+			);
+		}
 	};
 
 	/**
@@ -384,10 +409,28 @@
 				}
 			}
 
-			_updateChildren(); // Update after DOM change
+			_updateChildren(); // Update childElements to reflect new DOM order
 
-			const newOrder = childElements.map((el) => el.dataset.dndId!); // el is wrapper
-			onreorder?.(newOrder);
+			if (_items.length > 0) {
+				// Use the map to get the reordered list of original item objects
+				const reorderedItems = childElements
+					.map((el) => dndIdToOriginalItemMap.get(el.dataset.dndId!))
+					.filter((item) => item !== undefined); // Filter out undefined if any dndId wasn't in map
+
+				if (reorderedItems.length === _items.length) {
+					onreorder?.(reorderedItems);
+				} else {
+					console.warn(
+						'VerticalDND: Could not map reordered items. Item count mismatch. Falling back to IDs.'
+					);
+					const newOrderIds = childElements.map((el) => el.dataset.dndId!);
+					onreorder?.(newOrderIds);
+				}
+			} else {
+				// No _items prop, just pass the dnd-ids
+				const newOrderIds = childElements.map((el) => el.dataset.dndId!);
+				onreorder?.(newOrderIds);
+			}
 		} else {
 			// Item was not moved, or no dragged element.
 			// If not moved, its opacity is restored. Ensure childElements is up-to-date.
@@ -479,11 +522,14 @@
 		});
 	};
 
+	let isMounted = false;
 	onMount(() => {
 		// Initial setup of children and drag handlers
 		if (container) {
-			_updateChildren(); // Wrap children in dnd-item-wrapper
+			_updateChildren(); // Wrap children in dnd-item-wrapper and assign dnd-ids
+			_buildInitialDndIdToItemMap(); // Build the map from dnd-ids to original items
 			_setupDragHandlers(); // Setup drag handlers for the wrapped items
+			isMounted = true;
 		}
 	});
 
