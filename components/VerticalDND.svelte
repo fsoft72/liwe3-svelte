@@ -1,6 +1,6 @@
 <!-- VerticalDND.svelte - Vertical Drag and Drop Component -->
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy } from 'svelte'; // onMount removed, $effect will handle setup
 
 	type PropsType = {
 		disabled?: boolean;
@@ -19,7 +19,7 @@
 	}: PropsType = $props();
 
 	let container: HTMLDivElement;
-	let childElements = $state<HTMLElement[]>([]);
+	let childElements = $state<HTMLElement[]>([]); // These will be the wrapper elements
 	let draggedItemHeight = $state(0);
 	let placeholder: HTMLDivElement | null = null;
 
@@ -103,20 +103,48 @@
 		}
 	};
 	/**
-	 * Update children list when container content changes
+	 * Update children list when container content changes.
+	 * Wraps raw children with a dnd-item-wrapper and adds a drag handle.
 	 */
 	const _updateChildren = (): void => {
 		if (!container) return;
-		const newChildElements: HTMLElement[] = [];
-		Array.from(container.children).forEach((child) => {
-			if (child instanceof HTMLElement && !child.classList.contains('dnd-placeholder')) {
-				if (!child.dataset.dndId) {
-					child.dataset.dndId = getUniqueDndId();
+		const newWrappedElements: HTMLElement[] = [];
+		const childrenToProcess = Array.from(container.children); // Snapshot
+
+		childrenToProcess.forEach((childNode) => {
+			if (childNode instanceof HTMLElement && !childNode.classList.contains('dnd-placeholder')) {
+				if (childNode.classList.contains('dnd-item-wrapper')) {
+					// Already a wrapper, ensure dndId and add to list
+					if (!childNode.dataset.dndId) {
+						childNode.dataset.dndId = getUniqueDndId();
+					}
+					newWrappedElements.push(childNode);
+				} else {
+					// This is a content element, needs to be wrapped
+					const contentElement = childNode;
+					const wrapper = document.createElement('div');
+					wrapper.className = 'dnd-item-wrapper';
+					wrapper.dataset.dndId = getUniqueDndId(); // Wrapper gets its own unique ID
+
+					const handle = document.createElement('div');
+					handle.className = 'dnd-drag-handle';
+					handle.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display: block;">
+                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
+                        </svg>
+                    `;
+					handle.setAttribute('aria-label', 'Drag handle');
+
+					// Insert wrapper before contentElement, then move contentElement into wrapper
+					container.insertBefore(wrapper, contentElement);
+					wrapper.appendChild(contentElement); // Moves the original content element
+					wrapper.appendChild(handle);
+
+					newWrappedElements.push(wrapper);
 				}
-				newChildElements.push(child);
 			}
 		});
-		childElements = newChildElements;
+		childElements = newWrappedElements; // These are all wrappers
 	};
 
 	/**
@@ -184,16 +212,16 @@
 	const _handleDragStart = (e: MouseEvent | TouchEvent, itemId: string): void => {
 		if (disabled) return;
 
-		_updateChildren(); // Ensure childElements and IDs are fresh
-		const target = childElements.find((el) => el.dataset.dndId === itemId);
-		if (!target) return;
+		// _updateChildren(); // Not needed here, $effect handles it. childElements are wrappers.
+		const targetWrapper = childElements.find((el) => el.dataset.dndId === itemId);
+		if (!targetWrapper) return;
 
 		const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
 		const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
 
 		_dragState.isDragging = true;
 		_dragState.draggedItemId = itemId;
-		_dragState.draggedElement = target;
+		_dragState.draggedElement = targetWrapper; // This is the wrapper
 
 		const currentIndex = childElements.findIndex((el) => el.dataset.dndId === itemId);
 		if (currentIndex !== -1 && currentIndex + 1 < childElements.length) {
@@ -209,10 +237,10 @@
 		_dragState.lastPlaceholderY = clientY;
 
 		// Create visual clone that follows mouse vertically only
-		_dragState.draggedClone = _createDragClone(target, clientX, clientY);
+		_dragState.draggedClone = _createDragClone(targetWrapper, clientX, clientY);
 
 		// Make the original element faint instead of removing it, for touch compatibility
-		target.style.opacity = '0.1';
+		targetWrapper.style.opacity = '0.1';
 		// target.remove(); // Do not remove here
 		// _updateChildren(); // Not needed here as DOM structure hasn't changed yet
 
@@ -348,7 +376,7 @@
 
 			_updateChildren(); // Update after DOM change
 
-			const newOrder = childElements.map((el) => el.id || el.dataset.dndId!);
+			const newOrder = childElements.map((el) => el.dataset.dndId!); // el is wrapper
 			onreorder?.(newOrder);
 		} else {
 			// Item was not moved, or no dragged element.
@@ -371,53 +399,92 @@
 		draggedItemHeight = 0;
 	};
 
+	// Extend HTMLElement interface for custom properties if not using a more robust WeakMap approach
+	// This is often implicitly handled by TypeScript in Svelte files for DOM elements.
+	// interface HTMLElement {
+	// 	_dndMouseDown?: (e: MouseEvent) => void;
+	// 	_dndTouchStart?: (e: TouchEvent) => void;
+	// }
+
 	/**
-	 * Add drag handlers to all direct children
+	 * Add drag handlers to all direct children's drag handles
 	 */
 	const _setupDragHandlers = (): void => {
-		if (!container || disabled) return;
+		if (!container) return;
 
-		_updateChildren(); // Ensure children have IDs before attaching handlers
+		// _updateChildren() is called by $effect before this, ensuring wrappers and IDs
 
-		childElements.forEach((child) => {
-			child.style.cursor = 'move';
-			child.style.userSelect = 'none';
-			child.style.touchAction = 'none';
+		childElements.forEach((wrapper) => {
+			// Iterate over wrappers
+			const handle = wrapper.querySelector('.dnd-drag-handle') as HTMLElement | null;
 
-			// Remove existing listeners first to prevent duplicates if called multiple times
-			if (child._dndMouseDown) {
-				child.removeEventListener('mousedown', child._dndMouseDown);
-			}
-			if (child._dndTouchStart) {
-				child.removeEventListener('touchstart', child._dndTouchStart);
+			if (!handle) {
+				// console.warn('DND: Drag handle not found in wrapper', wrapper);
+				return;
 			}
 
-			const itemId = child.dataset.dndId!; // ID is guaranteed by _updateChildren
+			// Clear any existing styles that might interfere if re-running
+			handle.style.cursor = '';
+			// @ts-expect-error _dndMouseDown is a custom property
+			if (handle._dndMouseDown) {
+				// @ts-expect-error _dndMouseDown is a custom property
+				handle.removeEventListener('mousedown', handle._dndMouseDown);
+			}
+			// @ts-expect-error _dndTouchStart is a custom property
+			if (handle._dndTouchStart) {
+				// @ts-expect-error _dndTouchStart is a custom property
+				handle.removeEventListener('touchstart', handle._dndTouchStart);
+			}
+
+			if (disabled) {
+				// If disabled, ensure no drag interactions are possible on handle
+				// Listeners are not added below.
+				return;
+			}
+
+			handle.style.cursor = 'move';
+			// touchAction: 'none' is set via CSS on .dnd-drag-handle
+
+			const itemId = wrapper.dataset.dndId!; // ID of the wrapper
 
 			// Create bound handlers
-			const mouseDownHandler = (e: MouseEvent) => _handleDragStart(e, itemId);
-			const touchStartHandler = (e: TouchEvent) => _handleDragStart(e, itemId);
+			const mouseDownHandler = (e: MouseEvent) => {
+				e.stopPropagation(); // Prevent event from bubbling to parent elements
+				_handleDragStart(e, itemId);
+			};
+			const touchStartHandler = (e: TouchEvent) => {
+				e.stopPropagation(); // Prevent event from bubbling
+				_handleDragStart(e, itemId);
+			};
 
 			// Store handlers on element for later removal
-			child._dndMouseDown = mouseDownHandler;
-			child._dndTouchStart = touchStartHandler;
+			// @ts-expect-error _dndMouseDown is a custom property
+			handle._dndMouseDown = mouseDownHandler;
+			// @ts-expect-error _dndTouchStart is a custom property
+			handle._dndTouchStart = touchStartHandler;
 
 			// Add event listeners
-			child.addEventListener('mousedown', mouseDownHandler);
-			child.addEventListener('touchstart', touchStartHandler);
+			handle.addEventListener('mousedown', mouseDownHandler);
+			handle.addEventListener('touchstart', touchStartHandler, { passive: false });
 		});
 	};
 
-	onMount(() => {
-		// Initial setup
+	$effect(() => {
 		if (container) {
-			_updateChildren(); // Ensure IDs are set on initial children
-			_setupDragHandlers();
+			_updateChildren(); // Ensure all slotted items are wrapped and have IDs
+			_setupDragHandlers(); // Setup or update drag handlers respecting 'disabled' state
 		}
+	});
 
-		// Optional: Observe container for child changes if items can be added/removed externally
-		// This would make it more robust to dynamic children not managed by this component's reordering.
-		// For now, assuming _setupDragHandlers is sufficient for items managed by this DND.
+	// Clean up event listeners on document when component is destroyed
+	onDestroy(() => {
+		document.removeEventListener('mousemove', _handleDragMove);
+		document.removeEventListener('mouseup', _handleDragEnd);
+		document.removeEventListener('touchmove', _handleDragMove);
+		document.removeEventListener('touchend', _handleDragEnd);
+		if (_dragState.draggedClone) {
+			_removeDragClone();
+		}
 	});
 </script>
 
@@ -432,6 +499,44 @@
 		display: flex;
 		flex-direction: column;
 		width: 100%;
+	}
+
+	:global(.dnd-item-wrapper) {
+		display: flex;
+		align-items: center; /* Vertically align content and handle */
+		position: relative;
+		/* Optional: add some visual separation or styling for wrappers */
+		/* margin-bottom: 2px; */
+		/* background-color: rgba(0,0,0,0.02); */
+	}
+
+	:global(.dnd-item-wrapper > :first-child) {
+		/* This is the original content element */
+		flex-grow: 1; /* Content takes available space */
+		min-width: 0; /* Prevent content from overflowing if it's too wide */
+	}
+
+	:global(.dnd-drag-handle) {
+		width: auto; /* Adjust as needed, e.g., 30px */
+		padding: 4px; /* Makes the touch target a bit larger */
+		height: auto; /* e.g., 30px */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: move;
+		margin-left: 8px; /* Space between content and handle */
+		flex-shrink: 0; /* Prevent handle from shrinking */
+		touch-action: none; /* Crucial for touch dragging without page scroll */
+		color: var(--liwe3-color-subtle, #555); /* Icon color */
+		border-radius: var(--liwe3-border-radius-sm, 2px);
+	}
+	:global(.dnd-drag-handle:hover) {
+		background-color: var(--liwe3-background-alt, rgba(0, 0, 0, 0.05));
+	}
+	:global(.dnd-drag-handle svg) {
+		width: 20px; /* Adjust icon size */
+		height: 20px;
+		display: block; /* Remove extra space below SVG */
 	}
 
 	:global(.dnd-placeholder) {
@@ -478,10 +583,12 @@
 	}
 
 	:global(.vertical-dnd-container > *) {
+		/* This now targets .dnd-item-wrapper */
 		transition: opacity 0.2s ease;
 	}
 
 	:global(.vertical-dnd-container > *.dragging) {
-		opacity: 0.1;
+		/* This class is not explicitly added, opacity is set directly */
+		opacity: 0.1; /* This style is applied to the original dragged item (wrapper) */
 	}
 </style>
