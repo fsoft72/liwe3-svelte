@@ -349,8 +349,8 @@
 			top: 100%;
 			left: 0;
 			right: 0;
-			background: white;
-			border: 1px solid #ccc;
+			background: var(--FCP-google-address-dropdown-bg, #fff);
+			border: 1px solid var(--FCP-google-address-dropdown-border, #ccc);
 			border-top: none;
 			max-height: 200px;
 			overflow-y: auto;
@@ -366,17 +366,17 @@
 			item.style.cssText = `
 				padding: 10px;
 				cursor: pointer;
-				border-bottom: 1px solid #eee;
+				border-bottom: 1px solid var(--FCP-google-address-item-border,#eee);
 				transition: background-color 0.2s;
 			`;
 			item.textContent = prediction.text.text;
 
 			item.addEventListener('mouseenter', () => {
-				item.style.backgroundColor = '#f5f5f5';
+				item.style.backgroundColor = 'var(--FCP-google-address-item-hover,#f5f5f5)';
 			});
 
 			item.addEventListener('mouseleave', () => {
-				item.style.backgroundColor = 'white';
+				item.style.backgroundColor = 'var(--FCP-google-address-item-bg,#fff)';
 			});
 
 			item.addEventListener('click', () => {
