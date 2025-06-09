@@ -26,6 +26,7 @@
 	import { Trash, Plus } from 'svelte-hero-icons';
 
 	import type { FormField } from '$liwe3/components/FormCreator.svelte';
+	import AutoComplete from '../AutoComplete.svelte';
 
 	interface Props {
 		field: FormField;
@@ -57,12 +58,13 @@
 	};
 
 	const prefix = 'address';
-	let { onchange, name, _v, field, telephone = false, multiple = true, addressOnly = true, hideFields = false, ...props }: Props = $props();
+	let { onchange, name, _v, field, telephone = false, multiple = true, addressOnly = true, hideFields = false, optionalRequestFields, ...rest }: Props = $props();
 
 	let maps: any;
 	let placesService: any;
 	let autocompleteService: any;
-	let listenerHandle: any;
+	let autocompleteSuggestion: any;
+	let sessionToken: any; // Autocomplete session token
 	let libLoaded: boolean = $state(false); // Google Maps library loaded
 	let current: number = $state(0); // current address index
 	let values: ValuesType = $state({}); // all addresses values
@@ -138,7 +140,7 @@
 	};
 
 	/**
-	 * @description Load new Places API library
+	 * @description Load new Places API library (latest version)
 	 */
 	const loadPlacesLibrary = async () => {
 		// @ts-ignore
@@ -153,45 +155,35 @@
 		// @ts-ignore
 		maps = window.google.maps;
 
-		// Import the new Places API
+		// Import the new Places API (latest version)
 		// @ts-ignore
-		const { PlacesService, AutocompleteService } = await window.google.maps.importLibrary('places');
-
-		// Create a dummy div for PlacesService (required but not used for autocomplete)
-		const dummyDiv = document.createElement('div');
-		placesService = new PlacesService(dummyDiv);
-		autocompleteService = new AutocompleteService();
-
-		return { PlacesService, AutocompleteService };
+		const { AutocompleteSessionToken, AutocompleteSuggestion } = await window.google.maps.importLibrary('places');
+		autocompleteSuggestion = AutocompleteSuggestion;
+		sessionToken = AutocompleteSessionToken;
+		// Optionally log to verify
+		 console.log('Google Maps Places library loaded successfully');
 	};
 
 	/**
-	 * @description Get place details using the new Places API
-	 * @param placeId: string
+	 * @description Get place details using the new Place class (latest Places API)
+	 * @param placeObj: any
 	 * @returns Promise<any>
 	 */
-	const getPlaceDetails = (placeId: string): Promise<any> => {
-		return new Promise((resolve, reject) => {
-			const request = {
-				placeId: placeId,
+	const getPlaceDetails = async (placeObj: any): Promise<any> => {
+		try {
+			const place = placeObj.placePrediction.toPlace();
+       		await place.fetchFields({
 				fields: [
-					'address_components',
-					'formatted_address',
-					'geometry.location',
-					'name',
-					'place_id'
+					'addressComponents',
+					'formattedAddress',
+					'location',
 				]
-			};
-
-			placesService.getDetails(request, (place: any, status: any) => {
-				if (status === maps.places.PlacesServiceStatus.OK) {
-					resolve(place);
-				} else {
-					console.error('Places service failed:', status);
-					reject(status);
-				}
 			});
-		});
+			return place;
+		} catch (error) {
+			console.error('Place fetch failed:', error);
+			throw error;
+		}
 	};
 
 	/**
@@ -199,28 +191,27 @@
 	 * @param input: string
 	 * @returns Promise<any[]>
 	 */
-	const getAutocompletePredictions = (input: string): Promise<any[]> => {
-		return new Promise((resolve, reject) => {
+	const getAutocompletePredictions = async (input: string): Promise<any[]> => {
 			if (!input || input.length < 2) {
-				resolve([]);
-				return;
+				return [];
 			}
 
-			const request = {
+			const token = new sessionToken();
+
+			let  request = {
+				sessionToken: token,
 				input: input,
-				types: searchType,
-				componentRestrictions: {} // Add country restrictions if needed
+				includedPrimaryTypes: searchType,
 			};
 
-			autocompleteService.getPlacePredictions(request, (predictions: any[], status: any) => {
-				if (status === maps.places.PlacesServiceStatus.OK || status === maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-					resolve(predictions || []);
-				} else {
-					console.error('Autocomplete service failed:', status);
-					reject(status);
-				}
-			});
-		});
+			// If optionalRequestFields is provided, merge it with the request
+			if( optionalRequestFields ) {
+				request = { ...request, ...optionalRequestFields };
+			}
+			console.log('Autocomplete request:', request);
+
+			const { suggestions } = await autocompleteSuggestion.fetchAutocompleteSuggestions(request);
+			return suggestions;
 	};
 
 	/**
@@ -247,12 +238,12 @@
 
 	/**
 	 * @description Process place selection and update form fields
-	 * @param placeId: string
+	 * @param placeObj: any
 	 * @returns Promise<void>
 	 */
-	const processPlaceSelection = async (placeId: string) => {
+	const processPlaceSelection = async (placeObj: any) => {
 		try {
-			const place = await getPlaceDetails(placeId);
+			const place = await getPlaceDetails(placeObj);
 
 			const tmp: Record<string, string | { lat: number; lng: number } | {} | undefined> = {};
 			// clear form fields to avoid messy data when changing address
@@ -268,22 +259,24 @@
 				country: 'country'
 			};
 
-			// Process address components
-			if (place.address_components) {
-				place.address_components.forEach((component: any) => {
-					component.types.forEach((type: string) => {
+			// Process address components (adapt to new API property names)
+			const addressComponents = place.addressComponents || place.address_components;
+			if (addressComponents) {
+				addressComponents.forEach((component: any) => {
+					const types = component.types || component.type;
+					(types || []).forEach((type: string) => {
 						const objKey = typeMapping[type];
 						if (objKey) {
 							if (type === 'street_number') {
-								tmp[objKey] = component.long_name || '';
+								tmp[objKey] = component.longText || component.long_name || '';
 							} else if (type === 'route') {
 								const number = tmp[objKey] === undefined ? '' : tmp[objKey];
-								tmp[objKey] = `${number} ${component.long_name}`.trim();
+								tmp[objKey] = `${number} ${component.longText || component.long_name}`.trim();
 							} else {
-								// Use short_name for postal codes and countries, long_name for others
+								// Use shortText/short_name for postal codes and countries, longText/long_name for others
 								tmp[objKey] = type === 'postal_code' || type === 'country'
-									? (component.short_name || component.long_name)
-									: (component.long_name || component.short_name);
+									? (component.shortText || component.short_name || component.longText || component.long_name)
+									: (component.longText || component.long_name || component.shortText || component.short_name);
 							}
 						}
 					});
@@ -291,14 +284,14 @@
 			}
 
 			// Add formatted address
-			tmp.formatted = place.formatted_address || '';
+			tmp.formatted = place.formattedAddress || place.formatted_address || '';
 
 			// Keep telephone value when changing address
 			tmp.telephone = values[prefix + current]?.telephone || '';
 
 			// Get coordinates
-			if (place.geometry && place.geometry.location) {
-				const location = place.geometry.location;
+			const location = place.location || (place.geometry && place.geometry.location);
+			if (location) {
 				const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
 				const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
 				tmp.position = { lat, lng };
@@ -365,7 +358,9 @@
 			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 		`;
 
-		predictions.forEach((prediction) => {
+		predictions.forEach((suggestion) => {
+		//for( let suggestion of predictions) {
+			const prediction = suggestion.placePrediction;
 			const item = document.createElement('div');
 			item.className = 'autocomplete-item';
 			item.style.cssText = `
@@ -374,7 +369,7 @@
 				border-bottom: 1px solid #eee;
 				transition: background-color 0.2s;
 			`;
-			item.textContent = prediction.description;
+			item.textContent = prediction.text.text;
 
 			item.addEventListener('mouseenter', () => {
 				item.style.backgroundColor = '#f5f5f5';
@@ -385,8 +380,8 @@
 			});
 
 			item.addEventListener('click', () => {
-				input.value = prediction.description;
-				processPlaceSelection(prediction.place_id);
+				input.value = prediction.text.text;
+				processPlaceSelection(suggestion);
 				removeAutocompleteDropdown();
 			});
 
