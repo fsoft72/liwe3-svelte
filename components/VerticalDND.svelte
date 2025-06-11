@@ -26,6 +26,7 @@
 	let childElements = $state<HTMLElement[]>([]); // These will be the wrapper elements
 	let draggedItemHeight = $state(0);
 	let placeholder: HTMLDivElement | null = null;
+	let observer: MutationObserver;
 
 	let dndIdToOriginalItemMap = new Map<string, any>(); // Maps dndId of wrapper to original item object
 
@@ -115,6 +116,7 @@
 	 */
 	const _updateChildren = (): void => {
 		if (!container) return;
+		// Clear previous childElements
 		const newWrappedElements: HTMLElement[] = [];
 		const childrenToProcess = Array.from(container.children); // Snapshot
 
@@ -522,14 +524,21 @@
 		});
 	};
 
-	let isMounted = false;
 	onMount(() => {
 		// Initial setup of children and drag handlers
 		if (container) {
+			// Observe changes to the container's children for async elements rendering
+			observer = new MutationObserver(() => {
+				_updateChildren();
+				_buildInitialDndIdToItemMap();
+				_setupDragHandlers();
+			});
+			observer.observe(container, { childList: true });
+
+			// Initial run
 			_updateChildren(); // Wrap children in dnd-item-wrapper and assign dnd-ids
 			_buildInitialDndIdToItemMap(); // Build the map from dnd-ids to original items
 			_setupDragHandlers(); // Setup drag handlers for the wrapped items
-			isMounted = true;
 		}
 	});
 
@@ -542,6 +551,8 @@
 		if (_dragState.draggedClone) {
 			_removeDragClone();
 		}
+
+		if (observer) observer.disconnect();
 	});
 </script>
 
