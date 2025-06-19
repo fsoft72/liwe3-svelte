@@ -80,6 +80,7 @@
 
 <script lang="ts">
 	import Modal from './Modal.svelte';
+	import { runeDebug } from '$liwe3/utils/runes.svelte';
 
 	interface Props {
 		fields: DataGridField[];
@@ -174,14 +175,14 @@
 
 				const filter = filters[field];
 
-				// console.log('=== FILTER: ', { field, filter }) ;
-
 				if (!row[field]) {
 					add = false;
 					break;
 				}
 
 				let v = row[field];
+
+				runeDebug('=== FILTER: ', { field, filter, v });
 
 				switch (filter.mode) {
 					case filterModes.CONTAINS:
