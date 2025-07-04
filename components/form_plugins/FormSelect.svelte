@@ -37,6 +37,7 @@
 			on:clear={() => onchange(name, '', field)}
 			on:mousedown={(e: any) => onmousedown(e)}
 			items={field.options ?? []}
+			listAutoWidth={false}
 		/>
 	</div>
 </div>
