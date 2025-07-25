@@ -1,6 +1,7 @@
 <script module lang="ts">
 	export type ModalAction = {
 		label: string;
+		mode?: Color;
 		action: Function;
 	};
 
@@ -89,6 +90,7 @@
 						{#each actions as action}
 							<Button
 								size="sm"
+								mode={action.mode || 'primary'}
 								onclick={() => {
 									action.action();
 								}}
