@@ -10,7 +10,7 @@
 	import Input from './Input.svelte';
 	import Paginator from './Paginator.svelte';
 	import type { PaginatorButtons } from './Paginator.svelte';
-	import { onMount, tick } from 'svelte';
+	import { tick } from 'svelte';
 
 	export interface DataGridFieldExtra {
 		options?: { label: string; value: string }[];
@@ -625,7 +625,7 @@
 {#snippet filtersRow()}
 	<!-- filters -->
 	{#if has_filters}
-		<tr class="filter" style="background-color: var(--liwe3-lighter-paper)">
+		<tr class="filter" style="background-color: var(--liwe3-surface-raised)">
 			{#each fields as field}
 				{#if !field.hidden}
 					<td class="filter" style={`width: ${field.width || 'min-content'};`}>
@@ -838,7 +838,7 @@
 	{/if}
 {/snippet}
 
-<div class="dg-container">
+<div class="dg-container form-container">
 	<div class="dg-header">
 		{@render titleBar()}
 	</div>
@@ -966,7 +966,7 @@
 		flex-direction: column;
 		height: 100%; /* Or a specific height */
 		min-height: 250px;
-		border: 1px solid var(--liwe3-datagrid-container-border, var(--liwe3-button-border));
+		border: 1px solid var(--liwe3-datagrid-container-border, var(--liwe3-button-border-color));
 		border-radius: var(--liwe3-border-radius);
 		overflow: hidden; /* Hide overflow */
 		width: 100%;
@@ -974,7 +974,7 @@
 
 	.dg-header {
 		flex: 0 0 auto; /* Don't grow or shrink */
-		background-color: var(--liwe3-datagrid-container-header-bg, var(--liwe3-darker-paper));
+		background-color: var(--liwe3-datagrid-container-header-bg, var(--liwe3-dark-gray-200));
 		z-index: 2; /* Ensure it's above the scrolling content */
 	}
 
@@ -994,7 +994,7 @@
 
 		min-height: 250px;
 
-		border: 1px solid var(--liwe3-datagrid-container2-border, var(--liwe3-button-border));
+		border: 1px solid var(--liwe3-datagrid-container2-border, var(--liwe3-button-border-color));
 		border-radius: var(--liwe3-border-radius);
 	}
 
@@ -1013,10 +1013,10 @@
 		width: 100%;
 
 		scrollbar-width: thin;
-		scrollbar-color: var(--liwe3-datagrid-scrollbar-track, var(--liwe3-darker-paper))
-			var(--liwe3-datagrid-scrollbar-thumb, var(--liwe3-paper));
+		scrollbar-color: var(--liwe3-datagrid-scrollbar-track, var(--liwe3-gray-200))
+			var(--liwe3-datagrid-scrollbar-thumb, var(--liwe3-surface-mode1));
 
-		background-color: var(--liwe3-datagrid-bg, var(--liwe3-paper));
+		background-color: var(--liwe3-datagrid-bg, var(--liwe3-surface-mode1));
 		color: var(--liwe3-datagrid-color, var(--liwe3-color));
 
 		font-size: var(--table-font-size);
@@ -1032,7 +1032,7 @@
 		align-items: center;
 		padding: 4px;
 
-		background-color: var(--liwe3-datagrid-title-bg, var(--liwe3-darker-paper));
+		background-color: var(--liwe3-datagrid-title-bg, var(--liwe3-gray-50));
 	}
 
 	.title {
@@ -1058,19 +1058,19 @@
 		position: sticky;
 		top: 0;
 		z-index: 1;
-		background-color: var(--liwe3-datagrid-head-bg, var(--liwe3-darker-paper));
+		background-color: var(--liwe3-datagrid-head-bg, var(--liwe3-gray-200));
 	}
 
 	.dg-footer {
 		flex: 0 0 auto; /* Don't grow or shrink */
-		background-color: var(--liwe3-datagrid-footer-bg, var(--liwe3-darker-paper));
+		background-color: var(--liwe3-datagrid-footer-bg, var(--liwe3-gray-200));
 		z-index: 2; /* Ensure it's above the scrolling content */
 	}
 
 	th,
 	td {
 		text-align: left;
-		border: 1px solid var(--liwe3-datagrid-td-border-color, var(--liwe3-secondary-color));
+		border: 1px solid var(--liwe3-datagrid-td-border-color, var(--liwe3-color-mode2));
 	}
 
 	th {
@@ -1079,11 +1079,11 @@
 	}
 
 	thead > tr:first-child {
-		background-color: var(--liwe3-datagrid-header-bg, var(--liwe3-secondary-color));
+		background-color: var(--liwe3-datagrid-header-bg, var(--liwe3-color-mode2));
 	}
 
 	thead tr:hover {
-		background-color: var(--liwe3-datagrid-header-bg, var(--liwe3-secondary-color)) !important;
+		background-color: var(--liwe3-datagrid-header-bg, var(--liwe3-color-mode2)) !important;
 	}
 
 	.full-width,
@@ -1117,20 +1117,20 @@
 	}
 
 	tr {
-		border-bottom: 1px solid var(--liwe3-datagrid-tr-border-color, var(--liwe3-tertiary-color));
+		border-bottom: 1px solid var(--liwe3-datagrid-tr-border-color, var(--liwe3-color-mode3));
 		max-height: 2rem;
 	}
 
 	tr:hover {
-		background-color: var(--liwe3-datagrid-tr-hover, var(--liwe3-secondary-color)) !important;
+		background-color: var(--liwe3-datagrid-tr-hover, var(--liwe3-color-mode2)) !important;
 	}
 
 	td {
-		border-right: 1px solid var(--liwe3-datagrid-td-border-color, var(--liwe3-button-border));
+		border-right: 1px solid var(--liwe3-datagrid-td-border-color, var(--liwe3-button-border-color));
 	}
 
 	tbody tr:nth-child(even) {
-		background-color: var(--liwe3-datagrid-tr-even-bg, var(--liwe3-darker-paper));
+		background-color: var(--liwe3-datagrid-tr-even-bg, var(--liwe3-gray-400));
 	}
 
 	.resizer {
@@ -1191,9 +1191,15 @@
 		box-sizing: border-box;
 		padding: 4px;
 
-		background-color: var(--liwe3-mode3);
-		color: var(--liwe3-text-color);
+		background-color: var(--liwe3-color-mode3);
+		color: var(--liwe3-color);
 
 		border-radius: var(--liwe3-border-radius);
+	}
+
+	.radio-group {
+		display: flex;
+		flex-direction: row;
+		gap: 0.5rem;
 	}
 </style>
