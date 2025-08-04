@@ -140,7 +140,11 @@
 			}
 
 			// Check standard required fields
-			if (field.required && (typeof values[(field as any)[nameField]] == 'undefined' || values[(field as any)[nameField]] === '')) {
+			if (
+				field.required &&
+				(typeof values[(field as any)[nameField]] == 'undefined' ||
+					values[(field as any)[nameField]] === '')
+			) {
 				required.push(field.label ?? field.name);
 				return;
 			}
@@ -272,7 +276,7 @@
 	{/if}
 {/snippet}
 
-<div class="form">
+<div class="form form-container">
 	<form onsubmit={handleSubmit} bind:this={formID}>
 		<div class="liwe3-row">
 			{#each fields as field}
