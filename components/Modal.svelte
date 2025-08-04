@@ -111,7 +111,7 @@
 					/>
 				{/if}
 			</div>
-			<div class="modal-body" style:padding>
+			<div class="modal-body mode1" style:padding>
 				{@render children()}
 			</div>
 			<!--
@@ -143,11 +143,11 @@
 	}
 
 	.modal {
-		border: 2px solid var(--liwe3-button-border);
+		border: 2px solid var(--liwe3-button-border-color);
 		border-radius: var(--liwe3-border-radius);
 		color: var(--liwe3-color);
 
-		background-color: var(--liwe3-lighter-tertiary-color);
+		background-color: var(--liwe3-mode3-200);
 
 		box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
 	}
@@ -158,17 +158,17 @@
 		align-items: center;
 		border-radius: var(--liwe3-border-radius) var(--liwe3-border-radius) 0 0;
 
-		border-bottom: 1px solid var(--liwe3-button-border);
+		border-bottom: 1px solid var(--liwe3-button-border-color);
 		padding: 0.5rem;
 
-		background-color: var(--liwe3-darker-tertiary-color);
+		background-color: var(--liwe3-mode3-400);
 	}
 
 	.modal-header h3 {
 		margin: 0;
 		font-size: 1em;
 		font-weight: 400;
-		color: var(--liwe3-darker-tertiary-color-text);
+		color: var(--liwe3-gray-900);
 	}
 
 	.modal-body {
@@ -179,7 +179,7 @@
 
 		scrollbar-width: thin;
 
-		/* background-color: var(--light); */
+		background-color: var(--liwe3-gray-100);
 	}
 
 	.modal-footer {
@@ -189,10 +189,10 @@
 
 		border-radius: 0 0 0.5rem 0.5rem;
 
-		border-top: 1px solid var(--liwe3-button-border);
+		border-top: 1px solid var(--liwe3-button-border-color);
 		padding: 0.5rem;
 
-		background-color: var(--liwe3-dark-tertiary-color);
+		background-color: var(--liwe3-mode3-700);
 	}
 
 	.xs {

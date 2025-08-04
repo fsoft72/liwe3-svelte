@@ -208,8 +208,8 @@
 		min-height: 3.5rem;
 	}
 	input[type='checkbox'] {
-		background: var(--liwe3-form-bg);
-		border: 2px solid #ccc;
+		background: var(--liwe3-surface-raised);
+		border: 2px solid var(--liwe3-button-border-color);
 		appearance: none;
 		-webkit-appearance: none;
 		-moz-appearance: none;
@@ -218,8 +218,8 @@
 	}
 
 	input[type='checkbox']:checked {
-		color: white;
-		background: var(--liwe3-accent-color);
+		color: var(--liwe3-gray-100);
+		background: var(--liwe3-mode4-500);
 	}
 
 	input[type='checkbox']:checked::after {
@@ -228,7 +228,7 @@
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-		color: white;
+		color: var(--liwe3-mode1-100);
 		font-weight: bold;
 	}
 
