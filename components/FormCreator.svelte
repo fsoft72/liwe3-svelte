@@ -250,7 +250,9 @@
 		// check if the CTLRL key is pressed
 		if (!e.ctrlKey) return;
 
-		onfieldsel && onfieldsel(e.target?.name ?? 'no-field-name', e.target.value ?? 'no-field-value');
+		const v: any = e.target || {};
+
+		onfieldsel && onfieldsel(v.name ?? 'no-field-name', v.value ?? 'no-field-value');
 	};
 
 	export const resetForm = () => {
@@ -280,7 +282,7 @@
 	<form onsubmit={handleSubmit} bind:this={formID}>
 		<div class="liwe3-row">
 			{#each fields as field}
-				<div class={`liwe3-col${field?.col ?? 12} ${field?.align ? 'align-' + field?.align : ''}`}>
+				<div class={`liwe3-col-${field?.col ?? 12} ${field?.align ? 'align-' + field?.align : ''}`}>
 					<div class="space">
 						{#if has_one_perm(storeUser, field?.perms ?? []) && !field?.hide}
 							{@const p = formCreatorPluginGet(field?.type ?? '---')}
