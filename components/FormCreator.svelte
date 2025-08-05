@@ -100,6 +100,8 @@
 
 		nameField?: string;
 
+		padding?: string; // padding for the form container
+
 		// events
 		onsubmit?: (values: Record<string, any>) => void;
 		onchange?: (name: string, value: any) => void;
@@ -115,6 +117,7 @@
 		showReset = true,
 
 		nameField = 'name',
+		padding = '1rem',
 
 		// events
 		onsubmit,
@@ -278,7 +281,7 @@
 	{/if}
 {/snippet}
 
-<div class="form form-container">
+<div class="form form-container" style:padding>
 	<form onsubmit={handleSubmit} bind:this={formID}>
 		<div class="liwe3-row">
 			{#each fields as field}
