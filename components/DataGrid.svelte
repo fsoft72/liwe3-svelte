@@ -73,6 +73,7 @@
 		onclick: (checked?: boolean) => void;
 		type?: 'button' | 'checkbox'; // New property
 		checked?: boolean; // New property for checkbox state
+		hidden?: boolean; // Hide the button
 
 		action?: () => void;
 	}
@@ -719,24 +720,26 @@
 			{#if buttons}
 				<div class="buttons">
 					{#each buttons as button}
-						{#if button.type === 'checkbox'}
-							<Checkbox
-								size="md"
-								mode={button.mode || mode}
-								checked={button.checked || false}
-								onchange={() => handleButtonClick(button)}
-								label={button.label}
-							/>
-						{:else}
-							<Button
-								size="md"
-								mode={button.mode || mode}
-								variant={button.variant}
-								icon={button.icon}
-								onclick={() => handleButtonClick(button)}
-							>
-								{button.label}
-							</Button>
+						{#if !button.hidden}
+							{#if button.type === 'checkbox'}
+								<Checkbox
+									size="md"
+									mode={button.mode || mode}
+									checked={button.checked || false}
+									onchange={() => handleButtonClick(button)}
+									label={button.label}
+								/>
+							{:else}
+								<Button
+									size="md"
+									mode={button.mode || mode}
+									variant={button.variant}
+									icon={button.icon}
+									onclick={() => handleButtonClick(button)}
+								>
+									{button.label}
+								</Button>
+							{/if}
 						{/if}
 					{/each}
 				</div>
