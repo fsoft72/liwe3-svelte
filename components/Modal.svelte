@@ -180,6 +180,10 @@
 		scrollbar-width: thin;
 
 		background-color: var(--liwe3-gray-100);
+
+		display: flex;
+		flex-direction: column;
+		flex: 1;
 	}
 
 	.modal-footer {

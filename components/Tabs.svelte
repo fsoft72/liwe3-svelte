@@ -94,6 +94,10 @@
 <style>
 	.liwe3-tabs {
 		width: 100%;
+
+		display: flex;
+		flex-direction: column;
+		flex: 1;
 	}
 
 	.container {
@@ -104,6 +108,10 @@
 
 		border: 1px solid var(--liwe3-border-color);
 		border-radius: var(--liwe3-border-radius);
+
+		display: flex;
+		flex-direction: column;
+		flex: 1;
 
 		/* box-shadow: 0 2px 3px 1px #000000; */
 	}
@@ -116,6 +124,10 @@
 
 		background: var(--liwe3-background-color);
 		width: 100%;
+
+		display: flex;
+		flex-direction: column;
+		flex: 1;
 	}
 
 	.tabs-buttons {
