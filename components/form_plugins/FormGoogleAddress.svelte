@@ -69,7 +69,7 @@
 	let current: number = $state(0); // current address index
 	let values: ValuesType = $state({}); // all addresses values
 	let counter: number = $derived(Object.keys(values).length);
-	let searchType: string[] = $derived( addressOnly ? ['address'] : ['geocode', 'establishment'] );
+	let searchType: string[] = $derived( addressOnly ? ['street_address'] : ['geocode', 'establishment'] );
 
 	/**
 	 * @description Clear undefined values from object and add missing keys to be compliant with AutoCompleteType
