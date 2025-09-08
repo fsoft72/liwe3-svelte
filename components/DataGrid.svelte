@@ -928,6 +928,7 @@
 		<div class="dg-footer">
 			<Paginator
 				bind:this={paginator}
+				{page}
 				total={totRows}
 				rows={rowsPerPage}
 				onpagechange={internalPageChange}
