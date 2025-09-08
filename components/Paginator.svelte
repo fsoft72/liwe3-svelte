@@ -3,6 +3,8 @@
 		mode?: Color;
 		variant?: Variant
 		size?: Size;
+		icon?: any;
+		iconRight?: any;
 	};
 
 	export type PaginatorButtons = {
