@@ -33,7 +33,7 @@
 			placeholder={field.placeholder}
 			{...field?.extra ?? {}}
 			{...props}
-			on:change={(e: any) => onchange(name, e.detail, field)}
+			on:change={(e: any) => onchange(name, e.detail.value, field)}
 			on:clear={() => onchange(name, '', field)}
 			on:mousedown={(e: any) => onmousedown(e)}
 			items={field.options ?? []}
