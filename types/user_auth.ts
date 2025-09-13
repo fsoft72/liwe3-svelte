@@ -6,4 +6,5 @@ export type UserAuth = {
 	perms?: string[];  // Record<string, string[]>;
 	token?: string;
 	username?: string;
+	domain?: string;
 };
