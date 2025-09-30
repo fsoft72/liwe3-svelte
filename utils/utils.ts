@@ -390,58 +390,58 @@ export const clean = ( obj: Record<string, any> ) => {
 };
 
 /**
- * This function returns a shortened text with a maximum number of words and if specified, a maximum length.
+ * This function returns a shortened text with a maximum number of words and if specified, a maximum length and a maximum number of rows.
  */
 export const short_text = (
-    text: string,
-    words: number,
-    maxLength?: number,
-    maxRows?: number
+	text: string,
+	words: number,
+	maxLength?: number,
+	maxRows?: number
 ) => {
-    if (!text || text.length === 0) return '';
+	if ( !text || text.length === 0 ) return '';
 
-    const words_arr = text.split(' ');
-    // Merge short words into previous word
-    for (let idx = 2; idx < words_arr.length; idx++) {
-        if (words_arr[idx].length < 4) {
-            words_arr[idx - 1] += ' ' + words_arr[idx];
-            words_arr.splice(idx, 1);
-            idx--; // Adjust index after splice
-        }
-    }
+	const words_arr = text.split( ' ' );
+	// Merge short words into previous word
+	for ( let idx = 2; idx < words_arr.length; idx++ ) {
+		if ( words_arr[ idx ].length < 4 ) {
+			words_arr[ idx - 1 ] += ' ' + words_arr[ idx ];
+			words_arr.splice( idx, 1 );
+			idx--; // Adjust index after splice
+		}
+	}
 
-    let output = words_arr.join(' ');
+	let output = words_arr.join( ' ' );
 
-    // If text doesn't need to be shortened
-    if (
-        words_arr.length <= words &&
-        (!maxRows || text.split('\n').length <= maxRows)
-    ) {
-        if (!maxLength || output.length <= maxLength) return text;
-    }
+	// If text doesn't need to be shortened
+	if (
+		words_arr.length <= words &&
+		( !maxRows || text.split( '\n' ).length <= maxRows )
+	) {
+		if ( !maxLength || output.length <= maxLength ) return text;
+	}
 
-    // Limit by words
-    if (words_arr.length > words) {
-        words_arr.splice(words, words_arr.length - words);
-        output = words_arr.join(' ');
-    }
+	// Limit by words
+	if ( words_arr.length > words ) {
+		words_arr.splice( words, words_arr.length - words );
+		output = words_arr.join( ' ' );
+	}
 
-    // Limit by maxLength
-    if (maxLength && output.length > maxLength) {
-        output = output.slice(0, maxLength) + '...';
-    } else {
-        output += '...';
-    }
+	// Limit by maxLength
+	if ( maxLength && output.length > maxLength ) {
+		output = output.slice( 0, maxLength ) + '...';
+	} else {
+		output += '...';
+	}
 
-    // Limit by maxRows
-    if (maxRows && maxRows > 0) {
-        const lines = output.split('\n');
-        if (lines.length > maxRows) {
-            output = lines.slice(0, maxRows).join('\n') + '...';
-        }
-    }
+	// Limit by maxRows
+	if ( maxRows && maxRows > 0 ) {
+		const lines = output.split( '\n' );
+		if ( lines.length > maxRows ) {
+			output = lines.slice( 0, maxRows ).join( '\n' ) + '...';
+		}
+	}
 
-    return output;
+	return output;
 };
 
 /**
